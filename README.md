@@ -15,5 +15,7 @@ Early. Research and planning only, no application code yet.
 
 - [Data source research](docs/research/data-sources.md) — what public soil,
   climate, and plant data actually exists, and what it costs to use
+- [Competitive landscape](docs/research/competitive-landscape.md) — who else is
+  in front of the same homeowner, and where the gaps are
 - [Architecture](docs/architecture.md) — proposed stack and the reasoning
 - [Roadmap](docs/roadmap.md) — phased plan and open questions
