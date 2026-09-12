@@ -22,6 +22,9 @@ Early. Research and planning only, no application code yet.
 - [Competitive landscape](docs/research/competitive-landscape.md) — who else is
   in front of the same homeowner, and where the gaps are
 - [Architecture](docs/architecture.md) — proposed stack and the reasoning
+- [Design system](docs/design-system.md) — the visual language and why it is
+  shaped this way
+- [Setup](docs/setup.md) — accounts and provisioning
 - [V1 spec](docs/v1-spec.md) — scope, data model, build order, and the full
   asset checklist
 - [Roadmap](docs/roadmap.md) — phased plan and open questions
