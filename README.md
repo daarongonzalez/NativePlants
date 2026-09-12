@@ -17,6 +17,8 @@ Early. Research and planning only, no application code yet.
   climate, and plant data actually exists, and what it costs to use
 - [Metro selection](docs/research/metro-selection.md) — where to launch, and
   the metrics that decide it
+- [Rebate programs](docs/research/rebate-programs.md) — how to find the markets
+  with turf rebates, and what to do with that
 - [Competitive landscape](docs/research/competitive-landscape.md) — who else is
   in front of the same homeowner, and where the gaps are
 - [Architecture](docs/architecture.md) — proposed stack and the reasoning
