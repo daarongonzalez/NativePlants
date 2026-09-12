@@ -1,6 +1,14 @@
 # Rebate Program Discovery
 
-Status: draft, September 2026.
+Status: **parked** — researched and shelved deliberately, September 2026.
+
+> **On the shelf until V1 ships.** This is a real asset and a strong acquisition
+> channel, and it is exactly the kind of work that quietly becomes a second
+> product and delays the first. Nothing here gets built until V1 is live in one
+> market. The Utah slice (one statewide program, ~60 communities) is the only
+> part that comes forward early, and only as a display field.
+>
+> Revisit trigger: V1 shipped and converting in the Wasatch Front.
 
 ## The short answer
 
@@ -125,12 +133,25 @@ arithmetic. Rank candidate metros on:
 The thing you asked for. It tells us where to go next after Utah, with numbers
 rather than intuition.
 
-### 2. An acquisition channel (external)
+### 2. An acquisition channel (external) — SEO and answer-engine surface
 
 "Turf rebate [city]" is a high-intent query, and the pages currently winning it
 are thin affiliate content. A page per program carrying accurate, current,
 structured data — amount, requirements, deadlines, and what plants qualify —
 should outrank them, and it compounds.
+
+It is also an **answer-engine surface**, which may matter more than search
+ranking within a couple of years. When someone asks an assistant "what turf
+rebate can I get in Sandy, Utah," the answer gets assembled from whatever
+structured, current, citable source exists. Today that is thin affiliate content
+with no verification dates. A registry with per-program `verified_at` stamps,
+explicit sourcing back to the utility, and clean schema markup is precisely what
+an answer engine prefers to cite — and being the cited source is a better
+position than being the top blue link.
+
+Two things this implies for how the pages get built, whenever they get built:
+structured data markup on every program page, and the verification date visible
+in the page content rather than buried in a footer.
 
 This is the cheapest acquisition channel available and it happens to sit in your
 professional wheelhouse. It is also durable in a way paid traffic is not.

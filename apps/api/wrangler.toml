@@ -1,0 +1,24 @@
+name = "nativeplants-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Hyperdrive keeps warm connection pools at the edge in front of Neon.
+# Create with:
+#   wrangler hyperdrive create nativeplants-db --connection-string="<NEON DIRECT URL>"
+# Use the DIRECT string, not the pooled one — Hyperdrive does the pooling.
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "REPLACE_WITH_HYPERDRIVE_ID"
+
+# Caches Google's public keys for Firebase token verification.
+[[kv_namespaces]]
+binding = "AUTH_KEYS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[vars]
+FIREBASE_PROJECT_ID = "REPLACE_ME"
+MARKET = "wasatch-front"
+
+[observability]
+enabled = true
