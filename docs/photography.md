@@ -1,6 +1,6 @@
 # Photography
 
-Status: draft, September 2026.
+Status: draft, September 2026. Catalogue work is in V1; user uploads are parked.
 
 ## These are two different problems
 
@@ -117,7 +117,14 @@ decision about the catalogue.
 
 ## Part 2 — User-uploaded yard photos
 
-Not in V1. Here is what will matter when it is.
+> **PARKED.** Not in V1, and not a near-term build. The concerns below are the
+> reason, recorded so the decision does not have to be re-derived. See
+> [scope.md](scope.md) for the authoritative boundary.
+>
+> **Revisit trigger:** V1 shipped and converting, retention and privacy policy
+> drafted and reviewed. Build the canvas before the analysis.
+
+Here is what will matter when it is.
 
 ### What a yard photo actually contains
 

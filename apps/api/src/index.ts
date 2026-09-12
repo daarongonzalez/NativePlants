@@ -14,8 +14,10 @@ import {
 } from "@np/db";
 import { recommend } from "@np/engine";
 import { goalsSchema, siteProfileSchema } from "@np/shared";
-import { requireAuth } from "./auth.js";
-import type { Env, Variables } from "./env.js";
+import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
+import { requireAuth } from "./auth";
+import type { Env, Variables } from "./env";
+import { resolveSite } from "./resolve";
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -113,6 +115,46 @@ protectedRoutes.get("/sites/:id/plants", async (c) => {
     consideredCount: recommended.length + rejected.length,
     ruledOutCount: rejected.length,
   });
+});
+
+/**
+ * Build a profile snapshot for a site.
+ *
+ * Always writes a new snapshot rather than updating one, so a recommendation
+ * stays reproducible against the profile it was generated from.
+ */
+protectedRoutes.post("/sites/:id/resolve", async (c) => {
+  const db = createDatabase(c.env.HYPERDRIVE.connectionString);
+  const owner: Owner = c.get("owner");
+  const siteId = c.req.param("id");
+
+  const site = await getSite(db, owner, siteId);
+  if (!site) return c.json({ error: "Site not found." }, 404);
+
+  const outcome = await resolveSite(
+    { db, geocoder: new CensusGeocodeClient(), elevation: new UsgsElevationClient() },
+    owner,
+    { id: site.id, addressText: site.addressText, latitude: site.latitude, longitude: site.longitude },
+  );
+
+  if (!outcome.ok) {
+    switch (outcome.reason) {
+      case "site_not_found":
+        return c.json({ error: "Site not found." }, 404);
+      case "address_not_found":
+        return c.json(
+          { error: "We could not find that address. Check it, or drop a pin on the map instead." },
+          422,
+        );
+      case "zone_unavailable":
+        return c.json(
+          { error: "We do not have hardiness zone data for that area yet. Right now we cover the Wasatch Front." },
+          422,
+        );
+    }
+  }
+
+  return c.json({ profileId: outcome.profileId, summary: outcome.summary }, 201);
 });
 
 protectedRoutes.post("/sites/:id/saved", async (c) => {

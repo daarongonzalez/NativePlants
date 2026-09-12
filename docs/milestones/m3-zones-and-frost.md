@@ -117,3 +117,71 @@ on a user action, not on a page load.
 - No sun modelling — solar geometry is cheap but belongs with the rest of the
   profile work in M4.
 - Not pretty. The report screen is M5, and it gets real design time.
+
+---
+
+## Build status, September 2026
+
+### Done and verified
+
+- **Schema applied** to the Neon `dev` branch (project `cool-term-95598834`,
+  branch `br-winter-flower-ae0lr1gs`, Postgres 18.6, PostGIS enabled). All 16
+  tables, both GiST indexes, all foreign keys.
+- **PostGIS nearest-station query verified against the real database.** Three
+  probe points returned the correct station and distances in metres:
+  downtown SLC → airport at 4.9 mi, Midway → Heber at 3.2 mi, Bountiful bench
+  → airport at 10.0 mi. KNN ordering via `<->` uses the index; the
+  `::geography` cast returns metres rather than degrees.
+- **Elevation confidence rule** with 9 tests, including both directions of the
+  comparison and the missing-elevation case.
+- **Source clients** for the Census geocoder and USGS elevation, with 13 tests
+  against fixture responses — including a guard against swapping latitude and
+  longitude, and a guard against treating the USGS no-data sentinel as a real
+  elevation.
+- **Resolve pipeline** with sources injected, writing snapshot rows and
+  returning per-field provenance plus plain-language caveats.
+- **`POST /v1/sites/:id/resolve`** wired with owner scoping.
+- **Both ingestion jobs** written, idempotent, writing `data_provenance` rows,
+  with a job that writes zero rows logged as a warning rather than passing
+  quietly.
+
+A real-world check that validates the whole elevation thesis: the two Wasatch
+stations used in verification sit 431 m apart in elevation, and their median
+last-frost dates differ by **34 days** — April 24 against May 28. That is the
+error a ZIP-code lookup makes silently.
+
+### Blocked by this environment's egress policy
+
+Organization policy blocks these hosts from the build environment. The code is
+written to their documented shapes; the first real call is the first test of
+those field paths.
+
+| Blocked | Consequence |
+|---|---|
+| `geocoding.geo.census.gov` | Geocoder parsing unverified against a live response |
+| `epqs.nationalmap.gov` | Elevation parsing unverified |
+| `phzmapi.org` | Zone table is empty — no real ZIP-to-zone data loaded |
+| NCEI hosts | `src/data/wasatch-frost.ts` is a **placeholder** and must be replaced |
+| Postgres TCP 5432 | The 13 database integration tests skip rather than run |
+
+### Before M3 can be called done
+
+1. **Replace `apps/ingest/src/data/wasatch-frost.ts`.** It currently holds one
+   station with plausible but unsourced values. Shipping it would make the
+   `data_provenance` row cite NOAA for numbers that did not come from NOAA,
+   which is worse than having no data. The file says so at the top.
+2. **Run the ingestion jobs** from a network that can reach phzmapi.org, and
+   confirm the zone table covers every Wasatch Front ZIP. The ZIP list in
+   `wasatch-zips.ts` is a starting set, not complete — a missing ZIP tells a
+   real gardener we do not cover an address we do intend to cover.
+3. **Run the integration tests** where TCP 5432 is reachable:
+   `TEST_DATABASE_URL=<dev direct url> pnpm --filter @np/db test`. Thirteen
+   tests, covering cross-account scoping and the PostGIS queries. **A skip is
+   not a pass.**
+4. **Make one live call** to each of the Census and USGS clients and compare
+   against the fixtures in their test files.
+5. **Create the Hyperdrive config and the `AUTH_KEYS` KV namespace**, and put
+   their ids into `apps/api/wrangler.toml`. Use Neon's **direct** connection
+   string for Hyperdrive — the one without `-pooler` in the host.
+6. **Build the screen.** The endpoint returns everything it needs; there is no
+   UI yet.

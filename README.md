@@ -29,6 +29,7 @@ Early. Research and planning only, no application code yet.
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
 - [Setup](docs/setup.md) — accounts and provisioning
+- [Scope boundary](docs/scope.md) — the authoritative in/out list for V1
 - [V1 spec](docs/v1-spec.md) — scope, data model, build order, and the full
   asset checklist
 - [Roadmap](docs/roadmap.md) — phased plan and open questions

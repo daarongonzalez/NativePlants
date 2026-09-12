@@ -1,5 +1,5 @@
 import type { Plant, WaterUse, NativeStatus } from "@np/shared";
-import type { plants } from "./schema.js";
+import type { plants } from "./schema";
 
 type PlantRow = typeof plants.$inferSelect;
 

@@ -1,4 +1,5 @@
-export * from "./client.js";
-export * from "./repositories.js";
-export * from "./mappers.js";
-export * as schema from "./schema.js";
+export * from "./client";
+export * from "./repositories";
+export * from "./mappers";
+export * from "./resolve-repo";
+export * as schema from "./schema";
