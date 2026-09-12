@@ -1,0 +1,193 @@
+/*
+ * NativePlants design tokens.
+ *
+ * Three rules this file exists to enforce:
+ *
+ * 1. Every colour is defined in the bare :root block first. A colour whose
+ *    only definition sits inside a media query or [data-theme] block never
+ *    applies in the un-stamped default state, which is what most viewers get.
+ *
+ * 2. Semantic colour (confidence, warning) is separate from the accent hue.
+ *    Confidence is a core concept in this product, not a decoration, and it
+ *    must never be confused with brand colour.
+ *
+ * 3. The soil horizon ramp is DATA, not decoration. Those values map to real
+ *    depth bands and must stay perceptually ordered.
+ */
+
+:root {
+  /* --- Ground and surface ------------------------------------------ */
+  /* Neutrals carry a slight green bias so they read as chosen, not default. */
+  --np-ground:      #EDF0E9;
+  --np-surface:     #F7F9F4;
+  --np-raise:       #FFFFFF;
+  --np-sunken:      #E3E8DD;
+
+  /* --- Ink ---------------------------------------------------------- */
+  --np-ink:         #1C201A;
+  --np-body:        #3A4036;
+  --np-muted:       #656C5E;
+  --np-faint:       #8B9382;
+
+  /* --- Lines -------------------------------------------------------- */
+  --np-line:        #CBD2C3;
+  --np-line-soft:   #DDE2D6;
+
+  /* --- Accent ------------------------------------------------------- */
+  /* Chicory blue: the alkaline end of a soil pH strip, and the colour of
+     the asters and chicory that thrive in exactly that soil. Deliberately
+     not the obvious garden green. */
+  --np-accent:      #2E5C7A;
+  --np-accent-hover:#24495F;
+  --np-accent-soft: #E2ECF2;
+  --np-accent-line: #A9C6D8;
+
+  /* --- Semantic: confidence ---------------------------------------- */
+  /* A measured value and an area-average estimate are different claims.
+     These three are the product's most-used semantic scale. */
+  --np-conf-high:   #4A7C3F;
+  --np-conf-high-bg:#E6EFE2;
+  --np-conf-med:    #8A6D1F;
+  --np-conf-med-bg: #F2EDDC;
+  --np-conf-low:    #8A5A3C;
+  --np-conf-low-bg: #F1E6DE;
+
+  /* --- Semantic: alert --------------------------------------------- */
+  /* Toxicity and invasive-species warnings. Never used for emphasis. */
+  --np-warn:        #9C3D26;
+  --np-warn-bg:     #F6E3DD;
+
+  /* --- Soil horizon ramp (DATA) ------------------------------------ */
+  /* Surface organic layer through to parent material. Perceptually ordered
+     light to dark; do not reorder or reuse for anything but depth. */
+  --np-horizon-0:   #6B5A44;
+  --np-horizon-1:   #7D6A4E;
+  --np-horizon-2:   #8E7A5A;
+  --np-horizon-3:   #A08C6C;
+  --np-horizon-4:   #B4A184;
+  --np-horizon-5:   #C7B79E;
+
+  /* --- Type --------------------------------------------------------- */
+  /* Fraunces for display: it reads as 19th-century botanical plate printing,
+     which is the right ancestry for a plant reference. IBM Plex Sans for
+     interface, Plex Mono for every measured value. The pairing is the whole
+     product in two typefaces — horticulture meeting spec sheet. */
+  --np-font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --np-font-body:    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --np-font-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Modular scale, 1.25. */
+  --np-text-xs:   0.75rem;
+  --np-text-sm:   0.875rem;
+  --np-text-base: 1rem;
+  --np-text-lg:   1.125rem;
+  --np-text-xl:   1.375rem;
+  --np-text-2xl:  1.75rem;
+  --np-text-3xl:  2.25rem;
+  --np-text-4xl:  3rem;
+
+  /* --- Space (4px base) --------------------------------------------- */
+  --np-space-1: 0.25rem;
+  --np-space-2: 0.5rem;
+  --np-space-3: 0.75rem;
+  --np-space-4: 1rem;
+  --np-space-5: 1.5rem;
+  --np-space-6: 2rem;
+  --np-space-7: 3rem;
+  --np-space-8: 4rem;
+
+  /* --- Radius ------------------------------------------------------- */
+  /* Restrained on purpose. Border, fill, radius and shadow each say
+     "separate object"; spending all four on every block flattens hierarchy. */
+  --np-radius-sm: 2px;
+  --np-radius-md: 3px;
+  --np-radius-lg: 6px;
+
+  /* --- Elevation ---------------------------------------------------- */
+  --np-shadow-1: 0 1px 2px rgba(28, 32, 26, 0.06);
+  --np-shadow-2: 0 2px 8px rgba(28, 32, 26, 0.08);
+
+  /* --- Motion ------------------------------------------------------- */
+  --np-ease: cubic-bezier(0.2, 0, 0.2, 1);
+  --np-duration: 160ms;
+
+  /* --- Touch -------------------------------------------------------- */
+  /* Gardeners use this standing in a yard, often in gloves and bright sun.
+     Nothing interactive goes below this. */
+  --np-touch-min: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --np-ground:      #12150F;
+    --np-surface:     #191D15;
+    --np-raise:       #20251C;
+    --np-sunken:      #0D100B;
+
+    --np-ink:         #E9EDE2;
+    --np-body:        #C3CAB8;
+    --np-muted:       #8D9682;
+    --np-faint:       #6B7360;
+
+    --np-line:        #333A2C;
+    --np-line-soft:   #272D21;
+
+    --np-accent:      #85B6D6;
+    --np-accent-hover:#A2C9E3;
+    --np-accent-soft: #1B2B36;
+    --np-accent-line: #3A5D74;
+
+    --np-conf-high:   #8FBF80;
+    --np-conf-high-bg:#1D2A18;
+    --np-conf-med:    #CDAE5E;
+    --np-conf-med-bg: #2B2516;
+    --np-conf-low:    #C89272;
+    --np-conf-low-bg: #2C1F16;
+
+    --np-warn:        #E08A70;
+    --np-warn-bg:     #331A13;
+
+    --np-horizon-0:   #4A3E2E;
+    --np-horizon-1:   #5B4C38;
+    --np-horizon-2:   #6D5B43;
+    --np-horizon-3:   #806C50;
+    --np-horizon-4:   #947E5E;
+    --np-horizon-5:   #A8916D;
+
+    --np-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --np-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  --np-ground:      #12150F;
+  --np-surface:     #191D15;
+  --np-raise:       #20251C;
+  --np-sunken:      #0D100B;
+  --np-ink:         #E9EDE2;
+  --np-body:        #C3CAB8;
+  --np-muted:       #8D9682;
+  --np-faint:       #6B7360;
+  --np-line:        #333A2C;
+  --np-line-soft:   #272D21;
+  --np-accent:      #85B6D6;
+  --np-accent-hover:#A2C9E3;
+  --np-accent-soft: #1B2B36;
+  --np-accent-line: #3A5D74;
+  --np-conf-high:   #8FBF80;
+  --np-conf-high-bg:#1D2A18;
+  --np-conf-med:    #CDAE5E;
+  --np-conf-med-bg: #2B2516;
+  --np-conf-low:    #C89272;
+  --np-conf-low-bg: #2C1F16;
+  --np-warn:        #E08A70;
+  --np-warn-bg:     #331A13;
+  --np-horizon-0:   #4A3E2E;
+  --np-horizon-1:   #5B4C38;
+  --np-horizon-2:   #6D5B43;
+  --np-horizon-3:   #806C50;
+  --np-horizon-4:   #947E5E;
+  --np-horizon-5:   #A8916D;
+  --np-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --np-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
