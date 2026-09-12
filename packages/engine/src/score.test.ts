@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { textureClass, zoneToOrdinal, ordinalToZone } from "@np/shared";
 import type { Goals } from "@np/shared";
-import { recommend, scorePlant } from "./score.js";
+import { recommend, scorePlant } from "./score";
 import {
   bougainvillea,
   firecrackerPenstemon,
@@ -12,7 +12,7 @@ import {
   sltSunnyClay,
   wasatchCatalogue,
   yarrow,
-} from "./__fixtures__/wasatch.js";
+} from "./__fixtures__/wasatch";
 
 const NO_GOALS: Goals = {
   pollinators: false,
