@@ -26,6 +26,8 @@ Early. Research and planning only, no application code yet.
   they are different problems
 - [M3: zones and frost](docs/milestones/m3-zones-and-frost.md) — the next
   build milestone
+- [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to
+  get the backend working end to end
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
 - [Setup](docs/setup.md) — accounts and provisioning
