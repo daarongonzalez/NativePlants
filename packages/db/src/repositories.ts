@@ -1,8 +1,8 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import type { Database } from "./client.js";
-import { toDomainPlant } from "./mappers.js";
+import type { Database } from "./client";
+import { toDomainPlant } from "./mappers";
 import type { Plant } from "@np/shared";
-import { plants, savedPlants, siteConstraints, siteProfiles, sites, users } from "./schema.js";
+import { plants, savedPlants, siteConstraints, siteProfiles, sites, users } from "./schema";
 
 /**
  * The authorization boundary.

@@ -1,1 +1,2 @@
-export * from "./score.js";
+export * from "./score";
+export * from "./confidence";

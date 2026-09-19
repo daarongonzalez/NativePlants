@@ -21,13 +21,29 @@ pnpm check        # typecheck + tests
 The engine tests run with no configuration. The database scoping suite skips
 without a test database — see step 4.
 
-## 2. Neon
+## 2. Neon — already provisioned
 
-1. Create a project. Create two branches: `main` (production) and `dev`.
-2. Enable PostGIS on each: `CREATE EXTENSION IF NOT EXISTS postgis;`
-3. Copy the **direct** connection string, not the pooled one. The pooled string
-   is the one with `-pooler` in the host. Hyperdrive does the pooling, and
-   doubling up causes problems.
+| | |
+|---|---|
+| Project | `NativePlants` / `cool-term-95598834` |
+| Region | `aws-us-east-2` |
+| Postgres | 18.6 |
+| Branches | `production` (default), `dev` |
+| Dev branch id | `br-winter-flower-ae0lr1gs` |
+
+PostGIS is enabled and the initial migration is applied **on `dev` only**.
+Production is still empty — apply the migration there as a deliberate step,
+not as a side effect.
+
+Copy the **direct** connection string, not the pooled one: the pooled host
+contains `-pooler`. Hyperdrive does the pooling and doubling up causes
+problems. The pooled string is the right one for local tests and scripts,
+which connect with `pg` directly.
+
+> **Credential note.** The `dev` branch connection string was read during the
+> M3 build and is therefore in that session's transcript. Nothing was committed
+> and the credential is for the dev branch only, but rotating the
+> `neondb_owner` password is cheap if you would rather not rely on that.
 
 ## 3. Cloudflare
 

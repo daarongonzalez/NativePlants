@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createDatabase, type Database } from "./client.js";
-import { createSite, deleteSite, getSite, listSites, savePlant } from "./repositories.js";
-import { users } from "./schema.js";
+import { createDatabase, type Database } from "./client";
+import { createSite, deleteSite, getSite, listSites, savePlant } from "./repositories";
+import { users } from "./schema";
 import { eq } from "drizzle-orm";
 
 /**
@@ -47,7 +47,7 @@ describeIfDb("cross-account scoping", () => {
       longitude: -111.891,
     });
     aliceSiteId = site!.id;
-  });
+  }, 60_000);
 
   afterAll(async () => {
     if (!db) return;
