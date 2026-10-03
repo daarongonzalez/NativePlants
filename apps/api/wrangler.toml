@@ -22,7 +22,10 @@ binding = "AUTH_KEYS"
 id = "1cb0f9131fe848c899674e965b755592"
 
 [vars]
-FIREBASE_PROJECT_ID = "REPLACE_ME"  # <- still needed: your Firebase project id
+# Public identifier, not a credential. Token verification fetches Google's
+# published signing keys and checks the token's `aud` claim against this.
+# No API key, no service account, no secret anywhere in this Worker.
+FIREBASE_PROJECT_ID = "nativeplants-eb3c5"
 MARKET = "wasatch-front"
 
 [observability]

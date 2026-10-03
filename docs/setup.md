@@ -105,3 +105,50 @@ curl http://localhost:8787/v1/health
 `.dev.vars` and `.env` are gitignored. For deployed environments use
 `wrangler secret put`, never `[vars]` in `wrangler.toml` — that file is
 committed.
+
+---
+
+## What is a secret here, and what is not
+
+Short version: **this backend currently has no runtime secrets at all.** That is
+a property worth protecting as the project grows.
+
+### Safe to commit and to paste anywhere
+
+These are public identifiers. They appear in config files, in client bundles,
+or in both, by design.
+
+| Value | Where it lives |
+|---|---|
+| Firebase project id | `apps/api/wrangler.toml` |
+| Firebase web config, **including `apiKey`** | the browser bundle, once `apps/web` exists |
+| Hyperdrive config id | both `wrangler.toml` files |
+| KV namespace id | `apps/api/wrangler.toml` |
+| R2 bucket name | `wrangler.toml`, when it exists |
+
+The Firebase `apiKey` catches people out. It is not a key in the password
+sense — it identifies the project to Google's endpoints and ships in every
+client bundle. Firebase's security comes from Auth rules and server-side token
+verification, not from keeping that string hidden.
+
+The Hyperdrive id is a reference, not a credential. The actual database
+password is held by Cloudflare inside the Hyperdrive config; the Worker only
+ever sees a local connection string pointing at Hyperdrive's proxy.
+
+### Never commit, never paste into a chat or an issue
+
+| Value | Where it belongs |
+|---|---|
+| Neon password / connection string | Cloudflare, via the Hyperdrive config |
+| Cloudflare API tokens | your machine's `wrangler` login |
+| Firebase service account JSON | nowhere — we do not use one |
+
+### If a real secret is ever needed
+
+Use `wrangler secret put NAME`, which stores it on Cloudflare and keeps it out
+of the repo. Never add it to `[vars]` in `wrangler.toml` — that file is
+committed.
+
+Today nothing needs this. Verifying a Firebase token requires only the project
+id, and the database credential lives in Hyperdrive. Keep it that way for as
+long as the design allows.
