@@ -9,9 +9,11 @@ compatibility_flags = ["nodejs_compat"]
 [triggers]
 crons = ["0 4 1 * *"]
 
+# Same Hyperdrive config as the API. Ingestion needs no KV — it never
+# authenticates a user.
 [[hyperdrive]]
 binding = "HYPERDRIVE"
-id = "REPLACE_WITH_HYPERDRIVE_ID"
+id = "df4a5c68e1464a9db5e7080829fce511"
 
 [vars]
 MARKET = "wasatch-front"

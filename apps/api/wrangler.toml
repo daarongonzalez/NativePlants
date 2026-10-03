@@ -4,20 +4,25 @@ compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Hyperdrive keeps warm connection pools at the edge in front of Neon.
-# Create with:
-#   wrangler hyperdrive create nativeplants-db --connection-string="<NEON DIRECT URL>"
-# Use the DIRECT string, not the pooled one — Hyperdrive does the pooling.
+# Points at the Neon DIRECT host (no "-pooler") — Hyperdrive does the pooling,
+# and stacking it on Neon's pooler fails under load rather than immediately.
+#
+# Query caching is DISABLED on this config. Hyperdrive's cache does not
+# invalidate on writes, so a cached read of a site profile or a saved list
+# could serve stale or another gardener's data. Reference tables would benefit
+# from caching, but one config serves both, so correctness wins. If reference
+# reads ever need it, add a SECOND cached config and bind it separately.
 [[hyperdrive]]
 binding = "HYPERDRIVE"
-id = "REPLACE_WITH_HYPERDRIVE_ID"
+id = "df4a5c68e1464a9db5e7080829fce511"
 
 # Caches Google's public keys for Firebase token verification.
 [[kv_namespaces]]
 binding = "AUTH_KEYS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "1cb0f9131fe848c899674e965b755592"
 
 [vars]
-FIREBASE_PROJECT_ID = "REPLACE_ME"
+FIREBASE_PROJECT_ID = "REPLACE_ME"  # <- still needed: your Firebase project id
 MARKET = "wasatch-front"
 
 [observability]
