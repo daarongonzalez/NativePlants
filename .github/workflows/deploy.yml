@@ -7,9 +7,16 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Shared with the ingestion workflow: the two must never overlap. An
+# ingestion run that starts mid-deploy hits whichever code happens to be
+# live, which once produced a failure report for a bug that was already
+# fixed and seconds away from being deployed.
+#
+# cancel-in-progress is false on purpose. Cancelling a half-finished
+# deploy or a database write to start another is worse than queueing.
 concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  group: cloudflare-workers
+  cancel-in-progress: false
 
 jobs:
   deploy:
