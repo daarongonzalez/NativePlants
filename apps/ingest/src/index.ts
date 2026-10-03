@@ -17,14 +17,32 @@ export default {
   },
 
   /**
-   * Manual trigger for development. Not exposed in production — the deployed
-   * Worker has no route, only a cron trigger.
+   * Manual trigger, for running a job outside the monthly cron.
+   *
+   * A deployed Worker with a fetch handler is reachable at a public
+   * workers.dev URL, so this is gated on a shared secret. With RUN_TOKEN
+   * unset the route refuses entirely rather than running open — failing
+   * closed is the only safe default for something that writes to the
+   * database.
    */
   async fetch(request: Request, env: IngestEnv): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname !== "/__run" || request.method !== "POST") {
       return new Response("Not found", { status: 404 });
     }
+
+    if (!env.RUN_TOKEN) {
+      return Response.json(
+        { error: "RUN_TOKEN is not configured, so the manual run route is disabled." },
+        { status: 503 },
+      );
+    }
+
+    const offered = request.headers.get("Authorization");
+    if (offered !== `Bearer ${env.RUN_TOKEN}`) {
+      return new Response("Not found", { status: 404 });
+    }
+
     const results = await runAll(env);
     return Response.json({ results });
   },

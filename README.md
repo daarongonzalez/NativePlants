@@ -30,6 +30,8 @@ Early. Research and planning only, no application code yet.
   get the backend working end to end
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
+- [Operating without a local environment](docs/operating-without-local.md) —
+  deploy and run everything from GitHub
 - [Setup](docs/setup.md) — accounts and provisioning
 - [Scope boundary](docs/scope.md) — the authoritative in/out list for V1
 - [V1 spec](docs/v1-spec.md) — scope, data model, build order, and the full

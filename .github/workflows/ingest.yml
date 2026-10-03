@@ -1,0 +1,50 @@
+name: Run ingestion
+
+# Triggers a reference data load on the deployed ingest Worker.
+#
+# Run it from the Actions tab: "Run ingestion" -> "Run workflow". No local
+# toolchain needed.
+#
+# The Worker runs on Cloudflare's network, so it can reach phzmapi.org and the
+# other upstream sources regardless of what any individual machine can.
+on:
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the run
+        run: |
+          if [ -z "${INGEST_URL}" ] || [ -z "${RUN_TOKEN}" ]; then
+            echo "::error::Set the INGEST_WORKER_URL and INGEST_RUN_TOKEN repository secrets first."
+            exit 1
+          fi
+
+          echo "Triggering ${INGEST_URL}/__run"
+          code=$(curl -sS -o response.json -w '%{http_code}' \
+            -X POST "${INGEST_URL}/__run" \
+            -H "Authorization: Bearer ${RUN_TOKEN}")
+
+          echo "HTTP ${code}"
+          cat response.json
+          echo
+
+          # A 404 here means the token did not match - the route hides itself
+          # rather than confirming it exists.
+          if [ "$code" != "200" ]; then
+            echo "::error::Ingestion did not run. A 404 usually means INGEST_RUN_TOKEN is wrong."
+            exit 1
+          fi
+
+          # A job that wrote nothing is a failure worth surfacing, not a
+          # quiet success.
+          written=$(python3 -c "import json;print(sum(r['rowsWritten'] for r in json.load(open('response.json'))['results']))")
+          echo "Rows written across all jobs: ${written}"
+          if [ "$written" = "0" ]; then
+            echo "::error::Every job wrote zero rows. Check the warnings above."
+            exit 1
+          fi
+        env:
+          INGEST_URL: ${{ secrets.INGEST_WORKER_URL }}
+          RUN_TOKEN: ${{ secrets.INGEST_RUN_TOKEN }}
