@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FrostRecord } from "./frost";
+import { WASATCH_FRONT_FROST } from "./data/wasatch-frost";
 
 /**
  * Validation is exercised through a copy of the module's rules rather than by
@@ -10,21 +11,8 @@ import type { FrostRecord } from "./frost";
 
 const MMDD = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
-const VALID: FrostRecord = {
-  stationId: "USW00024127",
-  name: "Salt Lake City Intl",
-  latitude: 40.7884,
-  longitude: -111.9777,
-  elevationM: 1288,
-  lastSpringP10: "05-08",
-  lastSpringP50: "04-24",
-  lastSpringP90: "04-09",
-  firstFallP10: "10-05",
-  firstFallP50: "10-19",
-  firstFallP90: "11-02",
-  frostFreeDays: 178,
-  normalsPeriod: "1991-2020",
-};
+/** The real Salt Lake City record, as generated from NCEI normals. */
+const VALID: FrostRecord = WASATCH_FRONT_FROST[0]!;
 
 describe("frost date format", () => {
   it("accepts the real Salt Lake City values", () => {
@@ -53,6 +41,34 @@ describe("frost date format", () => {
     expect(MMDD.test("13-01")).toBe(false);
     expect(MMDD.test("00-15")).toBe(false);
     expect(MMDD.test("02-32")).toBe(false);
+  });
+
+  it("ships at least one station", () => {
+    expect(WASATCH_FRONT_FROST.length).toBeGreaterThan(0);
+  });
+
+  it("ships no placeholder stations", () => {
+    for (const r of WASATCH_FRONT_FROST) {
+      expect(r.stationId).not.toMatch(/PLACEHOLDER/i);
+      expect(r.name).not.toMatch(/placeholder/i);
+    }
+  });
+
+  it("gives every shipped station an elevation, which the confidence rule needs", () => {
+    for (const r of WASATCH_FRONT_FROST) {
+      expect(r.elevationM).not.toBeNull();
+    }
+  });
+
+  it("orders the probability bands correctly on every shipped station", () => {
+    // Guards the whole file, not just one record. Swapped columns parse
+    // cleanly, validate as dates, and reverse the advice.
+    for (const r of WASATCH_FRONT_FROST) {
+      expect(r.lastSpringP10 > r.lastSpringP50, r.stationId).toBe(true);
+      expect(r.lastSpringP50 > r.lastSpringP90, r.stationId).toBe(true);
+      expect(r.firstFallP10 < r.firstFallP50, r.stationId).toBe(true);
+      expect(r.firstFallP50 < r.firstFallP90, r.stationId).toBe(true);
+    }
   });
 
   it("keeps the probability bands in a sensible order for Salt Lake City", () => {
