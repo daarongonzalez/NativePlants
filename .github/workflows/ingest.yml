@@ -37,14 +37,33 @@ jobs:
             exit 1
           fi
 
-          # A job that wrote nothing is a failure worth surfacing, not a
-          # quiet success.
-          written=$(python3 -c "import json;print(sum(r['rowsWritten'] for r in json.load(open('response.json'))['results']))")
-          echo "Rows written across all jobs: ${written}"
-          if [ "$written" = "0" ]; then
-            echo "::error::Every job wrote zero rows. Check the warnings above."
-            exit 1
-          fi
+          # Check EVERY job, not the total.
+          #
+          # Summing across jobs hid a real failure once: the zone job skipped
+          # all 67 ZIPs with an error, the frost job wrote its single row, the
+          # total came to 1, and the run reported success.
+          python3 - <<'PY'
+          import json, sys
+
+          results = json.load(open("response.json"))["results"]
+          failed = []
+
+          for r in results:
+              written, skipped = r["rowsWritten"], r["rowsSkipped"]
+              print(f"{r['job']}: {written} written, {skipped} skipped")
+              for w in r["warnings"][:5]:
+                  print(f"    warning: {w}")
+              if len(r["warnings"]) > 5:
+                  print(f"    ... and {len(r['warnings']) - 5} more")
+              if written == 0:
+                  failed.append(r["job"])
+
+          if failed:
+              print(f"::error::These jobs wrote zero rows: {', '.join(failed)}")
+              sys.exit(1)
+
+          print("Every job wrote at least one row.")
+          PY
         env:
           INGEST_URL: ${{ secrets.INGEST_WORKER_URL }}
           RUN_TOKEN: ${{ secrets.INGEST_RUN_TOKEN }}
