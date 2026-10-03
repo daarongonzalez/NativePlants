@@ -13,7 +13,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { multiPolygon, point } from "./geometry.js";
+import { multiPolygon, point } from "./geometry";
 
 /* ------------------------------------------------------------------ *
  * Reference tables — written only by scheduled ingestion, never by a

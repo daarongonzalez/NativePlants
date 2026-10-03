@@ -22,9 +22,16 @@ Early. Research and planning only, no application code yet.
 - [Competitive landscape](docs/research/competitive-landscape.md) — who else is
   in front of the same homeowner, and where the gaps are
 - [Architecture](docs/architecture.md) — proposed stack and the reasoning
+- [Photography](docs/photography.md) — catalog images and user uploads, and why
+  they are different problems
+- [M3: zones and frost](docs/milestones/m3-zones-and-frost.md) — the next
+  build milestone
+- [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to
+  get the backend working end to end
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
 - [Setup](docs/setup.md) — accounts and provisioning
+- [Scope boundary](docs/scope.md) — the authoritative in/out list for V1
 - [V1 spec](docs/v1-spec.md) — scope, data model, build order, and the full
   asset checklist
 - [Roadmap](docs/roadmap.md) — phased plan and open questions

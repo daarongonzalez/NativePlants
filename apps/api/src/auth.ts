@@ -1,7 +1,7 @@
 import { Auth, WorkersKVStoreSingle } from "firebase-auth-cloudflare-workers";
 import type { MiddlewareHandler } from "hono";
 import { createDatabase, findOrCreateUser } from "@np/db";
-import type { Env, Variables } from "./env.js";
+import type { Env, Variables } from "./env";
 
 /**
  * Verifies a Firebase ID token at the edge.

@@ -21,13 +21,29 @@ pnpm check        # typecheck + tests
 The engine tests run with no configuration. The database scoping suite skips
 without a test database — see step 4.
 
-## 2. Neon
+## 2. Neon — already provisioned
 
-1. Create a project. Create two branches: `main` (production) and `dev`.
-2. Enable PostGIS on each: `CREATE EXTENSION IF NOT EXISTS postgis;`
-3. Copy the **direct** connection string, not the pooled one. The pooled string
-   is the one with `-pooler` in the host. Hyperdrive does the pooling, and
-   doubling up causes problems.
+| | |
+|---|---|
+| Project | `NativePlants` / `cool-term-95598834` |
+| Region | `aws-us-east-2` |
+| Postgres | 18.6 |
+| Branches | `production` (default), `dev` |
+| Dev branch id | `br-winter-flower-ae0lr1gs` |
+
+PostGIS is enabled and the initial migration is applied **on `dev` only**.
+Production is still empty — apply the migration there as a deliberate step,
+not as a side effect.
+
+Copy the **direct** connection string, not the pooled one: the pooled host
+contains `-pooler`. Hyperdrive does the pooling and doubling up causes
+problems. The pooled string is the right one for local tests and scripts,
+which connect with `pg` directly.
+
+> **Credential note.** The `dev` branch connection string was read during the
+> M3 build and is therefore in that session's transcript. Nothing was committed
+> and the credential is for the dev branch only, but rotating the
+> `neondb_owner` password is cheap if you would rather not rely on that.
 
 ## 3. Cloudflare
 
@@ -89,3 +105,50 @@ curl http://localhost:8787/v1/health
 `.dev.vars` and `.env` are gitignored. For deployed environments use
 `wrangler secret put`, never `[vars]` in `wrangler.toml` — that file is
 committed.
+
+---
+
+## What is a secret here, and what is not
+
+Short version: **this backend currently has no runtime secrets at all.** That is
+a property worth protecting as the project grows.
+
+### Safe to commit and to paste anywhere
+
+These are public identifiers. They appear in config files, in client bundles,
+or in both, by design.
+
+| Value | Where it lives |
+|---|---|
+| Firebase project id | `apps/api/wrangler.toml` |
+| Firebase web config, **including `apiKey`** | the browser bundle, once `apps/web` exists |
+| Hyperdrive config id | both `wrangler.toml` files |
+| KV namespace id | `apps/api/wrangler.toml` |
+| R2 bucket name | `wrangler.toml`, when it exists |
+
+The Firebase `apiKey` catches people out. It is not a key in the password
+sense — it identifies the project to Google's endpoints and ships in every
+client bundle. Firebase's security comes from Auth rules and server-side token
+verification, not from keeping that string hidden.
+
+The Hyperdrive id is a reference, not a credential. The actual database
+password is held by Cloudflare inside the Hyperdrive config; the Worker only
+ever sees a local connection string pointing at Hyperdrive's proxy.
+
+### Never commit, never paste into a chat or an issue
+
+| Value | Where it belongs |
+|---|---|
+| Neon password / connection string | Cloudflare, via the Hyperdrive config |
+| Cloudflare API tokens | your machine's `wrangler` login |
+| Firebase service account JSON | nowhere — we do not use one |
+
+### If a real secret is ever needed
+
+Use `wrangler secret put NAME`, which stores it on Cloudflare and keeps it out
+of the repo. Never add it to `[vars]` in `wrangler.toml` — that file is
+committed.
+
+Today nothing needs this. Verifying a Firebase token requires only the project
+id, and the database credential lives in Hyperdrive. Keep it that way for as
+long as the design allows.
