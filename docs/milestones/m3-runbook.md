@@ -119,8 +119,18 @@ live on Cloudflare's side, so local dev needs its own connection string, under
 an env var whose suffix is the *binding* name:
 
 ```bash
-export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="<neon dev pooled string>"
+# The prefix depends on your wrangler major version. Set both and move on.
+export WRANGLER_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="<neon dev string>"
+export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="<neon dev string>"
 ```
+
+wrangler 3.x reads `WRANGLER_`, wrangler 4.x reads `CLOUDFLARE_`. The error from
+`wrangler dev` names the one it wants, so if only one is set you find out
+immediately rather than silently connecting to nothing.
+
+Better than either: put both in a gitignored `.env` and load it with
+`set -a; source .env; set +a`. An `export` typed at the prompt leaves the
+password in your scrollback and in any screenshot of it.
 
 Then, in one terminal:
 
