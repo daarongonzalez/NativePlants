@@ -1,0 +1,49 @@
+name: Deploy
+
+# Deploys both Workers to Cloudflare. Exists so the project can be operated
+# entirely from GitHub and the Cloudflare dashboard, with no local toolchain.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Never deploy something that does not typecheck or pass its tests.
+      - run: pnpm typecheck
+      - run: pnpm test
+
+      - name: Deploy API
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+
+      - name: Deploy ingest
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/ingest
+          secrets: |
+            RUN_TOKEN
+        env:
+          RUN_TOKEN: ${{ secrets.INGEST_RUN_TOKEN }}
