@@ -21,6 +21,16 @@ import type { IngestEnv, IngestJob, IngestResult } from "./types";
 
 const SOURCE_URL = "https://phzmapi.org";
 
+/**
+ * Default fetch, wrapped rather than passed bare.
+ *
+ * `= fetch` captures the global without its binding, so calling it as
+ * `this.fetchImpl(...)` sets `this` to the instance and the Workers runtime
+ * throws "Illegal invocation". Node tolerates it, so this only appeared in
+ * production — it skipped all 67 ZIPs on the first real run.
+ */
+const defaultFetch: typeof fetch = (...args) => fetch(...args);
+
 interface ZoneResponse {
   zone?: unknown;
   temperature_range?: unknown;
@@ -43,7 +53,7 @@ export class HardinessZoneJob implements IngestJob {
 
   constructor(
     private readonly zips: readonly string[],
-    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly fetchImpl: typeof fetch = defaultFetch,
   ) {}
 
   async run(env: IngestEnv): Promise<IngestResult> {

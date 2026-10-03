@@ -18,11 +18,14 @@ import { SourceShapeError } from "./types";
 
 const ENDPOINT = "https://epqs.nationalmap.gov/v1/json";
 
+/** Wrapped, not bare — see the note in geocode.ts on Illegal invocation. */
+const defaultFetch: typeof fetch = (...args) => fetch(...args);
+
 /** USGS returns this for points outside its coverage. */
 const NO_DATA_SENTINEL = -1000000;
 
 export class UsgsElevationClient implements ElevationClient {
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(private readonly fetchImpl: typeof fetch = defaultFetch) {}
 
   async elevation(latitude: number, longitude: number): Promise<ElevationResult | null> {
     const url = new URL(ENDPOINT);

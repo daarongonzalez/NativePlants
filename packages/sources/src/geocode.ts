@@ -18,6 +18,17 @@ import { SourceShapeError } from "./types";
 const ENDPOINT = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress";
 
 /**
+ * Default fetch, wrapped rather than passed bare.
+ *
+ * `= fetch` captures the global function without its binding, so calling it as
+ * `this.fetchImpl(...)` sets `this` to the instance and the Workers runtime
+ * throws "Illegal invocation: function called with incorrect `this` reference".
+ * It works in Node, which is more forgiving, so this only shows up in
+ * production — it took out all 67 ZIPs on the first real ingestion run.
+ */
+const defaultFetch: typeof fetch = (...args) => fetch(...args);
+
+/**
  * Census matches are ALWAYS interpolated, never rooftop.
  *
  * The service works by finding the street segment containing the address
@@ -42,7 +53,7 @@ function zipFrom(match: Record<string, unknown>): string | null {
 }
 
 export class CensusGeocodeClient implements GeocodeClient {
-  constructor(private readonly fetchImpl: typeof fetch = fetch) {}
+  constructor(private readonly fetchImpl: typeof fetch = defaultFetch) {}
 
   async geocode(address: string): Promise<GeocodeResult | null> {
     const url = new URL(ENDPOINT);
