@@ -114,10 +114,34 @@ Fill it from a Census ZCTA list for the four counties.
 
 ### 2c. Run the jobs
 
+**`wrangler dev` cannot use the deployed Hyperdrive config.** Its credentials
+live on Cloudflare's side, so local dev needs its own connection string, under
+an env var whose suffix is the *binding* name:
+
 ```bash
-pnpm --filter @np/ingest dev
-curl -X POST http://localhost:8787/__run
+export CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="<neon dev pooled string>"
 ```
+
+Then, in one terminal:
+
+```bash
+pnpm --filter @np/ingest dev --port 8788
+```
+
+And in another:
+
+```bash
+curl -X POST http://localhost:8788/__run
+```
+
+The port override matters: both Workers default to 8787, so the API and the
+ingest Worker collide if you have both running.
+
+Two notes on local behaviour. Hyperdrive's caching does not apply locally, so
+local and deployed performance differ — that is expected, not a
+misconfiguration. And `wrangler dev --remote` runs the Worker in Cloudflare's
+network against the real Hyperdrive config instead, which is the better test
+once the job works.
 
 The response reports rows written and skipped per job, plus warnings. A job
 that wrote zero rows logs a warning rather than passing quietly — read the
