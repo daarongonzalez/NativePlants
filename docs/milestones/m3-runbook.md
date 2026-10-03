@@ -125,16 +125,23 @@ output rather than assuming.
 
 ### 2d. Verify the tables
 
-```sql
-SELECT count(*) FROM hardiness_zones;          -- expect ~70+
-SELECT count(*) FROM climate_stations;          -- expect several
-SELECT count(*) FROM frost_norms;
-SELECT count(*) FROM data_provenance;           -- one per ingested row
-SELECT DISTINCT zone_ordinal FROM hardiness_zones ORDER BY 1;
+```bash
+DATABASE_URL="<neon dev pooled string>" pnpm verify:data
 ```
 
-Zone ordinals on the Wasatch Front should cluster around 61–72 (zones 6a–7b).
-Anything outside that range means a parsing problem, not a surprising climate.
+Eleven checks, exiting non-zero on any failure so it can gate a deploy. Row
+counts are the least of it — the failure that matters is data that loaded
+cleanly and is wrong.
+
+The one worth understanding: **frost probability band ordering.** A 10%
+last-spring date is the *latest* of the three (only a 10% chance of frost after
+it); a 10% first-fall date is the *earliest*. Load those columns in the wrong
+order and everything still parses, every date is valid, nothing errors — and
+the advice is reversed. A gardener plants two weeks early and loses it. That
+check is the reason this script exists.
+
+It also reports which ZIPs in `wasatch-zips.ts` resolved to no zone, which is
+how you find coverage gaps without reading the job output line by line.
 
 **Done when:** `POST /v1/sites/:id/resolve` on a real Salt Lake address returns
 a zone and frost bands that match what you would find by hand.

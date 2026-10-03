@@ -12,7 +12,8 @@
     "build": "pnpm -r --if-present build",
     "db:generate": "pnpm --filter @np/db generate",
     "db:migrate": "pnpm --filter @np/db migrate",
-    "check": "pnpm typecheck && pnpm test"
+    "check": "pnpm typecheck && pnpm test",
+    "verify:data": "node scripts/verify-data.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.2",
