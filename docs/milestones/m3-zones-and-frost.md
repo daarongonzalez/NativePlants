@@ -150,7 +150,31 @@ stations used in verification sit 431 m apart in elevation, and their median
 last-frost dates differ by **34 days** — April 24 against May 28. That is the
 error a ZIP-code lookup makes silently.
 
-### Blocked by this environment's egress policy
+### Resolved since — the deployed path works
+
+The egress limits below apply to the session container, **not** to Cloudflare.
+Deploying the ingest Worker was what unblocked the data load, because the
+Worker fetches from Cloudflare's network.
+
+As of 3 October 2026 the Neon `dev` branch holds:
+
+| Table | Rows |
+|---|---|
+| `hardiness_zones` | 50 (zones 6a–7b, which is right for the Wasatch Front) |
+| `climate_stations` | 1 — Salt Lake City International, elevation 1287.8 m |
+| `frost_norms` | 1 — real NCEI 1991–2020 normals |
+| `data_provenance` | 54 — every ingested row sourced |
+
+Two bugs that only production could have found, both now fixed and tested:
+
+1. **`Illegal invocation`.** `fetchImpl: typeof fetch = fetch` loses the
+   global's binding, and the Workers runtime rejects the call. Node tolerates
+   it, so it passed every local test. It was in all three HTTP clients.
+2. **A verification step that reported success on a total failure.** The
+   ingest workflow summed `rowsWritten` across jobs, so the zone job writing
+   zero was masked by the frost job writing one.
+
+### Still blocked by this environment's egress policy
 
 Organization policy blocks these hosts from the build environment. The code is
 written to their documented shapes; the first real call is the first test of

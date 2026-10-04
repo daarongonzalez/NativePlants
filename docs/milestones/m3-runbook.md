@@ -1,5 +1,13 @@
 # Backend Setup Runbook
 
+**Status: steps 1 and 2 complete, 3 October 2026. Step 3 remains.**
+
+| Step | State |
+|---|---|
+| 1 — Provision and wire | **Done.** Hyperdrive, KV, Firebase project id, both Workers deployed |
+| 2 — Load reference data | **Done.** 50 hardiness zones, 1 climate station with real NOAA normals |
+| 3 — Verify | **Not started.** Needs a machine that can reach Postgres and the upstream hosts |
+
 Three steps to take the backend from "code exists" to "working end to end".
 Each has to happen on a machine with normal network access — the environment
 this code was written in blocks the hosts involved.
