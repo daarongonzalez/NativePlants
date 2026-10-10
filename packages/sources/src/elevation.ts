@@ -12,8 +12,9 @@ import { SourceShapeError } from "./types";
  *
  * Called once on an explicit user action, never on a page load.
  *
- * NOT YET VERIFIED AGAINST A LIVE RESPONSE — egress policy blocks
- * epqs.nationalmap.gov from the build environment.
+ * Checked against live responses on 10 October 2026: the value comes back as
+ * a numeric string, and a point outside coverage can come back as plain text
+ * rather than JSON (see below).
  */
 
 const ENDPOINT = "https://epqs.nationalmap.gov/v1/json";
@@ -40,7 +41,17 @@ export class UsgsElevationClient implements ElevationClient {
       throw new SourceShapeError("usgs-epqs", `HTTP ${response.status}`);
     }
 
-    const body = (await response.json()) as Record<string, unknown>;
+    // The service answers HTTP 200 with a plain-text body for some failures,
+    // e.g. "Call failed. [Failed cloud operation: Open, Path: ...]" for a
+    // point in the open ocean. That is not JSON, so say what happened rather
+    // than surfacing a bare SyntaxError.
+    const text = await response.text();
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      throw new SourceShapeError("usgs-epqs", `response is not JSON: ${text.slice(0, 120)}`);
+    }
     const raw = body["value"];
 
     // The service has historically returned the value as a numeric string.

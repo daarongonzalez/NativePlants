@@ -3,13 +3,11 @@ import { CensusGeocodeClient } from "./geocode";
 import { SourceShapeError } from "./types";
 
 /**
- * Fixture responses written to the Census geocoder's documented shape.
+ * Fixture responses in the shape the Census geocoder returns.
  *
- * These have NOT been captured from a live call — the build environment's
- * egress policy blocks geocoding.geo.census.gov. They pin our parsing against
- * the documented contract, which catches regressions but would not catch the
- * documentation being wrong. Replace them with captured responses on the first
- * run against the real service.
+ * MATCH is a response captured from the live service on 10 October 2026 for
+ * 451 S State St, Salt Lake City. Fields we do not read are kept so the
+ * fixture stays a faithful sample.
  */
 function respondWith(body: unknown, status = 200): typeof fetch {
   return (async () =>
@@ -21,19 +19,29 @@ function respondWith(body: unknown, status = 200): typeof fetch {
 
 const MATCH = {
   result: {
+    input: {
+      address: { address: "451 S State St, Salt Lake City, UT 84111" },
+      benchmark: { isDefault: true, benchmarkDescription: "Public Address Ranges - Current Benchmark", id: "4", benchmarkName: "Public_AR_Current" },
+    },
     addressMatches: [
       {
-        matchedAddress: "1745 E SUNNYSIDE AVE, SALT LAKE CITY, UT, 84108",
-        coordinates: { x: -111.839, y: 40.7503 },
-        tigerLine: { tigerLineId: "12345678", side: "L" },
+        tigerLine: { side: "L", tigerLineId: "176067423" },
+        coordinates: { x: -111.888147804451, y: 40.759545544294 },
         addressComponents: {
-          fromAddress: "1701",
-          toAddress: "1799",
-          streetName: "SUNNYSIDE",
+          zip: "84111",
+          streetName: "STATE",
+          preType: "",
           city: "SALT LAKE CITY",
+          preDirection: "S",
+          suffixDirection: "",
+          fromAddress: "401",
           state: "UT",
-          zip: "84108",
+          suffixType: "ST",
+          toAddress: "499",
+          suffixQualifier: "",
+          preQualifier: "",
         },
+        matchedAddress: "451 S STATE ST, SALT LAKE CITY, UT, 84111",
       },
     ],
   },
@@ -42,11 +50,11 @@ const MATCH = {
 describe("Census geocoder", () => {
   it("reads coordinates and ZIP from a match", async () => {
     const client = new CensusGeocodeClient(respondWith(MATCH));
-    const result = await client.geocode("1745 E Sunnyside Ave, Salt Lake City, UT");
+    const result = await client.geocode("451 S State St, Salt Lake City, UT 84111");
 
     expect(result).not.toBeNull();
-    expect(result!.zip).toBe("84108");
-    expect(result!.matchedAddress).toContain("SUNNYSIDE");
+    expect(result!.zip).toBe("84111");
+    expect(result!.matchedAddress).toContain("STATE");
   });
 
   it("does not swap latitude and longitude", async () => {
@@ -55,8 +63,8 @@ describe("Census geocoder", () => {
 
     // Census returns x as longitude and y as latitude. Swapping puts Salt
     // Lake City in the Southern Ocean, and nothing downstream would notice.
-    expect(result!.longitude).toBeCloseTo(-111.839, 3);
-    expect(result!.latitude).toBeCloseTo(40.7503, 3);
+    expect(result!.longitude).toBeCloseTo(-111.888, 3);
+    expect(result!.latitude).toBeCloseTo(40.7595, 3);
     expect(result!.latitude).toBeGreaterThan(0);
     expect(result!.longitude).toBeLessThan(0);
   });

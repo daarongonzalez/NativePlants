@@ -30,13 +30,17 @@ jobs:
         id: live
         run: |
           set -o pipefail
-          LIVE_CHECK=1 pnpm --filter @np/sources exec vitest run live --reporter=verbose 2>&1 | tee live.log
+          # NO_COLOR keeps terminal colour codes out of the log, which would
+          # otherwise sit in front of the RAW lines and hide them from grep.
+          NO_COLOR=1 LIVE_CHECK=1 pnpm --filter @np/sources exec vitest run live --reporter=verbose 2>&1 | tee live.log
 
       # Raw responses and what our parsers made of them, ready to compare with
       # the fixtures in geocode.test.ts and elevation.test.ts.
       - name: Summarise
         if: always()
         run: |
+          # Belt and braces: strip any colour codes that got through anyway.
+          sed -i 's/\x1b\[[0-9;]*m//g' live.log
           {
             echo "## Live source check"
             echo
