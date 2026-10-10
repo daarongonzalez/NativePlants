@@ -148,6 +148,13 @@ jobs:
       - name: Open a pull request
         uses: peter-evans/create-pull-request@v7
         with:
+          # Only the two generated files. Without this the action commits every
+          # untracked file in the workspace, including the raw downloads (the
+          # 130,000-line station inventory and ~50 CSVs) - those are attached
+          # to the run as an artifact instead.
+          add-paths: |
+            apps/ingest/src/wasatch-zips.ts
+            apps/ingest/src/data/wasatch-frost.ts
           branch: automation/refresh-reference-data
           commit-message: Refresh ZIP list and frost stations from Census and NOAA
           title: Refresh ZIP list and frost stations

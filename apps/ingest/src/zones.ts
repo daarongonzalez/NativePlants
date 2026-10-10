@@ -62,6 +62,7 @@ export class HardinessZoneJob implements IngestJob {
     const retrievedAt = new Date();
     let rowsWritten = 0;
     let rowsSkipped = 0;
+    const notInDataset: string[] = [];
 
     for (const zip of this.zips) {
       let payload: ZoneResponse;
@@ -71,6 +72,7 @@ export class HardinessZoneJob implements IngestJob {
         });
         // A 404 means this ZIP is outside the dataset, which is expected.
         if (response.status === 404) {
+          notInDataset.push(zip);
           rowsSkipped += 1;
           continue;
         }
@@ -124,6 +126,14 @@ export class HardinessZoneJob implements IngestJob {
       ]);
 
       rowsWritten += 1;
+    }
+
+    // Expected, but never silent: these are ZIPs we intend to cover and the
+    // source does not have, so someone has to decide what to do about them.
+    if (notInDataset.length > 0) {
+      warnings.unshift(
+        `${notInDataset.length} ZIPs not in the source dataset (404): ${notInDataset.join(" ")}`,
+      );
     }
 
     return { job: this.name, rowsWritten, rowsSkipped, warnings };
