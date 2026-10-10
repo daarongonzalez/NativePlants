@@ -2,8 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq, sql } from "drizzle-orm";
 import { createDatabase, type Database } from "./client";
 import { createSite } from "./repositories";
-import { countProfiles, createSiteProfile, findNearestStation, lookupZoneByZip } from "./resolve-repo";
-import { climateStations, frostNorms, hardinessZones, users } from "./schema";
+import { countProfiles, createSiteProfile, findNearestStation, lookupZoneByZip, recordProvenance } from "./resolve-repo";
+import { climateStations, dataProvenance, frostNorms, hardinessZones, users } from "./schema";
 
 /**
  * Integration tests for the resolve pipeline's data layer.
@@ -154,5 +154,32 @@ describeIfDb("resolve data layer", () => {
     expect(await countProfiles(db, owner, site!.id)).toBe(0);
 
     await db.delete(users).where(eq(users.id, other!.id));
+  });
+
+  it("records provenance once per source and refreshes it on a repeat run", async () => {
+    const recordId = `TEST-PROV-${Date.now()}`;
+    const entry = (citation: string, retrievedAt: Date, source = "usda_phzm") => ({
+      tableName: "hardiness_zones",
+      recordId,
+      source,
+      citation,
+      sourceUrl: "https://example.test/a",
+      retrievedAt,
+    });
+    const rows = () => db.select().from(dataProvenance).where(eq(dataProvenance.recordId, recordId));
+
+    await recordProvenance(db, [entry("first", new Date("2026-01-01"))]);
+    await recordProvenance(db, [entry("second", new Date("2026-02-01"))]);
+
+    const afterRepeat = await rows();
+    expect(afterRepeat).toHaveLength(1);
+    expect(afterRepeat[0]!.citation).toBe("second");
+    expect(afterRepeat[0]!.retrievedAt.toISOString()).toBe("2026-02-01T00:00:00.000Z");
+
+    // A different source for the same record is a different claim.
+    await recordProvenance(db, [entry("other", new Date("2026-03-01"), "other_source")]);
+    expect(await rows()).toHaveLength(2);
+
+    await db.delete(dataProvenance).where(eq(dataProvenance.recordId, recordId));
   });
 });

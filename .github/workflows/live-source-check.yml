@@ -1,0 +1,61 @@
+name: Live source check
+
+# Calls the real Census geocoder and USGS elevation service through our own
+# client code, to confirm they still answer in the shape the parsers expect.
+#
+# Run it from the Actions tab: "Live source check" -> "Run workflow".
+#
+# It is manual on purpose. It needs the internet and those services are
+# sometimes slow, so it should not decide whether a pull request can merge.
+# Run it before trusting a change to a source client, and now and then to catch
+# an upstream format change.
+on:
+  workflow_dispatch:
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Call the live services
+        id: live
+        run: |
+          set -o pipefail
+          LIVE_CHECK=1 pnpm --filter @np/sources exec vitest run live --reporter=verbose 2>&1 | tee live.log
+
+      # Raw responses and what our parsers made of them, ready to compare with
+      # the fixtures in geocode.test.ts and elevation.test.ts.
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "## Live source check"
+            echo
+            echo "### Test results"
+            echo '```'
+            grep -E "✓|✗|×|Tests |Test Files" live.log || echo "no results found"
+            echo '```'
+            echo "### Raw responses"
+            echo '```'
+            grep "^RAW " live.log | cut -c1-1500 || true
+            echo '```'
+            echo "### What the parsers produced"
+            echo '```'
+            grep "^PARSED " live.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-source-check
+          path: live.log
