@@ -5,8 +5,8 @@ name: Run ingestion
 # Run it from the Actions tab: "Run ingestion" -> "Run workflow". No local
 # toolchain needed.
 #
-# The Worker runs on Cloudflare's network, so it can reach phzmapi.org and the
-# other upstream sources regardless of what any individual machine can.
+# The Worker runs on Cloudflare's network, so it can reach Oregon State's PRISM
+# files and the other upstream sources regardless of what any individual machine can.
 on:
   workflow_dispatch:
 

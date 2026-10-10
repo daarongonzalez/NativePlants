@@ -7,7 +7,7 @@ machine.
 ## Why this works
 
 The container these sessions run in is behind a strict egress policy — it
-cannot reach phzmapi.org, NCEI, the Census geocoder, USGS, or Postgres over
+cannot reach prism.oregonstate.edu, NCEI, the Census geocoder, USGS, or Postgres over
 TCP. A laptop can, but so can **Cloudflare's network**, which is where the
 Workers actually run.
 
@@ -60,7 +60,8 @@ Worker's URL. Copy the ingest one into the `INGEST_WORKER_URL` secret.
 
 Actions tab → **Run ingestion** → **Run workflow**.
 
-This calls the deployed Worker, which fetches from phzmapi.org and writes to
+This calls the deployed Worker, which fetches the hardiness zone file from
+Oregon State's PRISM group and writes to
 Neon through Hyperdrive. The log shows rows written and skipped per job, and
 **fails the run if every job wrote zero rows** — a silent no-op is the failure
 mode worth catching.

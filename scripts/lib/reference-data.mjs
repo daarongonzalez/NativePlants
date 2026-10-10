@@ -8,6 +8,14 @@
 export const MARKET_COUNTY_FIPS = ["49035", "49049", "49011", "49057"];
 
 /**
+ * ZIPs the Census lists but that have no hardiness zone in the PRISM ZIP file
+ * (checked October 2026). 84138 and 84150 are most likely organization or PO
+ * box ZIPs with no land area, and 84602 is a special-purpose Provo ZIP. Without
+ * this list the refresh workflow would add them back every time.
+ */
+export const EXCLUDED_ZIPS = ["84138", "84150", "84602"];
+
+/**
  * Bounding box for candidate weather stations.
  *
  * Deliberately wider than the four counties: an address near a county line can
@@ -136,7 +144,8 @@ export function renderZipsModule(zips) {
  * Source: U.S. Census Bureau 2020 ZCTA-to-county relationship file. A ZCTA is
  * kept when at least 10% of its land area is inside the four counties. ZCTAs
  * approximate ZIP codes but are not identical, so ZIPs from the previous list
- * are kept as well.
+ * are kept as well. 84138, 84150 and 84602 are left out on purpose: the PRISM
+ * hardiness zone file has no entry for them.
  *
  * A ZIP that is missing here means a real gardener hears "we do not cover your
  * area yet" for an address we do intend to cover.
