@@ -21,3 +21,67 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:scripts
+
+  # The database tests prove that one gardener cannot read another's data and
+  # that the nearest-station query works. They need a real Postgres with
+  # PostGIS, so this job starts a throwaway one. Nothing here touches Neon and
+  # no secrets are needed.
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nativeplants_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: postgres
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nativeplants_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Enable PostGIS
+        run: psql -h localhost -U postgres -d nativeplants_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+      # The same migration production uses, so the tests run against the real
+      # schema rather than a copy that could drift.
+      - name: Apply the schema
+        run: pnpm db:migrate
+
+      - name: Run the database tests
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nativeplants_test
+        run: pnpm --filter @np/db exec vitest run --reporter=default --reporter=json --outputFile.json=db-tests.json
+
+      # A skipped test is not a passing test. If the database variable ever
+      # stops reaching the suite, vitest reports success with everything
+      # skipped, and nothing about authorization has been proven. Fail instead.
+      - name: Fail if any database test was skipped
+        run: |
+          python3 - <<'PY'
+          import json, sys
+
+          r = json.load(open("packages/db/db-tests.json"))
+          passed, failed, skipped = r["numPassedTests"], r["numFailedTests"], r["numPendingTests"]
+          print(f"{passed} passed, {failed} failed, {skipped} skipped")
+
+          if skipped > 0 or passed == 0:
+              print("::error::Database tests were skipped or did not run, so nothing was proven.")
+              sys.exit(1)
+          PY
