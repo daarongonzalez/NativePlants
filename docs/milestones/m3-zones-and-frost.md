@@ -182,8 +182,8 @@ those field paths.
 
 | Blocked | Consequence |
 |---|---|
-| `geocoding.geo.census.gov` | Geocoder parsing unverified against a live response |
-| `epqs.nationalmap.gov` | Elevation parsing unverified |
+| `geocoding.geo.census.gov` | Verified 10 Oct 2026 via the Live source check workflow (works from GitHub runners) |
+| `epqs.nationalmap.gov` | Verified 10 Oct 2026 the same way |
 | `phzmapi.org` | Zone table is empty — no real ZIP-to-zone data loaded |
 | NCEI hosts | `src/data/wasatch-frost.ts` is a **placeholder** and must be replaced |
 | Postgres TCP 5432 | The 13 database integration tests skip rather than run |
@@ -226,3 +226,11 @@ University, which produced the 2023 USDA map
   Oregon State University, URL, access date). The provenance rows carry it.
   The terms do not mention commercial use. **Before the app charges anyone,
   ask prism-questions@nacse.org for written confirmation.**
+
+### Update, 10 October 2026 — verification
+
+- **Live source check** (Actions tab, manual): 8 of 8 pass. Both parsers read real
+  Census and USGS responses correctly. The fixtures in the tests are now real
+  captured responses.
+- **Database tests** now run in CI against a throwaway PostGIS database
+  (`database` job in `ci.yml`). The job fails if any test is skipped.

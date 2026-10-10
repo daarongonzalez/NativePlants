@@ -211,6 +211,10 @@ Goal: stop trusting code that has never met a live response.
 
 ### 3a. Run the database integration tests
 
+**Now automatic:** the `database` job in CI starts a PostGIS database and runs
+them on every pull request, failing if any are skipped. The manual steps below
+are only needed to run them against Neon.
+
 These have never run. Thirteen tests covering cross-account scoping and the
 PostGIS queries.
 
