@@ -9,7 +9,7 @@
  * What was added is printed to stderr so the pull request can show it.
  */
 import { readFileSync } from "node:fs";
-import { renderZipsModule, selectZctas, zipsFromModule } from "./lib/reference-data.mjs";
+import { EXCLUDED_ZIPS, renderZipsModule, selectZctas, zipsFromModule } from "./lib/reference-data.mjs";
 
 const [zctaFile, existingFile] = process.argv.slice(2);
 if (!zctaFile || !existingFile) {
@@ -27,7 +27,9 @@ if (fromCensus.length < 50) {
   process.exit(1);
 }
 
-const merged = [...new Set([...existing, ...fromCensus])].sort();
+const merged = [...new Set([...existing, ...fromCensus])]
+  .filter((z) => !EXCLUDED_ZIPS.includes(z))
+  .sort();
 const added = merged.filter((z) => !existing.includes(z));
 const keptOnly = existing.filter((z) => !fromCensus.includes(z));
 

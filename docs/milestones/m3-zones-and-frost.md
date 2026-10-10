@@ -209,3 +209,20 @@ those field paths.
    string for Hyperdrive — the one without `-pooler` in the host.
 6. **Build the screen.** The endpoint returns everything it needs; there is no
    UI yet.
+
+---
+
+## Update, October 2026 — zones now come from PRISM
+
+phzmapi.org was missing 24 of our 88 ZIPs, including all of Weber County. The
+zone job now reads the ZIP file published by the PRISM Group at Oregon State
+University, which produced the 2023 USDA map
+(`https://prism.oregonstate.edu/phzm/data/2023/phzm_us_zipcode_2023.csv`).
+
+- The 64 zones already loaded from phzmapi.org matched this file exactly.
+- 85 of our ZIPs are covered. 84138, 84150 and 84602 have no entry and were
+  removed from the list.
+- Terms: "freely reproduced and redistributed", with attribution (PRISM Group,
+  Oregon State University, URL, access date). The provenance rows carry it.
+  The terms do not mention commercial use. **Before the app charges anyone,
+  ask prism-questions@nacse.org for written confirmation.**

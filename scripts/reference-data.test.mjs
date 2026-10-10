@@ -65,3 +65,8 @@ test("the rendered module round-trips through zipsFromModule", () => {
   const zips = ["84003", "84004", "84101"];
   assert.deepEqual(zipsFromModule(renderZipsModule(zips)), zips);
 });
+
+test("ZIPs with no PRISM zone are never added back by a refresh", async () => {
+  const { EXCLUDED_ZIPS } = await import("./lib/reference-data.mjs");
+  assert.deepEqual(EXCLUDED_ZIPS, ["84138", "84150", "84602"]);
+});

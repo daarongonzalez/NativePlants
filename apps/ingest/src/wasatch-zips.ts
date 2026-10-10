@@ -9,7 +9,8 @@
  * Source: U.S. Census Bureau 2020 ZCTA-to-county relationship file. A ZCTA is
  * kept when at least 10% of its land area is inside the four counties. ZCTAs
  * approximate ZIP codes but are not identical, so ZIPs from the previous list
- * are kept as well.
+ * are kept as well. 84138, 84150 and 84602 are left out on purpose: the PRISM
+ * hardiness zone file has no entry for them.
  *
  * A ZIP that is missing here means a real gardener hears "we do not cover your
  * area yet" for an address we do intend to cover.
@@ -22,8 +23,8 @@ export const WASATCH_FRONT_ZIPS: readonly string[] = [
   "84088", "84092", "84093", "84094", "84095", "84096", "84097", "84101",
   "84102", "84103", "84104", "84105", "84106", "84107", "84108", "84109",
   "84111", "84112", "84113", "84114", "84115", "84116", "84117", "84118",
-  "84119", "84120", "84121", "84123", "84124", "84128", "84129", "84138",
-  "84150", "84180", "84310", "84315", "84317", "84401", "84403", "84404",
-  "84405", "84408", "84414", "84601", "84602", "84604", "84606", "84626",
-  "84629", "84633", "84651", "84653", "84655", "84660", "84663", "84664",
+  "84119", "84120", "84121", "84123", "84124", "84128", "84129", "84180",
+  "84310", "84315", "84317", "84401", "84403", "84404", "84405", "84408",
+  "84414", "84601", "84604", "84606", "84626", "84629", "84633", "84651",
+  "84653", "84655", "84660", "84663", "84664",
 ];
