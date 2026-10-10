@@ -246,6 +246,15 @@ fixture so the test still means something.
 
 ### 3c. Apply the schema to production
 
+**Done, 10 October 2026.** The `production` branch has the schema (15 tables,
+29 indexes, 13 foreign keys, PostGIS 3.6.4), matching `dev` exactly. It was
+applied through the Neon connector in one transaction, and the migration is
+recorded in `drizzle.__drizzle_migrations` on both branches so a future
+`pnpm db:migrate` applies only newer migrations. Production holds no reference
+data yet. Note that the Hyperdrive config `nativeplants-db` still points at the
+**dev** branch, so both Workers read and write dev. The text below is kept for
+reference.
+
 Production is still empty. Do it deliberately rather than as a side effect:
 
 ```bash
