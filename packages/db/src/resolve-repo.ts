@@ -120,13 +120,52 @@ export async function setSiteLocation(
   return rows.length > 0;
 }
 
-/** Record where an ingested row came from. Called by ingestion jobs, never by a request. */
+/**
+ * Record where an ingested row came from.
+ *
+ * One row per (table, record, source). Ingestion runs repeatedly, and a plain
+ * insert added a fresh row for every ZIP and station on every run, so the
+ * table grew without bound and a reader could not tell which row described the
+ * current value. If a row for that source already exists it is refreshed in
+ * place (new citation, URL and retrieval date); a different source gets its
+ * own row.
+ *
+ * Called by ingestion jobs, never by a request. Jobs run one at a time (the
+ * workflows share a concurrency group), so there is no race between the lookup
+ * and the write.
+ */
 export async function recordProvenance(
   db: Database,
   entries: (typeof dataProvenance.$inferInsert)[],
 ) {
-  if (entries.length === 0) return;
-  await db.insert(dataProvenance).values(entries);
+  for (const entry of entries) {
+    const existing = await db
+      .select({ id: dataProvenance.id })
+      .from(dataProvenance)
+      .where(
+        and(
+          eq(dataProvenance.tableName, entry.tableName),
+          eq(dataProvenance.recordId, entry.recordId),
+          eq(dataProvenance.source, entry.source),
+        ),
+      )
+      .limit(1);
+
+    const found = existing[0];
+    if (found) {
+      await db
+        .update(dataProvenance)
+        .set({
+          license: entry.license ?? null,
+          citation: entry.citation ?? null,
+          sourceUrl: entry.sourceUrl ?? null,
+          retrievedAt: entry.retrievedAt,
+        })
+        .where(eq(dataProvenance.id, found.id));
+    } else {
+      await db.insert(dataProvenance).values(entry);
+    }
+  }
 }
 
 export async function latestProfileForSite(db: Database, owner: Owner, siteId: string) {
