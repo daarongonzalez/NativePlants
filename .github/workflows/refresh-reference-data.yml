@@ -1,0 +1,168 @@
+name: Refresh reference data
+
+# Rebuilds the two lists the ingestion Worker loads, from public sources, and
+# opens a pull request with the result:
+#
+#   apps/ingest/src/wasatch-zips.ts        <- Census ZCTA-to-county file
+#   apps/ingest/src/data/wasatch-frost.ts  <- NOAA NCEI 1991-2020 normals
+#
+# Run it from the Actions tab: "Refresh reference data" -> "Run workflow".
+#
+# It runs on a GitHub runner because the session container that most of this
+# code is written in cannot reach census.gov or ncei.noaa.gov. Nothing here
+# touches the database; loading happens later, through Deploy and then
+# Run ingestion, once the pull request has been reviewed and merged.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check the helper scripts
+        run: node --test scripts/*.test.mjs
+
+      # ---- ZIP codes ------------------------------------------------------
+      - name: Download the Census ZCTA-to-county file
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 -o zcta-county.txt \
+            https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/tab20_zcta520_county20_natl.txt
+          echo "Downloaded $(wc -l < zcta-county.txt) lines"
+
+      - name: Build the ZIP list
+        run: |
+          node scripts/select-zips.mjs zcta-county.txt apps/ingest/src/wasatch-zips.ts \
+            > wasatch-zips.new.ts 2> zips.log
+          cat zips.log
+          mv wasatch-zips.new.ts apps/ingest/src/wasatch-zips.ts
+
+      # ---- Weather stations -----------------------------------------------
+      - name: Download the GHCN-Daily station inventory
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 -o ghcnd-stations.txt \
+            https://www.ncei.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt
+
+      - name: Pick candidate stations
+        run: node scripts/select-stations.mjs ghcnd-stations.txt > candidates.txt
+
+      # A 404 just means the station has no published normals, which is common
+      # for small cooperative stations. Anything else (a 500, a timeout) is a
+      # real failure and stops the run rather than quietly shrinking the list.
+      - name: Download normals for each candidate
+        run: |
+          mkdir -p ncei
+          : > no-normals.txt
+          while read -r id; do
+            code=$(curl -sS --retry 3 --retry-delay 5 -o "ncei/${id}.csv" -w '%{http_code}' \
+              "https://www.ncei.noaa.gov/data/normals-annualseasonal/1991-2020/access/${id}.csv")
+            if [ "$code" = "200" ]; then
+              echo "ok   ${id}"
+            elif [ "$code" = "404" ]; then
+              rm -f "ncei/${id}.csv"
+              echo "${id}" >> no-normals.txt
+              echo "none ${id}"
+            else
+              echo "::error::${id} returned HTTP ${code}"
+              exit 1
+            fi
+          done < candidates.txt
+          echo "Downloaded $(ls ncei | wc -l) normals files; $(wc -l < no-normals.txt) candidates had none"
+
+      - name: Parse frost normals
+        run: |
+          node scripts/parse-noaa-frost.mjs ncei > wasatch-frost.new.ts 2> frost.log
+          cat frost.log
+
+      # The parser already refuses stations with out-of-order bands. These are
+      # the checks on the result as a whole.
+      - name: Sanity-check the station list
+        run: |
+          python3 - <<'PY'
+          import re, sys
+
+          src = open("wasatch-frost.new.ts").read()
+          ids = re.findall(r'stationId: "([^"]+)"', src)
+          elev = [float(x) for x in re.findall(r'elevationM: ([0-9.]+)', src)]
+
+          print(f"{len(ids)} stations, elevations {min(elev):.0f} m to {max(elev):.0f} m")
+
+          problems = []
+          if len(ids) < 5:
+              problems.append(f"only {len(ids)} stations parsed; expected at least 5")
+          if "USW00024127" not in ids:
+              problems.append("Salt Lake City International (USW00024127) is missing")
+          if len(ids) != len(set(ids)):
+              problems.append("duplicate station ids")
+          # The elevation check is the product's main claim, so the set needs
+          # real vertical spread to be worth loading.
+          if elev and max(elev) - min(elev) < 300:
+              problems.append("stations span less than 300 m of elevation")
+
+          if problems:
+              for p in problems:
+                  print(f"::error::{p}")
+              sys.exit(1)
+          PY
+          mv wasatch-frost.new.ts apps/ingest/src/data/wasatch-frost.ts
+
+      - name: Write a summary
+        if: always()
+        run: |
+          {
+            echo "## Reference data refresh"
+            echo
+            echo "### ZIP codes"
+            echo '```'
+            cat zips.log 2>/dev/null || echo "not reached"
+            echo '```'
+            echo "### Stations"
+            echo '```'
+            cat frost.log 2>/dev/null || echo "not reached"
+            echo '```'
+            echo "Candidates with no published normals: $(wc -l < no-normals.txt 2>/dev/null || echo 0)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the raw downloads
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-reference-data
+          path: |
+            ncei/
+            zcta-county.txt
+            candidates.txt
+            no-normals.txt
+            zips.log
+            frost.log
+          if-no-files-found: ignore
+
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/refresh-reference-data
+          commit-message: Refresh ZIP list and frost stations from Census and NOAA
+          title: Refresh ZIP list and frost stations
+          body: |
+            Regenerated by the **Refresh reference data** workflow.
+
+            - `apps/ingest/src/wasatch-zips.ts` from the Census 2020 ZCTA-to-county file
+            - `apps/ingest/src/data/wasatch-frost.ts` from NOAA NCEI 1991-2020 normals
+
+            What was added, what was skipped and why is in the workflow run
+            summary. The raw downloads are attached to the run as an artifact.
+
+            **Before merging:** look through the station list. Stations are
+            picked from a bounding box, so check that each one is somewhere a
+            gardener would actually be nearest to.
+
+            **After merging:** run **Deploy**, then **Run ingestion**.
+          delete-branch: true

@@ -83,9 +83,21 @@ DATABASE_URL="<neon dev string>" pnpm verify:data
 - **Schema migrations.** Generated from the Drizzle schema and applied through
   the Neon connector, deliberately — a migration should be a decision, not a
   side effect of a merge.
-- **Adding NOAA stations.** Download the station CSVs, attach them to a
-  session, and the parser regenerates the data file. That is how the Salt Lake
-  City record got there.
+
+## Refreshing the ZIP list and weather stations
+
+Actions tab -> **Refresh reference data** -> **Run workflow**.
+
+It downloads the Census ZIP-to-county file and the NOAA 1991-2020 normals for
+every Utah station in the market area, rebuilds `wasatch-zips.ts` and
+`wasatch-frost.ts`, and opens a pull request. Review the station list, merge,
+then run **Deploy** and **Run ingestion**.
+
+The run summary shows which ZIPs were added and which stations were skipped
+and why. In the repo settings, **Actions -> General -> Allow GitHub Actions to
+create and approve pull requests** must be on, or the last step fails.
+Pull requests opened this way do not start CI on their own; push an empty
+commit from the GitHub UI or close and reopen it if you want the checks.
 
 ## What is already loaded
 
