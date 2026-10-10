@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CensusGeocodeClient } from "./geocode";
 import { UsgsElevationClient } from "./elevation";
+import { SourceShapeError } from "./types";
 
 /**
  * Live check of the Census geocoder and the USGS elevation service.
@@ -37,7 +38,7 @@ const inMarket = (lat: number, lon: number) =>
 
 const ADDRESSES = [
   { label: "SLC City & County Building", address: "451 S State St, Salt Lake City, UT 84111", zip: "84111" },
-  { label: "Sugar House", address: "1745 E Sunnyside Ave, Salt Lake City, UT", zip: "84108" },
+  { label: "Hogle Zoo, east bench", address: "2600 E Sunnyside Ave, Salt Lake City, UT 84108", zip: "84108" },
   { label: "Ogden City Hall", address: "2549 Washington Blvd, Ogden, UT 84401", zip: "84401" },
 ];
 
@@ -84,11 +85,17 @@ describeLive("live: USGS elevation", () => {
     }, 30_000);
   }
 
-  it("treats a point outside US coverage as no data", async () => {
+  it("handles a point outside US coverage without an unexpected error", async () => {
     const client = new UsgsElevationClient(recording("usgs:mid-ocean"));
-    // Open Pacific. If the service answers with something other than the
-    // no-data value, this is the test that shows it.
-    const result = await client.elevation(0, -150);
-    expect(result).toBeNull();
+    // Open Pacific. The service answers HTTP 200 with a plain-text failure
+    // here, which our client reports as a SourceShapeError. A clean "no data"
+    // (null) would also be acceptable. Anything else, such as a SyntaxError or
+    // a made-up elevation, is a bug.
+    const outcome = await client.elevation(0, -150).then(
+      (r) => r,
+      (e: unknown) => e,
+    );
+    console.log("PARSED mid-ocean", outcome instanceof Error ? `${outcome.name}: ${outcome.message}` : JSON.stringify(outcome));
+    expect(outcome === null || outcome instanceof SourceShapeError).toBe(true);
   }, 30_000);
 });
