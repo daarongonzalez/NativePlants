@@ -28,6 +28,8 @@ Early. Research and planning only, no application code yet.
   build milestone
 - [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to
   get the backend working end to end
+- [Design brief](docs/design-brief.md) — a one-file summary of the product
+  for designers and design tools
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
 - [Operating without a local environment](docs/operating-without-local.md) —
