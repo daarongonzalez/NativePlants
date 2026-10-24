@@ -1,6 +1,15 @@
 import type { Database, Owner } from "@np/db";
 import { createSiteProfile, findNearestStation, findSoilAtPoint, lookupZoneByZip, setSiteLocation } from "@np/db";
-import { frostConfidence, soilConfidence, summarizeTopsoil, zoneConfidence } from "@np/engine";
+import {
+  SUN_EXPOSURE_LABELS,
+  frostConfidence,
+  openSkySunHours,
+  soilConfidence,
+  summarizeTopsoil,
+  sunHoursFromExposure,
+  zoneConfidence,
+  type SunExposure,
+} from "@np/engine";
 import type { ElevationClient, GeocodeClient } from "@np/sources";
 import { ordinalToZone } from "@np/shared";
 
@@ -10,8 +19,8 @@ import { ordinalToZone } from "@np/shared";
  * Sources are injected rather than imported so this is testable without
  * network access, and so a source outage is a swap at one seam.
  *
- * Resolves zone, frost and soil. Sun hours are not built yet and stay null — a
- * partial profile that says what it does not know is more useful than none.
+ * Resolves zone, frost, soil and sun. Sun is modelled from latitude unless the
+ * gardener says how sunny the spot is, in which case their word wins.
  */
 
 export interface ResolveDeps {
@@ -44,6 +53,7 @@ export async function resolveSite(
   deps: ResolveDeps,
   owner: Owner,
   site: { id: string; addressText: string | null; latitude: number; longitude: number },
+  options: { sunExposure?: SunExposure } = {},
 ): Promise<ResolveOutcome> {
   const { db, geocoder, elevation } = deps;
   const retrievedAt = new Date().toISOString();
@@ -146,6 +156,29 @@ export async function resolveSite(
     if (soil.drainageClass) provenance["drainageClass"] = { source: "ssurgo", confidence, retrievedAt, note };
   }
 
+  // 5. Sun. The gardener can see the spot; the model can only see the sky.
+  let sunHoursSummer: number;
+  if (options.sunExposure) {
+    sunHoursSummer = sunHoursFromExposure(options.sunExposure);
+    provenance["sunHoursSummer"] = {
+      source: "user_reported",
+      confidence: "medium",
+      retrievedAt,
+      note: `You told us this spot gets ${SUN_EXPOSURE_LABELS[options.sunExposure]}.`,
+    };
+  } else {
+    sunHoursSummer = openSkySunHours(latitude);
+    provenance["sunHoursSummer"] = {
+      source: "solar_geometry",
+      confidence: "low",
+      retrievedAt,
+      note: "Calculated from your latitude for the longest day of the year, assuming nothing shades the spot. Trees, buildings and hills will reduce it.",
+    };
+    caveats.push(
+      "We calculated sun from your latitude, so it assumes nothing shades your yard. Tell us how sunny the spot really is for better matches.",
+    );
+  }
+
   const profile = await createSiteProfile(db, owner, site.id, {
     zoneOrdinal,
     frostStationId,
@@ -155,7 +188,7 @@ export async function resolveSite(
     siltPct: topsoil?.siltPct ?? null,
     clayPct: topsoil?.clayPct ?? null,
     drainageClass: hasSoilData ? (soil!.drainageClass ?? null) : null,
-    sunHoursSummer: null,
+    sunHoursSummer,
     provenance,
   });
 

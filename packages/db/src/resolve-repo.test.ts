@@ -7,6 +7,7 @@ import {
   createSiteProfile,
   findNearestStation,
   findSoilAtPoint,
+  getFrostNorms,
   lookupZoneByZip,
   recordProvenance,
 } from "./resolve-repo";
@@ -97,6 +98,13 @@ describeIfDb("resolve data layer", () => {
   it("looks up a zone by ZIP", async () => {
     const zone = await lookupZoneByZip(db, "99999");
     expect(zone?.zoneOrdinal).toBe(72);
+  });
+
+  it("reads frost normals for a station, and null for one without", async () => {
+    const norms = await getFrostNorms(db, SLC_AIRPORT.id);
+    expect(norms?.lastSpringP50).toBe("04-24");
+    expect(norms?.frostFreeDays).toBe(178);
+    expect(await getFrostNorms(db, "TEST-NO-SUCH-STATION")).toBeNull();
   });
 
   it("returns null for an unknown ZIP rather than a default", async () => {

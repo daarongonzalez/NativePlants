@@ -234,3 +234,9 @@ export async function findSoilAtPoint(
     horizons,
   };
 }
+
+/** Frost normals for one station. Reference data, not owner-scoped. */
+export async function getFrostNorms(db: Database, stationId: string) {
+  const rows = await db.select().from(frostNorms).where(eq(frostNorms.stationId, stationId)).limit(1);
+  return rows[0] ?? null;
+}

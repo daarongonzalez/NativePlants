@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
-import { createDatabase, listPublishedPlants, type Owner } from "@np/db";
+import { createDatabase, getFrostNorms, listPublishedPlants, type Owner } from "@np/db";
 import {
   createSite,
   deleteSite,
@@ -17,6 +17,7 @@ import { goalsSchema, siteProfileSchema } from "@np/shared";
 import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
+import { toDomainProfile } from "./profile";
 import { resolveSite } from "./resolve";
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -99,7 +100,21 @@ protectedRoutes.get("/sites/:id/plants", async (c) => {
 
   // The engine takes a fully-typed profile and nothing else. Parsing here
   // rather than trusting the row keeps the engine's contract honest.
-  const domain = toDomainProfile(stored, site, siteId);
+  // Frost bands are reference data keyed by the station the profile recorded.
+  const norms = stored.frostStationId ? await getFrostNorms(db, stored.frostStationId) : null;
+  const frost = norms
+    ? {
+        lastSpringP10: norms.lastSpringP10,
+        lastSpringP50: norms.lastSpringP50,
+        lastSpringP90: norms.lastSpringP90,
+        firstFallP10: norms.firstFallP10,
+        firstFallP50: norms.firstFallP50,
+        firstFallP90: norms.firstFallP90,
+        frostFreeDays: norms.frostFreeDays,
+      }
+    : null;
+
+  const domain = toDomainProfile({ ...stored, frost }, site, siteId);
   if ("missing" in domain) {
     return c.json(
       {
@@ -141,10 +156,17 @@ protectedRoutes.post("/sites/:id/resolve", async (c) => {
   const site = await getSite(db, owner, siteId);
   if (!site) return c.json({ error: "Site not found." }, 404);
 
+  // Optional body: how sunny the gardener says the spot is. An empty body is fine.
+  const body = z
+    .object({ sunExposure: z.enum(["full", "part", "shade"]).optional() })
+    .safeParse(await c.req.json().catch(() => ({})));
+  if (!body.success) return c.json({ error: "Sun exposure must be full, part or shade." }, 400);
+
   const outcome = await resolveSite(
     { db, geocoder: new CensusGeocodeClient(), elevation: new UsgsElevationClient() },
     owner,
     { id: site.id, addressText: site.addressText, latitude: site.latitude, longitude: site.longitude },
+    body.data.sunExposure ? { sunExposure: body.data.sunExposure } : {},
   );
 
   if (!outcome.ok) {
@@ -192,57 +214,5 @@ app.onError((err, c) => {
 });
 
 app.notFound((c) => c.json({ error: "Not found." }, 404));
-
-/** Profile fields the engine needs, in the order we report them when missing. */
-const REQUIRED_FIELDS = ["zoneOrdinal", "frost", "ph", "sandPct", "siltPct", "clayPct", "drainageClass", "sunHoursSummer"] as const;
-
-type StoredProvenance = Record<string, { source: string; confidence: string; retrievedAt: string; note?: string }>;
-
-/**
- * Widen a stored profile row into the domain shape the engine expects.
- *
- * Source and confidence come from the provenance recorded when the profile was
- * resolved. A field with no recorded provenance is reported as missing rather
- * than given a confidence we did not measure.
- *
- * `frost` is not stored on the profile row (only the station id is), so it is
- * reported missing until the frost bands are joined in. Sun hours are not
- * resolved yet either.
- */
-function toDomainProfile(
-  stored: Record<string, unknown>,
-  site: { latitude: number; longitude: number },
-  siteId: string,
-): { profile: unknown } | { missing: string[] } {
-  const provenance = (stored["provenance"] ?? {}) as StoredProvenance;
-  const missing = REQUIRED_FIELDS.filter((f) => stored[f] == null || provenance[f] === undefined);
-  if (missing.length > 0) return { missing };
-
-  const attributed = (field: string) => ({ value: stored[field], provenance: provenance[field] });
-
-  return {
-    profile: {
-      siteId,
-      resolvedAt: new Date(String(stored["resolvedAt"])).toISOString(),
-      latitude: site.latitude,
-      longitude: site.longitude,
-      zoneOrdinal: attributed("zoneOrdinal"),
-      frost: attributed("frost"),
-      ph: attributed("ph"),
-      sandPct: attributed("sandPct"),
-      siltPct: attributed("siltPct"),
-      clayPct: attributed("clayPct"),
-      drainageClass: attributed("drainageClass"),
-      sunHoursSummer: attributed("sunHoursSummer"),
-      constraints: {
-        deerPressure: false,
-        pets: false,
-        youngChildren: false,
-        irrigationAvailable: true,
-        hoaRestrictions: false,
-      },
-    },
-  };
-}
 
 export default app;
