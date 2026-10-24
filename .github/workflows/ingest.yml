@@ -8,7 +8,8 @@ name: Run ingestion
 # Soil loads in slices. One Worker request is cut off at about 100 seconds and the
 # full load takes several minutes, so this workflow asks the Worker for the list of
 # survey areas, then calls it repeatedly for each, following the cursor it returns.
-# A failed slice is retried up to three times before the run gives up.
+# A failed slice is retried up to three more times, each with a smaller batch, before
+# the run gives up.
 #
 # The Worker runs on Cloudflare's network, so it can reach Oregon State's PRISM
 # files and the other upstream sources regardless of what any individual machine can.
@@ -46,7 +47,7 @@ jobs:
           # Summing across jobs hid a real failure once: the zone job skipped
           # all 67 ZIPs with an error, the frost job wrote its single row, the
           # total came to 1, and the run reported success.
-          python3 - <<'PY'
+          python3 -u - <<'PY'
           import json, os, sys, urllib.error, urllib.request
 
           # The secret may be stored as a bare host ("name.account.workers.dev"). curl
@@ -56,7 +57,12 @@ jobs:
               base = "https://" + base
           token = os.environ["RUN_TOKEN"]
           job = os.environ["JOB"]
-          MAX_ATTEMPTS = 3
+          MAX_ATTEMPTS = 4
+          # Batch sizes, largest first. The Worker has little memory and a batch of mountain
+          # or forest map units can exceed it (Cloudflare error 1102), so a failed slice is
+          # retried with fewer units at a time, and the survey area keeps the size that
+          # worked for its remaining slices. None means the Worker's default.
+          BATCH_SIZES = [None, 5, 2, 1]
 
 
           def call(query):
@@ -98,20 +104,23 @@ jobs:
               print(f"Soil plan: {' '.join(areas)}")
 
               for area in areas:
-                  cursor, attempts = f"{area}:0", 0
+                  cursor, attempts, level = f"{area}:0", 0, 0
                   while cursor:
-                      status, body, text = call(f"?job=soil&cursor={cursor}")
+                      size = BATCH_SIZES[level]
+                      sent = cursor if size is None else f"{cursor}:{size}"
+                      status, body, text = call(f"?job=soil&cursor={sent}")
                       fail_auth(status)
                       ok = status == 200 and body and body.get("results")
                       progressed = ok and body.get("next") != cursor
                       if not progressed:
                           attempts += 1
+                          level = min(level + 1, len(BATCH_SIZES) - 1)
                           detail = ""
                           if ok:
                               detail = "; ".join(body["results"][0]["warnings"][:2])
                           else:
                               detail = f"HTTP {status} {text[:200]}"
-                          print(f"  {cursor}: attempt {attempts} failed: {detail}")
+                          print(f"  {sent}: attempt {attempts} failed: {detail}")
                           if attempts >= MAX_ATTEMPTS:
                               errors.append(f"{area} stopped at {cursor}")
                               break

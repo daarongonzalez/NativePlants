@@ -56,8 +56,13 @@ export const WASATCH_SURVEY_AREAS = [
   "UT627",
 ] as const;
 
-/** Map units fetched per batch. Geometry is the heavy part of each response. */
-const BATCH = 25;
+/**
+ * Map units fetched per batch. Geometry is the heavy part of each response, and
+ * a Worker has little memory: batches of 25 mountain and forest units ran it out
+ * (Cloudflare error 1102) on the third load. A retry can ask for fewer.
+ */
+export const DEFAULT_BATCH = 10;
+const MAX_BATCH = 25;
 
 /**
  * Stop starting new batches after this long. Cloudflare cuts a request at about
@@ -73,13 +78,21 @@ const defaultFetch: typeof fetch = (...args) => fetch(...args);
 export interface SoilCursor {
   area: string;
   offset: number;
+  /** Map units per batch for this slice. */
+  batch: number;
 }
 
-/** "UT611:75" to its parts, or null when it is not a cursor for one of our areas. */
+/**
+ * "UT611:75" or "UT611:75:5" (the last part is a smaller batch size, which the
+ * workflow asks for when a slice fails) to its parts, or null when it is not a
+ * cursor for one of our areas.
+ */
 export function parseSoilCursor(raw: string, allowed: readonly string[] = WASATCH_SURVEY_AREAS): SoilCursor | null {
-  const match = /^(UT\d{3}):(\d{1,7})$/.exec(raw);
+  const match = /^(UT\d{3}):(\d{1,7})(?::(\d{1,2}))?$/.exec(raw);
   if (!match || !allowed.includes(match[1]!)) return null;
-  return { area: match[1]!, offset: Number(match[2]) };
+  const requested = match[3] === undefined ? DEFAULT_BATCH : Number(match[3]);
+  if (requested < 1 || requested > MAX_BATCH) return null;
+  return { area: match[1]!, offset: Number(match[2]), batch: requested };
 }
 
 /** The cursor for the next slice, or null when the area is finished. */
@@ -139,7 +152,7 @@ export class SoilJob {
     const noGeometry: string[] = [];
 
     while (position < units.length && (position === cursor.offset || this.now() - started < this.budgetMs)) {
-      const batch = units.slice(position, position + BATCH).map((u) => u.mukey);
+      const batch = units.slice(position, position + cursor.batch).map((u) => u.mukey);
       const geometries = await this.client.fetchGeometries(batch);
       const soilByKey = new Map((await this.client.fetchSoilForUnits(batch)).map((s) => [s.mukey, s]));
 

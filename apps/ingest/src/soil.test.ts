@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { SoilJob, nextSoilCursor, parseSoilCursor, WASATCH_SURVEY_AREAS } from "./soil";
+import { DEFAULT_BATCH, SoilJob, nextSoilCursor, parseSoilCursor, WASATCH_SURVEY_AREAS } from "./soil";
 
 describe("soil cursors", () => {
   it("reads a cursor into its area and offset", () => {
-    expect(parseSoilCursor("UT611:75")).toEqual({ area: "UT611", offset: 75 });
-    expect(parseSoilCursor("UT607:0")).toEqual({ area: "UT607", offset: 0 });
+    expect(parseSoilCursor("UT611:75")).toEqual({ area: "UT611", offset: 75, batch: DEFAULT_BATCH });
+    expect(parseSoilCursor("UT607:0")).toEqual({ area: "UT607", offset: 0, batch: DEFAULT_BATCH });
+  });
+
+  it("reads a smaller batch size, and refuses an absurd one", () => {
+    expect(parseSoilCursor("UT613:30:2")).toEqual({ area: "UT613", offset: 30, batch: 2 });
+    for (const bad of ["UT613:0:0", "UT613:0:26", "UT613:0:abc", "UT613:0:5:5"]) {
+      expect(parseSoilCursor(bad)).toBeNull();
+    }
   });
 
   it("rejects anything that is not one of our areas, so the route cannot be pointed elsewhere", () => {
@@ -35,7 +42,7 @@ describe("SoilJob", () => {
     const fake = (async () => new Response("", { status: 200 })) as typeof fetch;
     const result = await new SoilJob(["UT607"], fake).runSlice(
       { HYPERDRIVE: { connectionString: "unused" }, MARKET: "test" },
-      { area: "UT607", offset: 0 },
+      { area: "UT607", offset: 0, batch: DEFAULT_BATCH },
     );
     expect(result.next).toBeNull();
     expect(result.rowsWritten).toBe(0);
