@@ -1,0 +1,21 @@
+<!-- @dsCard group="Layout" height=640 width=1312 subtitle="12 columns, 24px gutters, 176px rows, open ground" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../fonts.css"><link rel="stylesheet" href="../../tokens.css"><style>html,body{margin:0;background:var(--cream);color:var(--ink)}
+*{box-sizing:border-box}
+h2,h3,p{margin:0}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:var(--layout-row);gap:var(--layout-gutter);width:var(--layout-content-width);padding:var(--space-32) 0}
+.tile{padding:var(--space-32);border:var(--border-1) solid var(--line);border-radius:var(--radius-lg);background:var(--cream);color:var(--ink);display:flex;flex-direction:column;gap:var(--space-8);overflow:hidden}
+.tile.green{background:var(--green);color:var(--on-green)}
+.tile.gold{background:var(--gold);color:var(--on-gold)}
+.tile.clay{background:var(--clay);color:var(--on-clay)}
+.tile .media{margin-top:auto;border:var(--border-1) solid currentColor;border-radius:var(--radius-md);height:var(--space-40);opacity:var(--opacity-muted)}
+.tile .light{color:var(--gold-light)}
+.note{color:var(--ink);opacity:var(--opacity-muted);align-self:center}
+</style></head><body>
+<div class="grid">
+<div class="tile green" style="grid-column:span 7;grid-row:span 2"><h3 class="heading-h5">Lead tile</h3><p class="text-regular light">7 columns by 2 rows. The first row carries the most space.</p></div>
+<div class="tile " style="grid-column:span 5"><h3 class="heading-h5">Half-plus tile</h3><p class="text-regular">5 columns by 1 row.</p></div>
+<div class="tile gold" style="grid-column:span 5"><h3 class="heading-h5">Accent tile</h3><p class="text-regular">5 columns by 1 row. Gold, once per view.</p></div>
+<div class="tile " style="grid-column:span 4"><h3 class="heading-h5">Third tile</h3><p class="text-regular">4 columns by 1 row.</p></div>
+<p class="note text-regular" style="grid-column:span 4;text-align:center">Open ground: 4 columns left empty</p>
+<div class="tile " style="grid-column:span 4"><h3 class="heading-h5">Third tile</h3><p class="text-regular">4 columns by 1 row.</p></div>
+</div></body></html>

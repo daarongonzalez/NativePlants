@@ -32,6 +32,8 @@ Early. Research and planning only, no application code yet.
   for designers and design tools
 - [Design system](docs/design-system.md) — the visual language and why it is
   shaped this way
+- [Nativo design system](design/nativo/README.md) — the brand book, tokens,
+  components and illustrations for the interface
 - [Operating without a local environment](docs/operating-without-local.md) —
   deploy and run everything from GitHub
 - [Setup](docs/setup.md) — accounts and provisioning
