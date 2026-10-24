@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SUN_QUESTION } from "@np/shared";
 import { SUN_EXPOSURE_HOURS, openSkySunHours, sunHoursFromExposure } from "./sun";
 
 describe("openSkySunHours", () => {
@@ -36,5 +37,18 @@ describe("sunHoursFromExposure", () => {
     expect(SUN_EXPOSURE_HOURS.part).toBeLessThan(6);
     expect(SUN_EXPOSURE_HOURS.shade).toBeLessThan(3);
     expect(sunHoursFromExposure("part")).toBe(4.5);
+  });
+});
+
+describe("the sun question", () => {
+  it("offers exactly the answers the engine has hours for", () => {
+    expect(SUN_QUESTION.options.map((o) => o.value).sort()).toEqual(Object.keys(SUN_EXPOSURE_HOURS).sort());
+  });
+
+  it("states the same hour bands the engine uses", () => {
+    const byValue = Object.fromEntries(SUN_QUESTION.options.map((o) => [o.value, o.detail]));
+    expect(byValue["full"]).toMatch(/6 hours or more/);
+    expect(byValue["part"]).toMatch(/3 to 6/);
+    expect(byValue["shade"]).toMatch(/Under 3/);
   });
 });

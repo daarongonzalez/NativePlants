@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createDatabase, type Database } from "./client";
-import { createSite, deleteSite, getSite, listSites, savePlant } from "./repositories";
+import { createSite, deleteSite, getSite, listSites, savePlant, setSiteSunExposure } from "./repositories";
 import { users } from "./schema";
 import { eq } from "drizzle-orm";
 
@@ -62,6 +62,18 @@ describeIfDb("cross-account scoping", () => {
   it("does not list Alice's site for Bob", async () => {
     const bobSites = await listSites(db, bob);
     expect(bobSites.map((s) => s.id)).not.toContain(aliceSiteId);
+  });
+
+  it("does not let Bob change how sunny Alice's site is", async () => {
+    expect(await setSiteSunExposure(db, bob, aliceSiteId, "shade")).toBe(false);
+    expect((await getSite(db, alice, aliceSiteId))?.sunExposure).toBeNull();
+  });
+
+  it("lets Alice set and clear her own sun answer", async () => {
+    expect(await setSiteSunExposure(db, alice, aliceSiteId, "part")).toBe(true);
+    expect((await getSite(db, alice, aliceSiteId))?.sunExposure).toBe("part");
+    expect(await setSiteSunExposure(db, alice, aliceSiteId, null)).toBe(true);
+    expect((await getSite(db, alice, aliceSiteId))?.sunExposure).toBeNull();
   });
 
   it("does not let Bob delete Alice's site", async () => {

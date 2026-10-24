@@ -114,7 +114,8 @@ Included:
 - Hardiness zone
 - Frost dates as 10 / 50 / 90 percent bands
 - Soil pH, texture and drainage
-- Sun hours, calculated and marked as modelled
+- Sun hours: asked as one question (see below), calculated and marked as
+  modelled until the gardener answers
 - A few optional questions (deer, pets, children, watering, HOA rules)
 - **The site profile report**, which is the hero screen
 - 60 to 100 plant recommendations, each with a plain-language reason
@@ -169,9 +170,29 @@ It shows:
 - **Frost probability band.** The 10 / 50 / 90 percent dates on one track, so a
   gardener sees that planting on 9 April is a different bet than planting on
   8 May.
-- **Sun hours,** marked as calculated.
+- **Sun hours.** Marked as calculated until answered, then as reported by the
+  gardener. See the sun question below.
 - **Plain caveats.** For example: "The nearest weather station is 900 ft lower
   than your address, so your last frost is likely later than this."
+
+### The sun question
+
+One question with three answers and a way out. It appears on the report next to
+the sun value, and anywhere a gardener sees the "calculated" label.
+
+- **Prompt:** "How much sun does this spot get on a summer day?"
+- **Most of the day:** about 6 hours or more of direct sun.
+- **Part of the day:** about 3 to 6 hours.
+- **Mostly shade:** under 3 hours.
+- **Not sure yet:** keeps the calculated value, with a plain note that it
+  assumes nothing shades the spot.
+
+Each answer carries a one-line "how to tell" in things a person can see (the
+north side of a house, under dense trees). Wording is final copy in
+`packages/shared/src/sun-question.ts`. The answer is saved on the site, and
+answering changes the value's label from "calculated" to "you told us".
+Tap targets are 44px or larger, and the selected state uses a border as well as
+colour.
 
 ## 8. Signature components
 

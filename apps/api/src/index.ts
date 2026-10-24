@@ -11,9 +11,10 @@ import {
   listSavedPlants,
   listSites,
   savePlant,
+  setSiteSunExposure,
 } from "@np/db";
 import { recommend } from "@np/engine";
-import { goalsSchema, siteProfileSchema } from "@np/shared";
+import { goalsSchema, siteProfileSchema, sunExposureSchema } from "@np/shared";
 import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
@@ -156,17 +157,19 @@ protectedRoutes.post("/sites/:id/resolve", async (c) => {
   const site = await getSite(db, owner, siteId);
   if (!site) return c.json({ error: "Site not found." }, 404);
 
-  // Optional body: how sunny the gardener says the spot is. An empty body is fine.
+  // Optional body: a one-off sun answer for this resolve. Otherwise the answer
+  // saved on the site is used, and failing that the profile calculates sun.
   const body = z
-    .object({ sunExposure: z.enum(["full", "part", "shade"]).optional() })
+    .object({ sunExposure: sunExposureSchema.optional() })
     .safeParse(await c.req.json().catch(() => ({})));
   if (!body.success) return c.json({ error: "Sun exposure must be full, part or shade." }, 400);
+  const sunExposure = body.data.sunExposure ?? sunExposureSchema.safeParse(site.sunExposure).data;
 
   const outcome = await resolveSite(
     { db, geocoder: new CensusGeocodeClient(), elevation: new UsgsElevationClient() },
     owner,
     { id: site.id, addressText: site.addressText, latitude: site.latitude, longitude: site.longitude },
-    body.data.sunExposure ? { sunExposure: body.data.sunExposure } : {},
+    sunExposure ? { sunExposure } : {},
   );
 
   if (!outcome.ok) {
@@ -187,6 +190,25 @@ protectedRoutes.post("/sites/:id/resolve", async (c) => {
   }
 
   return c.json({ profileId: outcome.profileId, summary: outcome.summary }, 201);
+});
+
+/**
+ * Save how sunny the gardener says a spot is, or clear it with null.
+ *
+ * Does not rebuild the profile; the client calls resolve next, so the saved
+ * answer lands in a fresh snapshot and old snapshots stay reproducible.
+ */
+protectedRoutes.put("/sites/:id/sun", async (c) => {
+  const body = z
+    .object({ sunExposure: sunExposureSchema.nullable() })
+    .safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: "Sun exposure must be full, part, shade or null." }, 400);
+
+  const db = createDatabase(c.env.HYPERDRIVE.connectionString);
+  const ok = await setSiteSunExposure(db, c.get("owner"), c.req.param("id"), body.data.sunExposure);
+  if (!ok) return c.json({ error: "Site not found." }, 404);
+
+  return c.json({ sunExposure: body.data.sunExposure });
 });
 
 protectedRoutes.post("/sites/:id/saved", async (c) => {

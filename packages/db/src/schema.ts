@@ -209,6 +209,11 @@ export const sites = pgTable(
     label: text("label").notNull(),
     addressText: text("address_text"),
     geom: point("geom").notNull(),
+    /**
+     * How sunny the gardener says this spot is: full, part or shade. Null means
+     * they have not said, and the profile falls back to a calculated value.
+     */
+    sunExposure: text("sun_exposure"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

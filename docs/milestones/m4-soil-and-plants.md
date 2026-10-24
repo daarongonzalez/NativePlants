@@ -68,11 +68,17 @@ Both now reach the plant recommendations route.
 
 - **Frost** needed no new data. The route looks up the saved station's normals
   and passes them to the scorer.
-- **Sun** is calculated from latitude and marked as modelled, low confidence. If
-  the gardener sends `{"sunExposure": "full" | "part" | "shade"}` when
-  resolving, their answer replaces it and is marked as reported by them.
-  The choice is not saved on the site, so a later resolve without it goes back
-  to the calculation. A saved setting is a small follow-up.
+- **Sun** is calculated from latitude and marked as modelled, low confidence,
+  until the gardener answers the sun question. Their answer replaces it and is
+  marked as reported by them.
+- **The sun question** is saved on the site (`sites.sun_exposure`) with
+  `PUT /v1/sites/:id/sun` and `{"sunExposure": "full" | "part" | "shade" | null}`.
+  Resolve uses the saved answer, so it survives a refresh. Resolve also accepts
+  a one-off answer in its body, which wins over the saved one. The wording the
+  screen shows is in `packages/shared/src/sun-question.ts`.
+- **Order matters on release.** The new column must exist before the API is
+  deployed, or reading a site fails. Apply migration `0001_add_site_sun_exposure`
+  to the Neon branch first (`pnpm db:migrate`), then run Deploy.
 
 Everything runs in the two Cloudflare Workers against the Neon database. Nothing
 new to deploy or provision.
@@ -82,4 +88,4 @@ new to deploy or provision.
 1. Run the three checks above.
 2. Have the horticultural reviewer start on the sheet (see the curation guide).
 3. Fill the plant sheet with Rachel, then run the `plants` load.
-4. Build the screen that asks "how sunny is this spot?", and save the answer on the site.
+4. Build the screen that shows the sun question. The wording and the save route are ready.

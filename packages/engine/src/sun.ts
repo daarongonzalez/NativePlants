@@ -12,6 +12,8 @@
  *    It is a better answer whenever we have it.
  */
 
+import type { SunExposure } from "@np/shared";
+
 const SUMMER_SOLSTICE_DECLINATION_DEG = 23.44;
 
 /** The sun's upper edge at the horizon, including atmospheric refraction. */
@@ -38,7 +40,7 @@ export function openSkySunHours(latitudeDeg: number): number {
   return Math.round(((2 * hourAngle * 12) / Math.PI) * 10) / 10;
 }
 
-export type SunExposure = "full" | "part" | "shade";
+export type { SunExposure };
 
 /**
  * The usual garden definitions, turned into one representative number so the
