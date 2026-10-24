@@ -12,6 +12,7 @@
   "dependencies": {
     "@np/db": "workspace:*",
     "@np/shared": "workspace:*",
+    "@np/sources": "workspace:*",
     "drizzle-orm": "^0.38.3"
   },
   "devDependencies": {

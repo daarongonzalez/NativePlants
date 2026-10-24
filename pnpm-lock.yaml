@@ -57,6 +57,9 @@ importers:
       '@np/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@np/sources':
+        specifier: workspace:*
+        version: link:../../packages/sources
       drizzle-orm:
         specifier: ^0.38.3
         version: 0.38.4(@cloudflare/workers-types@4.20260702.1)(@types/pg@8.23.1)(pg@8.23.0)

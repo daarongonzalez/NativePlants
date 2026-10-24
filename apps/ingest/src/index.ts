@@ -1,6 +1,7 @@
 import { FrostNormalsJob } from "./frost";
 import { HardinessZoneJob } from "./zones";
-import type { IngestEnv, IngestResult } from "./types";
+import { SoilJob } from "./soil";
+import type { IngestEnv, IngestJob, IngestResult } from "./types";
 import { WASATCH_FRONT_ZIPS } from "./wasatch-zips";
 import { WASATCH_FRONT_FROST } from "./data/wasatch-frost";
 
@@ -43,17 +44,17 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    const results = await runAll(env);
+    // Soil is the one heavy job, so it is opt-in rather than part of the default run.
+    const results = url.searchParams.get("job") === "soil" ? await runJobs(env, [new SoilJob()]) : await runAll(env);
     return Response.json({ results });
   },
 } satisfies ExportedHandler<IngestEnv>;
 
 async function runAll(env: IngestEnv): Promise<IngestResult[]> {
-  const jobs = [
-    new HardinessZoneJob(WASATCH_FRONT_ZIPS),
-    new FrostNormalsJob(WASATCH_FRONT_FROST),
-  ];
+  return runJobs(env, [new HardinessZoneJob(WASATCH_FRONT_ZIPS), new FrostNormalsJob(WASATCH_FRONT_FROST)]);
+}
 
+async function runJobs(env: IngestEnv, jobs: IngestJob[]): Promise<IngestResult[]> {
   const results: IngestResult[] = [];
   for (const job of jobs) {
     try {

@@ -1,7 +1,16 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "./client";
 import type { Owner } from "./repositories";
-import { climateStations, dataProvenance, frostNorms, hardinessZones, siteProfiles, sites } from "./schema";
+import {
+  climateStations,
+  dataProvenance,
+  frostNorms,
+  hardinessZones,
+  siteProfiles,
+  sites,
+  soilMapUnits,
+  soilProperties,
+} from "./schema";
 
 /** Reference-data reads used by the resolve pipeline. Not owner-scoped — this is public data. */
 
@@ -178,4 +187,50 @@ export async function latestProfileForSite(db: Database, owner: Owner, siteId: s
     .limit(1);
 
   return rows[0]?.profile ?? null;
+}
+
+export interface SoilAtPoint {
+  mukey: string;
+  name: string;
+  surveyArea: string;
+  drainageClass: string | null;
+  horizons: (typeof soilProperties.$inferSelect)[];
+}
+
+/**
+ * The soil map unit under a point, with its horizons.
+ *
+ * `ST_Covers` rather than `ST_Intersects` so a point exactly on a boundary
+ * still lands in one unit. Returns null when the point is in no mapped unit —
+ * water, or ground the county survey left out — which the caller must report
+ * rather than paper over. A unit with no horizons (urban land, rock outcrop)
+ * comes back with an empty list for the same reason.
+ */
+export async function findSoilAtPoint(
+  db: Database,
+  latitude: number,
+  longitude: number,
+): Promise<SoilAtPoint | null> {
+  const point = sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`;
+
+  const units = await db
+    .select({ mukey: soilMapUnits.mukey, name: soilMapUnits.name, surveyArea: soilMapUnits.surveyArea })
+    .from(soilMapUnits)
+    .where(sql`ST_Covers(${soilMapUnits.geom}, ${point})`)
+    .limit(1);
+
+  const unit = units[0];
+  if (!unit) return null;
+
+  const horizons = await db
+    .select()
+    .from(soilProperties)
+    .where(eq(soilProperties.mukey, unit.mukey))
+    .orderBy(soilProperties.depthTopCm);
+
+  return {
+    ...unit,
+    drainageClass: horizons.find((h) => h.drainageClass !== null)?.drainageClass ?? null,
+    horizons,
+  };
 }

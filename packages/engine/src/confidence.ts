@@ -92,3 +92,15 @@ export function frostConfidence(
 export function zoneConfidence(matchQuality: string): FrostConfidence["confidence"] {
   return matchQuality === "rooftop" ? "medium" : "low";
 }
+
+/**
+ * Confidence for soil read from the county survey.
+ *
+ * A survey map unit is a polygon of a couple of acres or more, described by
+ * its dominant soil. It is an area average, not a measurement of one yard, so
+ * it is never a high-confidence claim. If we also could not place the address
+ * on a building, the unit may not even be the right one.
+ */
+export function soilConfidence(matchQuality: string): FrostConfidence["confidence"] {
+  return matchQuality === "rooftop" ? "medium" : "low";
+}

@@ -1,6 +1,6 @@
 import type { Database, Owner } from "@np/db";
-import { createSiteProfile, findNearestStation, lookupZoneByZip, setSiteLocation } from "@np/db";
-import { frostConfidence, zoneConfidence } from "@np/engine";
+import { createSiteProfile, findNearestStation, findSoilAtPoint, lookupZoneByZip, setSiteLocation } from "@np/db";
+import { frostConfidence, soilConfidence, summarizeTopsoil, zoneConfidence } from "@np/engine";
 import type { ElevationClient, GeocodeClient } from "@np/sources";
 import { ordinalToZone } from "@np/shared";
 
@@ -10,9 +10,8 @@ import { ordinalToZone } from "@np/shared";
  * Sources are injected rather than imported so this is testable without
  * network access, and so a source outage is a swap at one seam.
  *
- * M3 resolves zone and frost only. Soil and sun arrive in M4 and leave their
- * columns null until then — a partial profile that says what it does not know
- * is more useful than none.
+ * Resolves zone, frost and soil. Sun hours are not built yet and stay null — a
+ * partial profile that says what it does not know is more useful than none.
  */
 
 export interface ResolveDeps {
@@ -32,6 +31,8 @@ export interface ResolveSummary {
   zone: string | null;
   frostStationName: string | null;
   frostStationDistanceKm: number | null;
+  /** Name of the county survey map unit under the address, or null when there is none. */
+  soilMapUnit: string | null;
   /** Non-empty when elevation makes the station's dates a weaker claim for this site. */
   caveats: string[];
 }
@@ -122,15 +123,38 @@ export async function resolveSite(
     if (trust.note) caveats.push(trust.note);
   }
 
+  // 4. Soil from the county survey. Missing soil is a caveat, not a failure:
+  //    zone and frost are still worth returning.
+  const soil = await findSoilAtPoint(db, latitude, longitude);
+  const topsoil = soil ? summarizeTopsoil(soil.horizons) : null;
+  const hasSoilData = topsoil !== null && topsoil.ph !== null;
+
+  if (!soil) {
+    caveats.push(
+      "The county soil survey has no map for this spot, so we cannot tell you about your soil. A home soil test would fill the gap.",
+    );
+  } else if (!hasSoilData) {
+    caveats.push(
+      `The county soil survey maps this ground as "${soil.name}", which it does not measure. Soil in built-up areas is often fill, so a home soil test is more reliable here.`,
+    );
+  } else {
+    const confidence = soilConfidence(matchQuality);
+    const note = `${soil.name}, county soil survey (${soil.surveyArea}), top 12 inches. An average for the surrounding map area, not a sample from your yard.`;
+    for (const field of ["ph", "sandPct", "siltPct", "clayPct"] as const) {
+      if (topsoil[field] !== null) provenance[field] = { source: "ssurgo", confidence, retrievedAt, note };
+    }
+    if (soil.drainageClass) provenance["drainageClass"] = { source: "ssurgo", confidence, retrievedAt, note };
+  }
+
   const profile = await createSiteProfile(db, owner, site.id, {
     zoneOrdinal,
     frostStationId,
-    mukey: null,
-    ph: null,
-    sandPct: null,
-    siltPct: null,
-    clayPct: null,
-    drainageClass: null,
+    mukey: hasSoilData ? soil!.mukey : null,
+    ph: topsoil?.ph ?? null,
+    sandPct: topsoil?.sandPct ?? null,
+    siltPct: topsoil?.siltPct ?? null,
+    clayPct: topsoil?.clayPct ?? null,
+    drainageClass: hasSoilData ? (soil!.drainageClass ?? null) : null,
     sunHoursSummer: null,
     provenance,
   });
@@ -147,6 +171,7 @@ export async function resolveSite(
       zone: ordinalToZone(zoneOrdinal),
       frostStationName,
       frostStationDistanceKm,
+      soilMapUnit: soil?.name ?? null,
       caveats,
     },
   };
