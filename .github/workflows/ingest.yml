@@ -9,6 +9,15 @@ name: Run ingestion
 # files and the other upstream sources regardless of what any individual machine can.
 on:
   workflow_dispatch:
+    inputs:
+      job:
+        description: "Which load to run. Soil and plants are opt-in; the default runs zones and frost."
+        type: choice
+        default: reference
+        options:
+          - reference
+          - soil
+          - plants
 
 # Same group as the deploy workflow, so this queues behind a deploy in
 # progress rather than racing it.
@@ -27,9 +36,12 @@ jobs:
             exit 1
           fi
 
-          echo "Triggering ${INGEST_URL}/__run"
-          code=$(curl -sS -o response.json -w '%{http_code}' \
-            -X POST "${INGEST_URL}/__run" \
+          query=""
+          if [ "${JOB}" != "reference" ]; then query="?job=${JOB}"; fi
+
+          echo "Triggering ${INGEST_URL}/__run${query}"
+          code=$(curl -sS -o response.json -w '%{http_code}' --max-time 3000 \
+            -X POST "${INGEST_URL}/__run${query}" \
             -H "Authorization: Bearer ${RUN_TOKEN}")
 
           echo "HTTP ${code}"
@@ -57,10 +69,10 @@ jobs:
           for r in results:
               written, skipped = r["rowsWritten"], r["rowsSkipped"]
               print(f"{r['job']}: {written} written, {skipped} skipped")
-              for w in r["warnings"][:5]:
+              for w in r["warnings"][:40]:
                   print(f"    warning: {w}")
-              if len(r["warnings"]) > 5:
-                  print(f"    ... and {len(r['warnings']) - 5} more")
+              if len(r["warnings"]) > 40:
+                  print(f"    ... and {len(r['warnings']) - 40} more")
               if written == 0:
                   failed.append(r["job"])
 
@@ -73,3 +85,4 @@ jobs:
         env:
           INGEST_URL: ${{ secrets.INGEST_WORKER_URL }}
           RUN_TOKEN: ${{ secrets.INGEST_RUN_TOKEN }}
+          JOB: ${{ inputs.job }}

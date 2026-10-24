@@ -1,6 +1,8 @@
 import { FrostNormalsJob } from "./frost";
 import { HardinessZoneJob } from "./zones";
+import { PlantImportJob } from "./plants";
 import { SoilJob } from "./soil";
+import plantsCsv from "../../../data/plants/wasatch-plants.csv";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 import { WASATCH_FRONT_ZIPS } from "./wasatch-zips";
 import { WASATCH_FRONT_FROST } from "./data/wasatch-frost";
@@ -44,8 +46,15 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    // Soil is the one heavy job, so it is opt-in rather than part of the default run.
-    const results = url.searchParams.get("job") === "soil" ? await runJobs(env, [new SoilJob()]) : await runAll(env);
+    // Soil is heavy and the plant import is a deliberate act, so both are
+    // opt-in rather than part of the default run.
+    const job = url.searchParams.get("job");
+    const results =
+      job === "soil"
+        ? await runJobs(env, [new SoilJob()])
+        : job === "plants"
+          ? await runJobs(env, [new PlantImportJob(plantsCsv)])
+          : await runAll(env);
     return Response.json({ results });
   },
 } satisfies ExportedHandler<IngestEnv>;
