@@ -98,6 +98,18 @@ describe("SoilDataAccessClient", () => {
     expect(areas).toEqual([{ areaSymbol: "UT609", areaName: "Morgan Area, Utah" }]);
   });
 
+  it("fetches soil for a batch of map units by key", async () => {
+    let sent = "";
+    const fake = (async (_u: RequestInfo | URL, init?: RequestInit) => {
+      sent = JSON.parse(String(init?.body)).query;
+      return new Response("", { status: 200 });
+    }) as typeof fetch;
+
+    expect(await new SoilDataAccessClient(fake).fetchSoilForUnits(["1", "2"])).toEqual([]);
+    expect(sent).toContain("m.mukey IN ('1','2')");
+    expect(await new SoilDataAccessClient(fake).fetchSoilForUnits([])).toEqual([]);
+  });
+
   it("throws on a non-200 response", async () => {
     const fake = (async () => new Response("down", { status: 503 })) as typeof fetch;
     await expect(new SoilDataAccessClient(fake).findSurveyAreas(["Salt Lake"])).rejects.toThrow(/HTTP 503/);

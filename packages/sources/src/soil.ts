@@ -246,14 +246,25 @@ export class SoilDataAccessClient {
       .map((r) => ({ mukey: requireString(r, "mukey"), wkt: requireString(r, "wkt") }));
   }
 
+  /** Horizons for every map unit in a survey area. Large; the load uses `fetchSoilForUnits`. */
   async fetchSoil(areaSymbol: string): Promise<MapUnitSoil[]> {
+    return this.fetchSoilWhere(`l.areasymbol = ${literal(areaSymbol)}`);
+  }
+
+  /** Horizons for a small batch of map units, so one response stays small and fast. */
+  async fetchSoilForUnits(mukeys: readonly string[]): Promise<MapUnitSoil[]> {
+    if (mukeys.length === 0) return [];
+    return this.fetchSoilWhere(`m.mukey IN (${mukeys.map(literal).join(",")})`);
+  }
+
+  private async fetchSoilWhere(condition: string): Promise<MapUnitSoil[]> {
     const rows = await this.query(
       `SELECT m.mukey, c.cokey, c.compname, c.comppct_r, c.drainagecl, ` +
         `h.hzdept_r, h.hzdepb_r, h.ph1to1h2o_r, h.sandtotal_r, h.silttotal_r, h.claytotal_r, h.om_r, h.awc_r ` +
         `FROM legend l JOIN mapunit m ON m.lkey = l.lkey ` +
         `JOIN component c ON c.mukey = m.mukey AND c.majcompflag = 'Yes' ` +
         `LEFT JOIN chorizon h ON h.cokey = c.cokey ` +
-        `WHERE l.areasymbol = ${literal(areaSymbol)} ` +
+        `WHERE ${condition} ` +
         `ORDER BY m.mukey, c.comppct_r DESC, c.cokey, h.hzdept_r`,
     );
     return dominantComponents(rows);

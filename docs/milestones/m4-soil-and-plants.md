@@ -80,8 +80,10 @@ Things most likely to need adjusting after the first run:
 
 - **Survey area names.** The job finds areas by name prefix (Salt Lake, Utah
   County, Davis, Weber). If a name differs, the output shows what was found.
-- **Time and size.** A Worker request has limits. If the run times out, the
-  fix is to run one survey area per request.
+- **Time and size.** Hit on the second load: a single Worker request is cut off
+  at about 100 seconds. The soil load now runs in slices of about a minute, and
+  the workflow follows a cursor until each survey area is done, retrying a failed
+  slice up to three times.
 - **Shape size.** Shapes are stored unsimplified. If the table is slow, simplify
   on load.
 

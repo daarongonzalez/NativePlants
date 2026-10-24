@@ -49,15 +49,41 @@ export default {
     // Soil is heavy and the plant import is a deliberate act, so both are
     // opt-in rather than part of the default run.
     const job = url.searchParams.get("job");
+
+    if (job === "soil") return runSoil(env, url.searchParams.get("cursor"));
+
     const results =
-      job === "soil"
-        ? await runJobs(env, [new SoilJob()])
-        : job === "plants"
-          ? await runJobs(env, [new PlantImportJob(plantsCsv)])
-          : await runAll(env);
+      job === "plants" ? await runJobs(env, [new PlantImportJob(plantsCsv)]) : await runAll(env);
     return Response.json({ results });
   },
 } satisfies ExportedHandler<IngestEnv>;
+
+/**
+ * Soil runs in slices (see soil.ts). Without a cursor this does no work and
+ * returns the survey areas to load; with one it loads about a minute of map
+ * units and returns the cursor for the next call, or null when the area is done.
+ */
+async function runSoil(env: IngestEnv, rawCursor: string | null): Promise<Response> {
+  const job = new SoilJob();
+  if (rawCursor === null) return Response.json({ plan: job.plan() });
+
+  const cursor = job.cursor(rawCursor);
+  if (!cursor) return Response.json({ error: "Not a valid soil cursor." }, { status: 400 });
+
+  try {
+    const { next, ...result } = await job.runSlice(env, cursor);
+    if (result.rowsWritten === 0 && next === null) console.warn("soil: wrote no rows", result.warnings.slice(0, 5));
+    else console.log(`soil ${rawCursor}: ${result.rowsWritten} written, next ${next}`);
+    return Response.json({ results: [result], next });
+  } catch (error) {
+    console.error("soil slice threw", error);
+    const message = error instanceof Error ? error.message : "unknown failure";
+    return Response.json(
+      { results: [{ job: "soil", rowsWritten: 0, rowsSkipped: 0, warnings: [message] }], next: rawCursor },
+      { status: 200 },
+    );
+  }
+}
 
 async function runAll(env: IngestEnv): Promise<IngestResult[]> {
   return runJobs(env, [new HardinessZoneJob(WASATCH_FRONT_ZIPS), new FrostNormalsJob(WASATCH_FRONT_FROST)]);
