@@ -1,6 +1,6 @@
-import { createDatabase, recordProvenance, schema } from "@np/db";
+import { createDatabase, multiPolygonFromWkt, recordProvenance, schema } from "@np/db";
 import { SoilDataAccessClient, type MapUnitSoil } from "@np/sources";
-import { inArray, sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 
 /**
@@ -78,14 +78,14 @@ export class SoilJob implements IngestJob {
               mukey: g.mukey,
               name: names.get(g.mukey) ?? "",
               surveyArea: area.areaSymbol,
-              geom: sql`ST_Multi(ST_GeomFromText(${g.wkt}, 4326))`,
+              geom: multiPolygonFromWkt(g.wkt),
             })
             .onConflictDoUpdate({
               target: schema.soilMapUnits.mukey,
               set: {
                 name: names.get(g.mukey) ?? "",
                 surveyArea: area.areaSymbol,
-                geom: sql`ST_Multi(ST_GeomFromText(${g.wkt}, 4326))`,
+                geom: multiPolygonFromWkt(g.wkt),
               },
             });
         }

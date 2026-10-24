@@ -36,7 +36,34 @@ placeholder confidence for every field. It now uses what was recorded when the
 profile was resolved, and says which fields are missing when the profile is
 incomplete.
 
-## Not verified yet
+## First soil load, 24 October 2026 (dev branch)
+
+| Survey area | Map units | With soil layers |
+|---|---|---|
+| UT607 Davis-Weber Area | 178 | 156 |
+| UT612 Salt Lake Area | 150 | 132 |
+| UT621 Utah County, Central Part | 143 | 139 |
+
+2,124 soil layers loaded. Average topsoil pH is 7.9, which is right for the
+Wasatch Front, and every unit that has layers has a drainage class. One
+provenance row per survey area.
+
+Spot checks of 18 places across the four counties: 17 landed in a map unit.
+Findings:
+
+- **Self-intersecting outlines.** 6 of 471 shapes were invalid, and they are
+  common valley soils (Chipman, Taylorsville). They were repaired on dev, and
+  the load now repairs every shape as it goes.
+- **Urban land.** Downtown Salt Lake City, Ogden, Bountiful and Provo fall in
+  "Urban land", which the survey does not measure. Those addresses get the
+  honest "soil test recommended" message rather than a number. Roughly a tenth
+  of units are like this.
+- **Coverage gap.** Eden, in Ogden Valley, is in no loaded survey area. The name
+  search found three areas; there may be others for eastern Weber County and
+  parts of Utah County. The Live source check now lists every Utah survey area
+  so the missing ones can be named.
+
+## Verified and not verified
 
 The build environment cannot reach the soil service, so the first real
 response is the first test of the field names, exactly as with Census and USGS.

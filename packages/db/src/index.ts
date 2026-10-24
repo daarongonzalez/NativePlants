@@ -3,3 +3,4 @@ export * from "./repositories";
 export * from "./mappers";
 export * from "./resolve-repo";
 export * as schema from "./schema";
+export { multiPolygonFromWkt } from "./geometry";

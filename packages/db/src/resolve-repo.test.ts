@@ -11,6 +11,7 @@ import {
   lookupZoneByZip,
   recordProvenance,
 } from "./resolve-repo";
+import { multiPolygonFromWkt } from "./geometry";
 import {
   climateStations,
   dataProvenance,
@@ -204,6 +205,26 @@ describeIfDb("resolve data layer", () => {
     expect(await rows()).toHaveLength(2);
 
     await db.delete(dataProvenance).where(eq(dataProvenance.recordId, recordId));
+  });
+
+  it("repairs a self-intersecting outline so point lookups still work", async () => {
+    // A bow-tie: two triangles meeting at a point, which is invalid as one ring.
+    const bowtie = "POLYGON((-111.80 40.70, -111.70 40.80, -111.70 40.70, -111.80 40.80, -111.80 40.70))";
+    await db.insert(soilMapUnits).values({
+      mukey: "TEST-SOIL-BOWTIE",
+      name: "Bow-tie test unit",
+      surveyArea: "UT-TEST",
+      geom: multiPolygonFromWkt(bowtie),
+    });
+    try {
+      const valid = await db.execute(sql`SELECT ST_IsValid(geom) AS ok FROM soil_map_units WHERE mukey = 'TEST-SOIL-BOWTIE'`);
+      expect(valid.rows[0]?.["ok"]).toBe(true);
+      // Inside the left lobe, and inside the right lobe.
+      expect((await findSoilAtPoint(db, 40.75, -111.78))?.mukey).toBe("TEST-SOIL-BOWTIE");
+      expect((await findSoilAtPoint(db, 40.75, -111.72))?.mukey).toBe("TEST-SOIL-BOWTIE");
+    } finally {
+      await db.delete(soilMapUnits).where(eq(soilMapUnits.mukey, "TEST-SOIL-BOWTIE"));
+    }
   });
 
   it("finds the soil map unit under a point, with its horizons", async () => {

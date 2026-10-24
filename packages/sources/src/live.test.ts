@@ -104,6 +104,12 @@ describeLive("live: USGS elevation", () => {
 describeLive("live: USDA Soil Data Access", () => {
   const client = () => new SoilDataAccessClient(recording("sda"));
 
+  it("lists every Utah survey area, to find any the name search misses", async () => {
+    const all = await client().findSurveyAreas([""]);
+    console.log("PARSED all Utah survey areas", all.map((a) => `${a.areaSymbol} ${a.areaName}`).join(" | "));
+    expect(all.length).toBeGreaterThan(10);
+  }, 60_000);
+
   it("finds survey areas for the four launch counties", async () => {
     const areas = await client().findSurveyAreas(["Salt Lake", "Utah County", "Davis", "Weber"]);
     console.log("PARSED survey areas", JSON.stringify(areas));
