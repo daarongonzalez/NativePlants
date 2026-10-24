@@ -86,6 +86,18 @@ describe("SoilDataAccessClient", () => {
     expect(sent?.query).toContain("'UT''1'");
   });
 
+  it("asks for survey areas by exact symbol", async () => {
+    let sent = "";
+    const fake = (async (_u: RequestInfo | URL, init?: RequestInit) => {
+      sent = JSON.parse(String(init?.body)).query;
+      return new Response(JSON.stringify({ Table: [["areasymbol", "areaname"], ["UT609", "Morgan Area, Utah"]] }), { status: 200 });
+    }) as typeof fetch;
+
+    const areas = await new SoilDataAccessClient(fake).getSurveyAreas(["UT609", "UT608"]);
+    expect(sent).toContain("areasymbol IN ('UT609','UT608')");
+    expect(areas).toEqual([{ areaSymbol: "UT609", areaName: "Morgan Area, Utah" }]);
+  });
+
   it("throws on a non-200 response", async () => {
     const fake = (async () => new Response("down", { status: 503 })) as typeof fetch;
     await expect(new SoilDataAccessClient(fake).findSurveyAreas(["Salt Lake"])).rejects.toThrow(/HTTP 503/);

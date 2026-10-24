@@ -58,10 +58,11 @@ Findings:
   "Urban land", which the survey does not measure. Those addresses get the
   honest "soil test recommended" message rather than a number. Roughly a tenth
   of units are like this.
-- **Coverage gap.** Eden, in Ogden Valley, is in no loaded survey area. The name
-  search found three areas; there may be others for eastern Weber County and
-  parts of Utah County. The Live source check now lists every Utah survey area
-  so the missing ones can be named.
+- **Coverage gap.** Eden, in Ogden Valley, was in no loaded survey area. The name
+  search found only three areas. The live check's list of every Utah survey
+  area showed six more that cover parts of our counties (UT608, UT609, UT611,
+  UT613, UT622, UT627; UT609 is the Morgan Area, which includes Ogden Valley).
+  The job now loads nine areas by symbol rather than searching by name.
 
 ## Verified and not verified
 

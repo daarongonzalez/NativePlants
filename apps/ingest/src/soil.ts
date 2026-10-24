@@ -11,16 +11,43 @@ import type { IngestEnv, IngestJob, IngestResult } from "./types";
  * (`POST /__run?job=soil`) when the survey changes, which is roughly annually.
  * It is safe to re-run: units are replaced, not duplicated.
  *
- * Survey areas are found by name rather than hard-coded symbols, so a renamed
- * or split survey shows up in the output instead of silently dropping out.
+ * Survey areas are listed by symbol. A name search missed Ogden Valley (Eden)
+ * on the first load, because the area covering it is named for Morgan County.
+ * A symbol the service no longer returns is reported as a warning, so a renamed
+ * or retired survey shows up in the output instead of silently dropping out.
  *
  * Provenance is recorded per survey area (record id = area symbol), not per
  * map unit; tens of thousands of identical rows would say nothing the area row
  * does not.
  */
 
-/** Name prefixes of the SSURGO survey areas covering Salt Lake, Utah, Davis and Weber counties. */
-export const WASATCH_SURVEY_NAME_PREFIXES = ["Salt Lake", "Utah County", "Davis", "Weber"] as const;
+/**
+ * SSURGO survey areas that cover any part of Salt Lake, Utah, Davis or Weber
+ * counties, taken from the survey catalogue on 24 October 2026. Some also cover
+ * neighbouring counties, so a few map units fall outside the market; that is
+ * harmless, and cheaper than clipping.
+ *
+ *  UT607 Davis-Weber Area
+ *  UT608 Fairfield-Nephi Area (Cedar Valley, west Utah County)
+ *  UT609 Morgan Area (Morgan County and part of Weber County, incl. Ogden Valley)
+ *  UT611 Tooele Area (parts of Davis County among others)
+ *  UT612 Salt Lake Area
+ *  UT613 Summit Area (parts of Salt Lake County among others)
+ *  UT621 Utah County, Central Part
+ *  UT622 Heber Valley Area (part of Utah County)
+ *  UT627 Sanpete Valley Area (part of Utah County)
+ */
+export const WASATCH_SURVEY_AREAS = [
+  "UT607",
+  "UT608",
+  "UT609",
+  "UT611",
+  "UT612",
+  "UT613",
+  "UT621",
+  "UT622",
+  "UT627",
+] as const;
 
 /** Map units fetched per geometry request. Geometry is the heavy part of each response. */
 const GEOMETRY_BATCH = 25;
@@ -35,7 +62,7 @@ export class SoilJob implements IngestJob {
   private readonly client: SoilDataAccessClient;
 
   constructor(
-    private readonly namePrefixes: readonly string[] = WASATCH_SURVEY_NAME_PREFIXES,
+    private readonly areaSymbols: readonly string[] = WASATCH_SURVEY_AREAS,
     fetchImpl: typeof fetch = defaultFetch,
   ) {
     this.client = new SoilDataAccessClient(fetchImpl);
@@ -46,10 +73,13 @@ export class SoilJob implements IngestJob {
     let rowsWritten = 0;
     let rowsSkipped = 0;
 
-    const areas = await this.client.findSurveyAreas(this.namePrefixes);
+    const areas = await this.client.getSurveyAreas(this.areaSymbols);
     if (areas.length === 0) {
-      return { job: this.name, rowsWritten: 0, rowsSkipped: 0, warnings: ["No survey areas matched the name prefixes."] };
+      return { job: this.name, rowsWritten: 0, rowsSkipped: 0, warnings: ["None of the survey area symbols were found."] };
     }
+    const found = new Set(areas.map((a) => a.areaSymbol));
+    const absent = this.areaSymbols.filter((s) => !found.has(s));
+    if (absent.length > 0) warnings.push(`Survey areas not in the catalogue (renamed or retired?): ${absent.join(" ")}`);
     warnings.push(`Survey areas: ${areas.map((a) => `${a.areaSymbol} ${a.areaName}`).join("; ")}`);
 
     const db = createDatabase(env.HYPERDRIVE.connectionString);

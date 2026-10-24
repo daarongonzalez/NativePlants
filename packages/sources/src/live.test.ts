@@ -110,6 +110,14 @@ describeLive("live: USDA Soil Data Access", () => {
     expect(all.length).toBeGreaterThan(10);
   }, 60_000);
 
+  it("still finds every survey area the soil load asks for", async () => {
+    // Keep in step with WASATCH_SURVEY_AREAS in apps/ingest/src/soil.ts.
+    const wanted = ["UT607", "UT608", "UT609", "UT611", "UT612", "UT613", "UT621", "UT622", "UT627"];
+    const found = (await client().getSurveyAreas(wanted)).map((a) => a.areaSymbol);
+    console.log("PARSED wanted survey areas", found.join(" "));
+    expect(found.sort()).toEqual(wanted);
+  }, 60_000);
+
   it("finds survey areas for the four launch counties", async () => {
     const areas = await client().findSurveyAreas(["Salt Lake", "Utah County", "Davis", "Weber"]);
     console.log("PARSED survey areas", JSON.stringify(areas));
