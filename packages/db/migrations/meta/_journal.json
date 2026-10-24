@@ -8,6 +8,13 @@
       "when": 1789222822781,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792822187932,
+      "tag": "0001_add_site_sun_exposure",
+      "breakpoints": true
     }
   ]
 }

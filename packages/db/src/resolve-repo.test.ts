@@ -2,8 +2,24 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq, sql } from "drizzle-orm";
 import { createDatabase, type Database } from "./client";
 import { createSite } from "./repositories";
-import { countProfiles, createSiteProfile, findNearestStation, lookupZoneByZip, recordProvenance } from "./resolve-repo";
-import { climateStations, dataProvenance, frostNorms, hardinessZones, users } from "./schema";
+import {
+  countProfiles,
+  createSiteProfile,
+  findNearestStation,
+  findSoilAtPoint,
+  getFrostNorms,
+  lookupZoneByZip,
+  recordProvenance,
+} from "./resolve-repo";
+import {
+  climateStations,
+  dataProvenance,
+  frostNorms,
+  hardinessZones,
+  soilMapUnits,
+  soilProperties,
+  users,
+} from "./schema";
 
 /**
  * Integration tests for the resolve pipeline's data layer.
@@ -82,6 +98,13 @@ describeIfDb("resolve data layer", () => {
   it("looks up a zone by ZIP", async () => {
     const zone = await lookupZoneByZip(db, "99999");
     expect(zone?.zoneOrdinal).toBe(72);
+  });
+
+  it("reads frost normals for a station, and null for one without", async () => {
+    const norms = await getFrostNorms(db, SLC_AIRPORT.id);
+    expect(norms?.lastSpringP50).toBe("04-24");
+    expect(norms?.frostFreeDays).toBe(178);
+    expect(await getFrostNorms(db, "TEST-NO-SUCH-STATION")).toBeNull();
   });
 
   it("returns null for an unknown ZIP rather than a default", async () => {
@@ -181,5 +204,46 @@ describeIfDb("resolve data layer", () => {
     expect(await rows()).toHaveLength(2);
 
     await db.delete(dataProvenance).where(eq(dataProvenance.recordId, recordId));
+  });
+
+  it("finds the soil map unit under a point, with its horizons", async () => {
+    // Two adjacent squares in the Salt Lake valley, so a point in each must
+    // land in a different unit and a point in neither must return null.
+    const square = (west: number, east: number) =>
+      `MULTIPOLYGON(((${west} 40.70, ${east} 40.70, ${east} 40.80, ${west} 40.80, ${west} 40.70)))`;
+    const units = [
+      { mukey: "TEST-SOIL-W", west: -112.0, east: -111.9 },
+      { mukey: "TEST-SOIL-E", west: -111.9, east: -111.8 },
+    ];
+
+    try {
+      for (const u of units) {
+        await db.insert(soilMapUnits).values({
+          mukey: u.mukey,
+          name: `Test unit ${u.mukey}`,
+          surveyArea: "UT-TEST",
+          geom: sql`ST_GeomFromText(${square(u.west, u.east)}, 4326)`,
+        });
+        await db.insert(soilProperties).values([
+          { mukey: u.mukey, depthTopCm: 30, depthBottomCm: 90, ph: 8.2, drainageClass: "well_drained" },
+          { mukey: u.mukey, depthTopCm: 0, depthBottomCm: 30, ph: 7.4, drainageClass: "well_drained" },
+        ]);
+      }
+
+      const west = await findSoilAtPoint(db, 40.75, -111.95);
+      expect(west?.mukey).toBe("TEST-SOIL-W");
+      expect(west?.drainageClass).toBe("well_drained");
+      // Ordered by depth, shallowest first, whatever order they were written in.
+      expect(west?.horizons.map((h) => h.depthTopCm)).toEqual([0, 30]);
+
+      expect((await findSoilAtPoint(db, 40.75, -111.85))?.mukey).toBe("TEST-SOIL-E");
+      expect(await findSoilAtPoint(db, 40.75, -111.5)).toBeNull();
+    } finally {
+      const keys = units.map((u) => u.mukey);
+      for (const key of keys) {
+        await db.delete(soilProperties).where(eq(soilProperties.mukey, key));
+        await db.delete(soilMapUnits).where(eq(soilMapUnits.mukey, key));
+      }
+    }
   });
 });

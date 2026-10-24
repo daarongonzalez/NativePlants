@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
-import { createDatabase, listPublishedPlants, type Owner } from "@np/db";
+import { createDatabase, getFrostNorms, listPublishedPlants, type Owner } from "@np/db";
 import {
   createSite,
   deleteSite,
@@ -11,12 +11,14 @@ import {
   listSavedPlants,
   listSites,
   savePlant,
+  setSiteSunExposure,
 } from "@np/db";
 import { recommend } from "@np/engine";
-import { goalsSchema, siteProfileSchema } from "@np/shared";
+import { goalsSchema, siteProfileSchema, sunExposureSchema } from "@np/shared";
 import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
+import { toDomainProfile } from "./profile";
 import { resolveSite } from "./resolve";
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -99,7 +101,31 @@ protectedRoutes.get("/sites/:id/plants", async (c) => {
 
   // The engine takes a fully-typed profile and nothing else. Parsing here
   // rather than trusting the row keeps the engine's contract honest.
-  const profile = siteProfileSchema.parse(toDomainProfile(stored, site, siteId));
+  // Frost bands are reference data keyed by the station the profile recorded.
+  const norms = stored.frostStationId ? await getFrostNorms(db, stored.frostStationId) : null;
+  const frost = norms
+    ? {
+        lastSpringP10: norms.lastSpringP10,
+        lastSpringP50: norms.lastSpringP50,
+        lastSpringP90: norms.lastSpringP90,
+        firstFallP10: norms.firstFallP10,
+        firstFallP50: norms.firstFallP50,
+        firstFallP90: norms.firstFallP90,
+        frostFreeDays: norms.frostFreeDays,
+      }
+    : null;
+
+  const domain = toDomainProfile({ ...stored, frost }, site, siteId);
+  if ("missing" in domain) {
+    return c.json(
+      {
+        error: "This site's profile is not complete enough to recommend plants yet.",
+        missing: domain.missing,
+      },
+      409,
+    );
+  }
+  const profile = siteProfileSchema.parse(domain.profile);
   const catalogue = await listPublishedPlants(db, c.env.MARKET);
   const { recommended, rejected } = recommend(profile, catalogue, goals);
 
@@ -131,10 +157,19 @@ protectedRoutes.post("/sites/:id/resolve", async (c) => {
   const site = await getSite(db, owner, siteId);
   if (!site) return c.json({ error: "Site not found." }, 404);
 
+  // Optional body: a one-off sun answer for this resolve. Otherwise the answer
+  // saved on the site is used, and failing that the profile calculates sun.
+  const body = z
+    .object({ sunExposure: sunExposureSchema.optional() })
+    .safeParse(await c.req.json().catch(() => ({})));
+  if (!body.success) return c.json({ error: "Sun exposure must be full, part or shade." }, 400);
+  const sunExposure = body.data.sunExposure ?? sunExposureSchema.safeParse(site.sunExposure).data;
+
   const outcome = await resolveSite(
     { db, geocoder: new CensusGeocodeClient(), elevation: new UsgsElevationClient() },
     owner,
     { id: site.id, addressText: site.addressText, latitude: site.latitude, longitude: site.longitude },
+    sunExposure ? { sunExposure } : {},
   );
 
   if (!outcome.ok) {
@@ -155,6 +190,25 @@ protectedRoutes.post("/sites/:id/resolve", async (c) => {
   }
 
   return c.json({ profileId: outcome.profileId, summary: outcome.summary }, 201);
+});
+
+/**
+ * Save how sunny the gardener says a spot is, or clear it with null.
+ *
+ * Does not rebuild the profile; the client calls resolve next, so the saved
+ * answer lands in a fresh snapshot and old snapshots stay reproducible.
+ */
+protectedRoutes.put("/sites/:id/sun", async (c) => {
+  const body = z
+    .object({ sunExposure: sunExposureSchema.nullable() })
+    .safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: "Sun exposure must be full, part, shade or null." }, 400);
+
+  const db = createDatabase(c.env.HYPERDRIVE.connectionString);
+  const ok = await setSiteSunExposure(db, c.get("owner"), c.req.param("id"), body.data.sunExposure);
+  if (!ok) return c.json({ error: "Site not found." }, 404);
+
+  return c.json({ sunExposure: body.data.sunExposure });
 });
 
 protectedRoutes.post("/sites/:id/saved", async (c) => {
@@ -182,47 +236,5 @@ app.onError((err, c) => {
 });
 
 app.notFound((c) => c.json({ error: "Not found." }, 404));
-
-/**
- * Widen a stored profile row into the domain shape the engine expects.
- *
- * TODO(M4): the stored `provenance` jsonb carries real per-field source and
- * confidence. Until the soil ingestion job lands there is nothing to read, so
- * this fills a placeholder. It must be replaced before V1 ships — showing a
- * confidence we did not measure is worse than showing none.
- */
-function toDomainProfile(
-  stored: Record<string, unknown>,
-  site: { latitude: number; longitude: number },
-  siteId: string,
-) {
-  const at = new Date().toISOString();
-  const attributed = (value: unknown) => ({
-    value,
-    provenance: { source: "ssurgo", confidence: "medium", retrievedAt: at },
-  });
-
-  return {
-    siteId,
-    resolvedAt: at,
-    latitude: site.latitude,
-    longitude: site.longitude,
-    zoneOrdinal: attributed(stored["zoneOrdinal"]),
-    frost: attributed(stored["frost"]),
-    ph: attributed(stored["ph"]),
-    sandPct: attributed(stored["sandPct"]),
-    siltPct: attributed(stored["siltPct"]),
-    clayPct: attributed(stored["clayPct"]),
-    drainageClass: attributed(stored["drainageClass"]),
-    sunHoursSummer: attributed(stored["sunHoursSummer"]),
-    constraints: {
-      deerPressure: false,
-      pets: false,
-      youngChildren: false,
-      irrigationAvailable: true,
-      hoaRestrictions: false,
-    },
-  };
-}
 
 export default app;

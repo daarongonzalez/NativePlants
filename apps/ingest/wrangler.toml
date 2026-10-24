@@ -6,6 +6,12 @@ compatibility_flags = ["nodejs_compat"]
 # Reference data changes rarely. Hardiness zones get an annual re-check and
 # frost normals change once a decade, so these run monthly and are idempotent
 # rather than running often and hoping.
+# The plant sheet is bundled into the Worker as text.
+[[rules]]
+type = "Text"
+globs = ["**/*.csv"]
+fallthrough = true
+
 [triggers]
 crons = ["0 4 1 * *"]
 

@@ -26,6 +26,10 @@ Early. Research and planning only, no application code yet.
   they are different problems
 - [M3: zones and frost](docs/milestones/m3-zones-and-frost.md) — the next
   build milestone
+- [M4 and M6 start: soil and plants](docs/milestones/m4-soil-and-plants.md) —
+  what was built and what is still unverified
+- [Plant curation](docs/plant-curation.md) — how the plant list is edited and
+  loaded
 - [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to
   get the backend working end to end
 - [Design brief](docs/design-brief.md) — a one-file summary of the product

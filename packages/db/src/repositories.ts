@@ -76,6 +76,7 @@ export async function getSite(db: Database, owner: Owner, siteId: string) {
       addressText: sites.addressText,
       longitude: sql<number>`ST_X(${sites.geom})`,
       latitude: sql<number>`ST_Y(${sites.geom})`,
+      sunExposure: sites.sunExposure,
     })
     .from(sites)
     // Both predicates, always. Dropping the userId here is the bug this
@@ -84,6 +85,25 @@ export async function getSite(db: Database, owner: Owner, siteId: string) {
     .limit(1);
 
   return rows[0] ?? null;
+}
+
+/**
+ * Save how sunny the gardener says a site is, or clear it with null.
+ * Returns false when the site is not theirs, same as every write here.
+ */
+export async function setSiteSunExposure(
+  db: Database,
+  owner: Owner,
+  siteId: string,
+  sunExposure: "full" | "part" | "shade" | null,
+): Promise<boolean> {
+  const rows = await db
+    .update(sites)
+    .set({ sunExposure })
+    .where(and(eq(sites.id, siteId), eq(sites.userId, owner.userId)))
+    .returning({ id: sites.id });
+
+  return rows.length > 0;
 }
 
 export async function createSite(

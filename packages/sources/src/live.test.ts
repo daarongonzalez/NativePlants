@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CensusGeocodeClient } from "./geocode";
 import { UsgsElevationClient } from "./elevation";
+import { SoilDataAccessClient } from "./soil";
 import { SourceShapeError } from "./types";
 
 /**
@@ -98,4 +99,41 @@ describeLive("live: USGS elevation", () => {
     console.log("PARSED mid-ocean", outcome instanceof Error ? `${outcome.name}: ${outcome.message}` : JSON.stringify(outcome));
     expect(outcome === null || outcome instanceof SourceShapeError).toBe(true);
   }, 30_000);
+});
+
+describeLive("live: USDA Soil Data Access", () => {
+  const client = () => new SoilDataAccessClient(recording("sda"));
+
+  it("finds survey areas for the four launch counties", async () => {
+    const areas = await client().findSurveyAreas(["Salt Lake", "Utah County", "Davis", "Weber"]);
+    console.log("PARSED survey areas", JSON.stringify(areas));
+    expect(areas.length).toBeGreaterThanOrEqual(3);
+  }, 60_000);
+
+  it("reads horizons for one survey area, with plausible values", async () => {
+    const [area] = await client().findSurveyAreas(["Salt Lake"]);
+    expect(area).toBeDefined();
+
+    const soil = await client().fetchSoil(area!.areaSymbol);
+    const withHorizons = soil.filter((s) => s.horizons.length > 0);
+    console.log("PARSED soil", area!.areaSymbol, `${soil.length} units, ${withHorizons.length} with horizons`, JSON.stringify(withHorizons[0]));
+    expect(withHorizons.length).toBeGreaterThan(0);
+
+    // Wasatch Front soils are alkaline. A pH column read from the wrong field
+    // would show up as values far outside this range.
+    const phs = withHorizons.flatMap((s) => s.horizons.map((h) => h.ph)).filter((p): p is number => p !== null);
+    expect(phs.length).toBeGreaterThan(0);
+    expect(Math.min(...phs)).toBeGreaterThanOrEqual(3);
+    expect(Math.max(...phs)).toBeLessThanOrEqual(11);
+    expect(soil.some((s) => s.drainageClass !== null)).toBe(true);
+  }, 120_000);
+
+  it("returns valid polygons for a few map units", async () => {
+    const [area] = await client().findSurveyAreas(["Salt Lake"]);
+    const units = await client().listMapUnits(area!.areaSymbol);
+    const geometries = await client().fetchGeometries(units.slice(0, 5).map((u) => u.mukey));
+    console.log("PARSED geometry", geometries.map((g) => `${g.mukey} ${g.wkt.slice(0, 80)}`).join(" | "));
+    expect(geometries.length).toBeGreaterThan(0);
+    for (const g of geometries) expect(g.wkt).toMatch(/^(MULTI)?POLYGON/);
+  }, 120_000);
 });
