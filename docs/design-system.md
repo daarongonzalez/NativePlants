@@ -1,8 +1,7 @@
 # Design System
 
-Status: v0.1, September 2026.
-Visual reference: https://claude.ai/code/artifact/95411f74-bb7a-44d3-83d2-df058dd3e59b
-Tokens: `packages/ui/src/tokens.css`
+Status: v0.2, October 2026. Nativo replaces the v0.1 visual language.
+Visual rules and tokens: `design/nativo/` (start with `design/nativo/README.md`)
 
 ## The problem this language solves
 
@@ -28,32 +27,19 @@ Everything else follows from it.
    glare, greyscale, and colour blindness.
 4. **Plain words, gardener's vocabulary.** "County soil survey," never `ssurgo`.
 
-## Colour: three palettes, three jobs
+## Visual language: Nativo
 
-**Ground, ink and accent.** Neutrals carry a slight green bias so they read as
-chosen rather than inherited. The accent is chicory blue — the alkaline end of
-a soil pH strip, and the colour of the chicory and asters that thrive in exactly
-that soil. Deliberately not garden green.
+Colour, type, borders, corner radius, space, layout and illustration all come
+from the Nativo design system in `design/nativo/`. This document keeps the
+product principles and the components that are specific to this subject. It
+does not repeat Nativo's rules.
 
-**Confidence.** Three levels — measured, survey estimate, modelled — kept
-entirely separate from the accent hue. These are the most-used colours in the
-product. Reaching for the warning colour to make something stand out would make
-a real toxicity warning mean less.
+Two product needs sit on top of Nativo:
 
-**Soil horizon ramp.** Six values mapped to the exact depth bands SSURGO
-reports. Perceptually ordered. **This ramp is data, not decoration** — using a
-horizon colour elsewhere would make the report lie.
-
-## Typography
-
-- **Fraunces** for display. It reads as 19th-century botanical plate printing,
-  the right ancestry for a plant reference.
-- **IBM Plex Sans** for interface.
-- **IBM Plex Mono** for every measured value, always with `tabular-nums`.
-
-Mono is not a style choice. It consistently marks "this is a measurement"
-across the whole product, which is why a plant's scientific name is set in it
-and its common name is not.
+- **Confidence** is shown with green (measured), gold (survey estimate) and
+  clay (modelled), always beside its written label.
+- **Warnings** for toxic or invasive plants use clay. Nativo has no separate
+  alert colour, so keep clay off ordinary emphasis on those screens.
 
 ## Signature components
 
@@ -62,8 +48,7 @@ subject.
 
 ### Attributed value
 Value, unit, confidence chip, source line. Every resolved field in a site
-profile renders through it. Low confidence carries a dashed border as well as
-colour.
+profile renders through it. Confidence is shown by colour and a written label.
 
 ### Range against a marker
 A plant's tolerance span with its optimum, plus a marker for the gardener's
@@ -80,26 +65,22 @@ The 10 / 50 / 90 percent spread on one track. Planting on 9 April is a
 different bet than planting on 8 May, and that choice belongs to the gardener.
 
 ### Plant card
-Common name in display, scientific name in mono italic, the engine's headline,
+Common name in display, scientific name in italic, the engine's headline,
 component reasons, tags, and a toxicity band when one applies.
 
 Rejected plants are shown, not hidden. "We considered 140 and ruled out 96
 because your soil is alkaline" is more trustworthy than a short unexplained
 list, and it teaches someone what their ground is like.
 
-## Theme handling
-
-Every colour is declared in the bare `:root` block before any media query or
-`[data-theme]` block redefines it. A colour defined only inside a dark-mode
-block never applies in the default un-stamped state, which is what most people
-see — that is the classic unreadable-page bug and the token file is structured
-to prevent it.
-
 ## What is not decided yet
 
 - Photography treatment. Plant images are a major asset and their crop, ratio
   and background handling should be settled before the first curation pass, not
   after.
-- Logo and wordmark.
+- Logo and wordmark. Nativo has none yet.
+- How measured values and scientific names are set, since Nativo has no
+  monospace face.
+- Whether a dark theme is needed. Nativo is light only.
+- A colour for the soil horizon column. Nativo allows no extra hues.
 - Print and PDF styling for the saved plant list a gardener takes to a nursery.
 - Map and pin-drop styling for the address confirm screen.

@@ -1,28 +1,28 @@
 /**
- * Design tokens as typed constants, for the places CSS custom properties
- * cannot reach — canvas rendering, SVG generated in JS, chart libraries.
+ * Product vocabulary that sits on top of the Nativo design system. The tokens
+ * themselves live in design/nativo/tokens.css; the names below point at them.
  *
- * These MUST stay in sync with tokens.css. When they drift, the soil horizon
- * drawn on a canvas stops matching the one drawn in CSS, which is exactly the
- * kind of bug nobody files and everybody notices.
+ * Use these for the places CSS custom properties cannot reach, such as canvas
+ * rendering, SVG generated in JS and chart libraries.
  */
 
-/** Depth bands as SSURGO reports them, with their ramp colour. */
+/** Depth bands as SSURGO reports them. */
 export const SOIL_HORIZONS = [
-  { topCm: 0, bottomCm: 5, token: "--np-horizon-0" },
-  { topCm: 5, bottomCm: 15, token: "--np-horizon-1" },
-  { topCm: 15, bottomCm: 30, token: "--np-horizon-2" },
-  { topCm: 30, bottomCm: 60, token: "--np-horizon-3" },
-  { topCm: 60, bottomCm: 100, token: "--np-horizon-4" },
-  { topCm: 100, bottomCm: 200, token: "--np-horizon-5" },
+  { topCm: 0, bottomCm: 5 },
+  { topCm: 5, bottomCm: 15 },
+  { topCm: 15, bottomCm: 30 },
+  { topCm: 30, bottomCm: 60 },
+  { topCm: 60, bottomCm: 100 },
+  { topCm: 100, bottomCm: 200 },
 ] as const;
 
 export type Confidence = "high" | "medium" | "low";
 
+/** Each level pairs a Nativo fill with its matching text token. */
 export const CONFIDENCE_TOKENS: Record<Confidence, { fg: string; bg: string; label: string }> = {
-  high: { fg: "--np-conf-high", bg: "--np-conf-high-bg", label: "Measured" },
-  medium: { fg: "--np-conf-med", bg: "--np-conf-med-bg", label: "Survey estimate" },
-  low: { fg: "--np-conf-low", bg: "--np-conf-low-bg", label: "Modelled" },
+  high: { fg: "--on-green", bg: "--green", label: "Measured" },
+  medium: { fg: "--on-gold", bg: "--gold", label: "Survey estimate" },
+  low: { fg: "--on-clay", bg: "--clay", label: "Modelled" },
 };
 
 /**
