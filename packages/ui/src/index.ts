@@ -6,14 +6,14 @@
  * rendering, SVG generated in JS and chart libraries.
  */
 
-/** Depth bands as SSURGO reports them. */
+/** Depth bands as SSURGO reports them, with their ramp colour (data, not decoration). */
 export const SOIL_HORIZONS = [
-  { topCm: 0, bottomCm: 5 },
-  { topCm: 5, bottomCm: 15 },
-  { topCm: 15, bottomCm: 30 },
-  { topCm: 30, bottomCm: 60 },
-  { topCm: 60, bottomCm: 100 },
-  { topCm: 100, bottomCm: 200 },
+  { topCm: 0, bottomCm: 5, token: "--np-horizon-0" },
+  { topCm: 5, bottomCm: 15, token: "--np-horizon-1" },
+  { topCm: 15, bottomCm: 30, token: "--np-horizon-2" },
+  { topCm: 30, bottomCm: 60, token: "--np-horizon-3" },
+  { topCm: 60, bottomCm: 100, token: "--np-horizon-4" },
+  { topCm: 100, bottomCm: 200, token: "--np-horizon-5" },
 ] as const;
 
 export type Confidence = "high" | "medium" | "low";

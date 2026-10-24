@@ -1,0 +1,52 @@
+/*
+ * NativePlants additions to the Nativo design system.
+ *
+ * Nativo (design/nativo/tokens.css) is the base. Load it first. This file adds
+ * only what the product needs and Nativo does not cover. Each addition is a
+ * deliberate exception to a Nativo rule, and docs/design-system.md says why.
+ *
+ * Light theme only for now.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  /* Type: every measured value, and every scientific name, is set in mono
+     with tabular figures. Mono signals "this is a measurement". */
+  --np-font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Alert: toxicity and invasive-species warnings only. Never for emphasis.
+     Kept apart from clay so a real warning never looks like ordinary emphasis. */
+  --np-warn:        #9c3d26;
+  --np-warn-bg:     #f6e3dd;
+
+  /* Soil horizon ramp. This is DATA, not decoration. The values map to real
+     depth bands and stay ordered dark at the surface to pale at depth. Use
+     them for the soil column and nothing else. */
+  --np-horizon-0:   #6b5a44;
+  --np-horizon-1:   #7d6a4e;
+  --np-horizon-2:   #8e7a5a;
+  --np-horizon-3:   #a08c6c;
+  --np-horizon-4:   #b4a184;
+  --np-horizon-5:   #c7b79e;
+
+  /* Touch: nothing tappable goes below this. */
+  --np-touch-min: 44px;
+}
+
+/* Measured values and scientific names. */
+.np-value {
+  font-family: var(--np-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.np-sci-name {
+  font-family: var(--np-font-mono);
+  font-style: italic;
+}
+
+/* Low confidence: a dashed outline as well as its colour, so the meaning
+   survives glare and colour blindness. Exception to Nativo's solid-only
+   borders. Applies to the confidence chip and nothing else. */
+.np-confidence[data-level="low"] {
+  border-style: dashed;
+}

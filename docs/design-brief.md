@@ -80,7 +80,7 @@ Four principles:
    tolerance is a span with a best point inside it. One date or one ideal value
    throws away what the gardener needs to decide.
 3. **Readable in a yard.** Tap targets at least 44px. Meaning is never carried
-   by colour alone: pair it with a written label, so it survives glare and
+   by colour alone: use shape or border as well, so it survives glare and
    colour blindness.
 4. **Plain words.** Say "County soil survey", not a database name.
 
@@ -104,7 +104,7 @@ Four principles:
 | Medium | Survey estimate | An average across the surrounding area |
 | Low | Modelled | Calculated, not observed |
 
-Every confidence chip carries its written label as well as its colour.
+Low confidence carries a **dashed border** as well as its colour.
 
 ## 5. What is in the first release
 
@@ -185,7 +185,7 @@ These are the ones a generic design system would not have.
 - **Soil horizon column.** As described above.
 - **Frost probability band.** As described above.
 - **Plant card.** Common name in the display face. Scientific name in
-  italic. A headline reason, the reasons behind it, tags, and a toxicity band
+  monospace italic. A headline reason, the reasons behind it, tags, and a toxicity band
   when one applies.
 
 ## 9. Visual language
@@ -202,12 +202,18 @@ Gold is the warm accent, one call-out per view. Clay is for emphasis, errors and
 warnings. No other hues.
 
 - **Confidence.** Green for measured, gold for survey estimate, clay for
-  modelled. Always shown with the written label.
-- **Alert.** Toxicity and invasive species warnings use clay. Do not use clay
-  for ordinary emphasis on those screens.
+  modelled. Always shown with the written label. Low confidence also gets a
+  dashed border.
+- **Soil horizon ramp.** Six browns, dark at the surface to pale at depth,
+  matched to real depth bands (0–5, 5–15, 15–30, 30–60, 60–100, 100–200 cm).
+  **This ramp is data, not decoration.** Never use it for anything else.
+- **Alert.** A single red-brown (`#9C3D26`) reserved for toxicity and invasive
+  species warnings. Never for emphasis.
 
 **Type.** Anta for titles and sub-titles (one weight, never bold). Anaheim for
-body copy. Scientific names are set in italic. How measured values are set is still open.
+body copy. IBM Plex Mono for every measured value, always with tabular figures. Mono
+signals "this is a measurement". It is why a plant's scientific name is mono
+italic and its common name is not.
 
 **Shape and space.** Plain 1px ink outlines on every tile, card and input.
 Tiles round at 16px, buttons and badges at 8px. Spacing steps of 4 to 64px on a
@@ -216,7 +222,11 @@ Tiles round at 16px, buttons and badges at 8px. Spacing steps of 4 to 64px on a
 **Illustration.** Tree, branch, grass and leaf drawings in `design/nativo/assets/`,
 in green or cream.
 
-**Themes.** Light only for now. Nativo has no dark theme.
+**Product additions.** The mono face, the dashed low-confidence border, the
+alert colour and the soil ramp are the only exceptions to Nativo's rules. They
+live in `packages/ui/src/tokens.css`, which loads after Nativo's files.
+
+**Themes.** Light only for now.
 
 ## 10. Tone of voice
 
@@ -234,7 +244,7 @@ entry point.
 
 **Decided**
 
-- The Nativo design system for colour, type, shape and spacing
+- The Nativo design system for colour, type, shape and spacing, plus the product additions (mono values, dashed low confidence, alert colour, soil ramp)
 - The principles in section 4
 - The seven screens and their order
 - The five signature components
@@ -243,9 +253,7 @@ entry point.
 **Open: please propose options**
 
 - Logo and wordmark (Nativo has none yet)
-- How measured values and scientific names are set, now that Nativo has no monospace face
-- Whether a dark theme is needed
-- A colour treatment for the soil horizon column, since Nativo allows no extra hues
+- Dark theme (light only for now)
 - The look of plant photography (crop, ratio and background). This needs
   settling before plants are photographed or licensed.
 - Map and pin styling for the address confirm screen
@@ -279,7 +287,7 @@ plausible placeholder content for those, and mark it as such.
 
 Longer background, if needed:
 
-- `docs/design-system.md` for the principles and signature components
+- `docs/design-system.md` for the principles, signature components and product additions
 - `design/nativo/README.md` for the visual rules
 - `docs/v1-spec.md` for the full specification
 - `docs/scope.md` for the authoritative in-scope and out-of-scope list

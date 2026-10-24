@@ -34,12 +34,22 @@ from the Nativo design system in `design/nativo/`. This document keeps the
 product principles and the components that are specific to this subject. It
 does not repeat Nativo's rules.
 
-Two product needs sit on top of Nativo:
+Four product needs sit on top of Nativo. They live in
+`packages/ui/src/tokens.css`, load after Nativo's own files, and are the only
+exceptions to Nativo's rules.
 
-- **Confidence** is shown with green (measured), gold (survey estimate) and
-  clay (modelled), always beside its written label.
-- **Warnings** for toxic or invasive plants use clay. Nativo has no separate
-  alert colour, so keep clay off ordinary emphasis on those screens.
+- **Measured values in mono.** IBM Plex Mono with tabular figures marks "this
+  is a measurement" everywhere. It is why a plant's scientific name is mono
+  italic and its common name is not.
+- **Dashed border for low confidence.** Confidence is green (measured), gold
+  (survey estimate) and clay (modelled), always beside its written label. Low
+  confidence also gets a dashed outline so it survives glare and colour
+  blindness. Nativo otherwise allows solid borders only.
+- **A separate warning colour.** Toxic and invasive plant warnings use
+  `--np-warn`, a deeper red-brown than clay, so a real warning never looks
+  like ordinary emphasis.
+- **Soil horizon ramp.** Six browns matched to the depth bands. The ramp is
+  data, not decoration; use it for the soil column and nothing else.
 
 ## Signature components
 
@@ -48,7 +58,7 @@ subject.
 
 ### Attributed value
 Value, unit, confidence chip, source line. Every resolved field in a site
-profile renders through it. Confidence is shown by colour and a written label.
+profile renders through it. Low confidence carries a dashed border as well as colour.
 
 ### Range against a marker
 A plant's tolerance span with its optimum, plus a marker for the gardener's
@@ -65,7 +75,7 @@ The 10 / 50 / 90 percent spread on one track. Planting on 9 April is a
 different bet than planting on 8 May, and that choice belongs to the gardener.
 
 ### Plant card
-Common name in display, scientific name in italic, the engine's headline,
+Common name in display, scientific name in mono italic, the engine's headline,
 component reasons, tags, and a toxicity band when one applies.
 
 Rejected plants are shown, not hidden. "We considered 140 and ruled out 96
@@ -78,9 +88,6 @@ list, and it teaches someone what their ground is like.
   and background handling should be settled before the first curation pass, not
   after.
 - Logo and wordmark. Nativo has none yet.
-- How measured values and scientific names are set, since Nativo has no
-  monospace face.
-- Whether a dark theme is needed. Nativo is light only.
-- A colour for the soil horizon column. Nativo allows no extra hues.
+- Dark theme. Nativo and these additions are light only.
 - Print and PDF styling for the saved plant list a gardener takes to a nursery.
 - Map and pin-drop styling for the address confirm screen.
