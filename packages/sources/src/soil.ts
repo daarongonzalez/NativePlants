@@ -212,6 +212,15 @@ export class SoilDataAccessClient {
     return rows.map((r) => ({ areaSymbol: requireString(r, "areasymbol"), areaName: requireString(r, "areaname") }));
   }
 
+  /** Survey areas by exact symbol. A symbol missing from the result was renamed or dropped. */
+  async getSurveyAreas(symbols: readonly string[]): Promise<SurveyArea[]> {
+    if (symbols.length === 0) return [];
+    const rows = await this.query(
+      `SELECT areasymbol, areaname FROM sacatalog WHERE areasymbol IN (${symbols.map(literal).join(",")}) ORDER BY areasymbol`,
+    );
+    return rows.map((r) => ({ areaSymbol: requireString(r, "areasymbol"), areaName: requireString(r, "areaname") }));
+  }
+
   async listMapUnits(areaSymbol: string): Promise<MapUnit[]> {
     const rows = await this.query(
       `SELECT m.mukey, m.muname FROM legend l JOIN mapunit m ON m.lkey = l.lkey ` +
