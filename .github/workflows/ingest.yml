@@ -5,6 +5,11 @@ name: Run ingestion
 # Run it from the Actions tab: "Run ingestion" -> "Run workflow". No local
 # toolchain needed.
 #
+# Soil loads in slices. One Worker request is cut off at about 100 seconds and the
+# full load takes several minutes, so this workflow asks the Worker for the list of
+# survey areas, then calls it repeatedly for each, following the cursor it returns.
+# A failed slice is retried up to three times before the run gives up.
+#
 # The Worker runs on Cloudflare's network, so it can reach Oregon State's PRISM
 # files and the other upstream sources regardless of what any individual machine can.
 on:
@@ -29,29 +34,10 @@ jobs:
   ingest:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger the run
+      - name: Run the load
         run: |
           if [ -z "${INGEST_URL}" ] || [ -z "${RUN_TOKEN}" ]; then
             echo "::error::Set the INGEST_WORKER_URL and INGEST_RUN_TOKEN repository secrets first."
-            exit 1
-          fi
-
-          query=""
-          if [ "${JOB}" != "reference" ]; then query="?job=${JOB}"; fi
-
-          echo "Triggering ${INGEST_URL}/__run${query}"
-          code=$(curl -sS -o response.json -w '%{http_code}' --max-time 3000 \
-            -X POST "${INGEST_URL}/__run${query}" \
-            -H "Authorization: Bearer ${RUN_TOKEN}")
-
-          echo "HTTP ${code}"
-          cat response.json
-          echo
-
-          # A 404 here means the token did not match - the route hides itself
-          # rather than confirming it exists.
-          if [ "$code" != "200" ]; then
-            echo "::error::Ingestion did not run. A 404 usually means INGEST_RUN_TOKEN is wrong."
             exit 1
           fi
 
@@ -61,26 +47,108 @@ jobs:
           # all 67 ZIPs with an error, the frost job wrote its single row, the
           # total came to 1, and the run reported success.
           python3 - <<'PY'
-          import json, sys
+          import json, os, sys, urllib.error, urllib.request
 
-          results = json.load(open("response.json"))["results"]
-          failed = []
+          base = os.environ["INGEST_URL"].rstrip("/")
+          token = os.environ["RUN_TOKEN"]
+          job = os.environ["JOB"]
+          MAX_ATTEMPTS = 3
 
+
+          def call(query):
+              """POST to the Worker. Returns (status, parsed JSON or None, raw text)."""
+              request = urllib.request.Request(
+                  f"{base}/__run{query}",
+                  method="POST",
+                  headers={"Authorization": f"Bearer {token}", "User-Agent": "nativeplants-ingest-workflow"},
+              )
+              try:
+                  with urllib.request.urlopen(request, timeout=300) as response:
+                      status, text = response.status, response.read().decode()
+              except urllib.error.HTTPError as error:
+                  status, text = error.code, error.read().decode(errors="replace")
+              except Exception as error:  # timeouts, resets
+                  return 0, None, str(error)
+              try:
+                  return status, json.loads(text), text
+              except ValueError:
+                  return status, None, text
+
+
+          def fail_auth(status):
+              if status == 404:
+                  print("::error::Ingestion did not run. A 404 usually means INGEST_RUN_TOKEN is wrong.")
+                  sys.exit(1)
+
+
+          results = []
+          errors = []
+
+          if job == "soil":
+              status, body, text = call("?job=soil")
+              fail_auth(status)
+              if status != 200 or not body or "plan" not in body:
+                  print(f"::error::Could not get the soil plan: HTTP {status} {text[:300]}")
+                  sys.exit(1)
+              areas = body["plan"]
+              print(f"Soil plan: {' '.join(areas)}")
+
+              for area in areas:
+                  cursor, attempts = f"{area}:0", 0
+                  while cursor:
+                      status, body, text = call(f"?job=soil&cursor={cursor}")
+                      fail_auth(status)
+                      ok = status == 200 and body and body.get("results")
+                      progressed = ok and body.get("next") != cursor
+                      if not progressed:
+                          attempts += 1
+                          detail = ""
+                          if ok:
+                              detail = "; ".join(body["results"][0]["warnings"][:2])
+                          else:
+                              detail = f"HTTP {status} {text[:200]}"
+                          print(f"  {cursor}: attempt {attempts} failed: {detail}")
+                          if attempts >= MAX_ATTEMPTS:
+                              errors.append(f"{area} stopped at {cursor}")
+                              break
+                          continue
+                      attempts = 0
+                      results.extend(body["results"])
+                      for w in body["results"][0]["warnings"]:
+                          print(f"  {w}")
+                      cursor = body["next"]
+          else:
+              query = "" if job == "reference" else f"?job={job}"
+              status, body, text = call(query)
+              print(f"HTTP {status}")
+              fail_auth(status)
+              if status != 200 or not body:
+                  print(text[:500])
+                  print("::error::Ingestion did not run.")
+                  sys.exit(1)
+              results = body["results"]
+
+          totals = {}
           for r in results:
-              written, skipped = r["rowsWritten"], r["rowsSkipped"]
-              print(f"{r['job']}: {written} written, {skipped} skipped")
-              for w in r["warnings"][:40]:
-                  print(f"    warning: {w}")
-              if len(r["warnings"]) > 40:
-                  print(f"    ... and {len(r['warnings']) - 40} more")
-              if written == 0:
-                  failed.append(r["job"])
+              t = totals.setdefault(r["job"], {"written": 0, "skipped": 0, "warnings": []})
+              t["written"] += r["rowsWritten"]
+              t["skipped"] += r["rowsSkipped"]
+              t["warnings"] += r["warnings"]
+
+          failed = list(errors)
+          for name, t in totals.items():
+              print(f"{name}: {t['written']} written, {t['skipped']} skipped")
+              if name != "soil":
+                  for w in t["warnings"][:40]:
+                      print(f"    warning: {w}")
+                  if len(t["warnings"]) > 40:
+                      print(f"    ... and {len(t['warnings']) - 40} more")
+              if t["written"] == 0:
+                  failed.append(f"{name} wrote zero rows")
 
           if failed:
-              print(f"::error::These jobs wrote zero rows: {', '.join(failed)}")
+              print(f"::error::{'; '.join(failed)}")
               sys.exit(1)
-
-          print("Every job wrote at least one row.")
           PY
         env:
           INGEST_URL: ${{ secrets.INGEST_WORKER_URL }}
