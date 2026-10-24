@@ -1,0 +1,19 @@
+<!-- @dsCard group="Layout" height=320 width=1312 subtitle="Cream, green, gold and clay fills" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../fonts.css"><link rel="stylesheet" href="../../tokens.css"><style>html,body{margin:0;background:var(--cream);color:var(--ink)}
+*{box-sizing:border-box}
+h2,h3,p{margin:0}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:var(--layout-row);gap:var(--layout-gutter);width:var(--layout-content-width);padding:var(--space-32) 0}
+.tile{padding:var(--space-32);border:var(--border-1) solid var(--line);border-radius:var(--radius-lg);background:var(--cream);color:var(--ink);display:flex;flex-direction:column;gap:var(--space-8);overflow:hidden}
+.tile.green{background:var(--green);color:var(--on-green)}
+.tile.gold{background:var(--gold);color:var(--on-gold)}
+.tile.clay{background:var(--clay);color:var(--on-clay)}
+.tile .media{margin-top:auto;border:var(--border-1) solid currentColor;border-radius:var(--radius-md);height:var(--space-40);opacity:var(--opacity-muted)}
+.tile .light{color:var(--gold-light)}
+.note{color:var(--ink);opacity:var(--opacity-muted);align-self:center}
+.grid{grid-auto-rows:240px}</style></head><body>
+<div class="grid">
+<div class="tile " style="grid-column:span 3"><h3 class="heading-h5">Cream</h3><p class="text-regular">Default. Ink text on cream.</p><div class=media></div></div>
+<div class="tile green" style="grid-column:span 3"><h3 class="heading-h5">Green</h3><p class="text-regular">Cream text on green.</p><div class=media></div></div>
+<div class="tile gold" style="grid-column:span 3"><h3 class="heading-h5">Gold</h3><p class="text-regular">Ink text on gold.</p><div class=media></div></div>
+<div class="tile clay" style="grid-column:span 3"><h3 class="heading-h5">Clay</h3><p class="text-regular">Cream text on clay.</p><div class=media></div></div>
+</div></body></html>

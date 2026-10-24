@@ -205,50 +205,49 @@ These are the ones a generic design system would not have.
   One glance answers "will this work here?"
 - **Soil horizon column.** As described above.
 - **Frost probability band.** As described above.
-- **Plant card.** Common name in the display face. Scientific name in monospace
-  italic. A headline reason, the reasons behind it, tags, and a toxicity band
+- **Plant card.** Common name in the display face. Scientific name in
+  monospace italic. A headline reason, the reasons behind it, tags, and a toxicity band
   when one applies.
 
-## 9. Visual language (already started)
+## 9. Visual language
 
-All values below exist as design tokens in `packages/ui/src/tokens.css`, with a
-matching dark theme.
+The visual language is the **Nativo design system**. The full rules are in
+`design/nativo/README.md`, and every value is a token in
+`design/nativo/tokens.css`.
 
-**Mood.** A botanical reference book crossed with a field spec sheet.
-Restrained, calm and exact.
+**Mood.** Earthy and grounded, like an open field with a vineyard's solid rows.
+Spacious and clearly structured. Flat: no shadows, no gradients, no pure white.
 
-**Colour: three palettes, each with one job.**
+**Colour.** Cream ground, ink text. Green leads (headers, primary buttons).
+Gold is the warm accent, one call-out per view. Clay is for emphasis, errors and
+warnings. No other hues.
 
-- **Ground, ink and accent.** Neutrals with a slight green tint. The accent is a
-  chicory blue (`#2E5C7A`), chosen because it matches the alkaline end of a soil
-  pH strip and the flower that thrives in that soil. It is deliberately not the
-  obvious garden green.
-- **Confidence.** Green for measured (`#4A7C3F`), amber for survey estimate
-  (`#8A6D1F`), brown for modelled (`#8A5A3C`). Kept completely separate from the
-  accent. Do not reuse them for emphasis.
+- **Confidence.** Green for measured, gold for survey estimate, clay for
+  modelled. Always shown with the written label. Low confidence also gets a
+  dashed border.
 - **Soil horizon ramp.** Six browns, dark at the surface to pale at depth,
   matched to real depth bands (0–5, 5–15, 15–30, 30–60, 60–100, 100–200 cm).
   **This ramp is data, not decoration.** Never use it for anything else.
 - **Alert.** A single red-brown (`#9C3D26`) reserved for toxicity and invasive
   species warnings. Never for emphasis.
 
-**Type.**
+**Type.** Anta for titles and sub-titles (one weight, never bold). Anaheim for
+body copy. IBM Plex Mono for every measured value, always with tabular figures. Mono
+signals "this is a measurement". It is why a plant's scientific name is mono
+italic and its common name is not.
 
-- **Fraunces** for display. It reads like 19th-century botanical plate printing.
-- **IBM Plex Sans** for the interface.
-- **IBM Plex Mono** for every measured value, always with tabular figures. Mono
-  signals "this is a measurement". It is why a plant's scientific name is mono
-  and its common name is not.
-- Scale: 1.25 ratio, from 12px up to 48px.
+**Shape and space.** Plain 1px ink outlines on every tile, card and input.
+Tiles round at 16px, buttons and badges at 8px. Spacing steps of 4 to 64px on a
+12-column bento grid.
 
-**Shape and space.** A 4px spacing base. Corners are small (2, 3 and 6px) on
-purpose. Border, fill, radius and shadow each say "separate object", so using
-all of them on every block flattens the hierarchy.
+**Illustration.** Tree, branch, grass and leaf drawings in `design/nativo/assets/`,
+in green or cream.
 
-**Motion.** Short and quiet: 160ms with a gentle ease.
+**Product additions.** The mono face, the dashed low-confidence border, the
+alert colour and the soil ramp are the only exceptions to Nativo's rules. They
+live in `packages/ui/src/tokens.css`, which loads after Nativo's files.
 
-**Themes.** Light and dark. Every colour is defined in the base theme first, so
-the page is readable before any theme choice is made.
+**Themes.** Light only for now.
 
 ## 10. Tone of voice
 
@@ -266,7 +265,7 @@ entry point.
 
 **Decided**
 
-- Colour, type and spacing tokens (above)
+- The Nativo design system for colour, type, shape and spacing, plus the product additions (mono values, dashed low confidence, alert colour, soil ramp)
 - The principles in section 4
 - The seven screens and their order
 - The five signature components
@@ -274,7 +273,8 @@ entry point.
 
 **Open: please propose options**
 
-- Name, logo and wordmark
+- Logo and wordmark (Nativo has none yet)
+- Dark theme (light only for now)
 - The look of plant photography (crop, ratio and background). This needs
   settling before plants are photographed or licensed.
 - Map and pin styling for the address confirm screen
@@ -287,7 +287,7 @@ entry point.
 
 - **Phone first.** Most use is in the yard.
 - **Accessibility.** Tap targets of 44px or more, meaning never carried by
-  colour alone, and readable contrast in both themes.
+  colour alone, and readable contrast.
 - **Privacy.** We collect home addresses. Say so plainly and keep it minimal.
   There is no photo upload in the first release, so no upload control.
 - **Honesty about data.** If a value is missing or low confidence, show that
@@ -308,6 +308,7 @@ plausible placeholder content for those, and mark it as such.
 
 Longer background, if needed:
 
-- `docs/design-system.md` for the reasoning behind the visual language
+- `docs/design-system.md` for the principles, signature components and product additions
+- `design/nativo/README.md` for the visual rules
 - `docs/v1-spec.md` for the full specification
 - `docs/scope.md` for the authoritative in-scope and out-of-scope list
