@@ -49,7 +49,11 @@ jobs:
           python3 - <<'PY'
           import json, os, sys, urllib.error, urllib.request
 
-          base = os.environ["INGEST_URL"].rstrip("/")
+          # The secret may be stored as a bare host ("name.account.workers.dev"). curl
+          # assumed a scheme for us; urllib does not, so add https:// when it is missing.
+          base = os.environ["INGEST_URL"].strip().rstrip("/")
+          if not base.startswith(("http://", "https://")):
+              base = "https://" + base
           token = os.environ["RUN_TOKEN"]
           job = os.environ["JOB"]
           MAX_ATTEMPTS = 3
