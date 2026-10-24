@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { SoilDataAccessClient, dominantComponents, normalizeDrainageClass, parseSdaTable } from "./soil";
+import {
+  GEOMETRY_SIMPLIFY_DEGREES,
+  SoilDataAccessClient,
+  dominantComponents,
+  normalizeDrainageClass,
+  parseSdaTable,
+} from "./soil";
 import { SourceShapeError } from "./types";
 
 /**
@@ -108,6 +114,29 @@ describe("SoilDataAccessClient", () => {
     expect(await new SoilDataAccessClient(fake).fetchSoilForUnits(["1", "2"])).toEqual([]);
     expect(sent).toContain("m.mukey IN ('1','2')");
     expect(await new SoilDataAccessClient(fake).fetchSoilForUnits([])).toEqual([]);
+  });
+
+  it("simplifies geometry in the query and drops units that reduce to nothing", async () => {
+    let sent = "";
+    const fake = (async (_u: RequestInfo | URL, init?: RequestInit) => {
+      sent = JSON.parse(String(init?.body)).query;
+      return new Response(
+        JSON.stringify({
+          Table: [
+            ["mukey", "wkt"],
+            ["1", "MULTIPOLYGON (((0 0, 1 0, 1 1, 0 0)))"],
+            ["2", "POLYGON ((0 0, 1 0, 1 1, 0 0))"],
+            ["3", "GEOMETRYCOLLECTION EMPTY"],
+            ["4", null],
+          ],
+        }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const geometries = await new SoilDataAccessClient(fake).fetchGeometries(["1", "2", "3", "4"]);
+    expect(sent).toContain(`.Reduce(${GEOMETRY_SIMPLIFY_DEGREES})`);
+    expect(geometries.map((g) => g.mukey)).toEqual(["1", "2"]);
   });
 
   it("throws on a non-200 response", async () => {

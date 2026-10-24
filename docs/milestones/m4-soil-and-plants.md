@@ -84,6 +84,12 @@ Things most likely to need adjusting after the first run:
   at about 100 seconds. The soil load now runs in slices of about a minute, and
   the workflow follows a cursor until each survey area is done, retrying a failed
   slice up to three times.
+- **Memory.** Hit on the third load (Cloudflare error 1102, "exceeded resource
+  limits"): batches of 25 mountain and forest map units, whose outlines run to
+  tens of megabytes, were too much for a Worker. Batches are now 10 units, outlines
+  are simplified by about 3 m at the source (well inside the survey's own
+  accuracy), and a failed slice is retried with 5, then 2, then 1 unit per batch.
+  The survey area keeps the size that worked.
 - **Shape size.** Shapes are stored unsimplified. If the table is slow, simplify
   on load.
 

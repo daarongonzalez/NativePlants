@@ -14,6 +14,15 @@ import { SourceShapeError } from "./types";
 
 const ENDPOINT = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest";
 
+/**
+ * How far, in degrees, map unit outlines are simplified before they leave the
+ * service. 0.00003 degrees is about 3 m. Survey outlines are drawn at roughly
+ * 1:24,000, where the pen width alone is about 12 m, so nothing real is lost,
+ * and the payload for mountain and forest units (which can run to tens of
+ * megabytes per batch) drops enough for a Worker to hold in memory.
+ */
+export const GEOMETRY_SIMPLIFY_DEGREES = 0.00003;
+
 /** Wrapped, not bare — see the note in geocode.ts on Illegal invocation. */
 const defaultFetch: typeof fetch = (...args) => fetch(...args);
 
@@ -230,7 +239,7 @@ export class SoilDataAccessClient {
   }
 
   /**
-   * One merged geometry per map unit. A map unit usually has many polygons
+   * One merged, simplified geometry per map unit. A map unit usually has many polygons
    * across the survey area; our table keeps one row per unit, so they are
    * unioned here rather than stored separately.
    */
@@ -238,11 +247,13 @@ export class SoilDataAccessClient {
     if (mukeys.length === 0) return [];
     const list = mukeys.map(literal).join(",");
     const rows = await this.query(
-      `SELECT mukey, geometry::UnionAggregate(mupolygongeo).STAsText() AS wkt ` +
+      `SELECT mukey, geometry::UnionAggregate(mupolygongeo).Reduce(${GEOMETRY_SIMPLIFY_DEGREES}).STAsText() AS wkt ` +
         `FROM mupolygon WHERE mukey IN (${list}) GROUP BY mukey`,
     );
+    // A unit smaller than the simplification can reduce to an empty collection;
+    // that is no shape at all, so it is dropped rather than stored.
     return rows
-      .filter((r) => r["wkt"])
+      .filter((r) => /^(MULTI)?POLYGON/.test(r["wkt"] ?? ""))
       .map((r) => ({ mukey: requireString(r, "mukey"), wkt: requireString(r, "wkt") }));
   }
 
