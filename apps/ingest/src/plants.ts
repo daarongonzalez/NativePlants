@@ -1,4 +1,4 @@
-import { createDatabase, recordProvenance, schema } from "@np/db";
+import { createDatabase, recordProvenance, upsertPlants } from "@np/db";
 import { parsePlantCsv } from "@np/shared";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 
@@ -35,21 +35,15 @@ export class PlantImportJob implements IngestJob {
     const db = createDatabase(env.HYPERDRIVE.connectionString);
     const retrievedAt = new Date();
 
-    for (const p of plants) {
-      const values = { ...p, market: env.MARKET, curatedAt: retrievedAt };
-      const row = await db
-        .insert(schema.plants)
-        .values(values)
-        .onConflictDoUpdate({
-          target: [schema.plants.scientificName, schema.plants.market],
-          set: values,
-        })
-        .returning({ id: schema.plants.id });
+    const written = await upsertPlants(db, env.MARKET, plants, retrievedAt);
+    const byName = new Map(plants.map((p) => [p.scientificName, p]));
 
+    for (const { id, scientificName } of written) {
+      const p = byName.get(scientificName)!;
       await recordProvenance(db, [
         {
           tableName: "plants",
-          recordId: row[0]!.id,
+          recordId: id,
           source: "curated",
           citation: `Curated by ${p.curatedBy || "unassigned"}; review status ${p.reviewStatus}. Source: data/plants/wasatch-plants.csv`,
           retrievedAt,
