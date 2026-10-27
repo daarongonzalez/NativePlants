@@ -1,4 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
+import type { PlantRow } from "@np/shared";
 import type { Database } from "./client";
 import type { Owner } from "./repositories";
 import {
@@ -6,6 +7,7 @@ import {
   dataProvenance,
   frostNorms,
   hardinessZones,
+  plants,
   siteProfiles,
   sites,
   soilMapUnits,
@@ -239,4 +241,30 @@ export async function findSoilAtPoint(
 export async function getFrostNorms(db: Database, stationId: string) {
   const rows = await db.select().from(frostNorms).where(eq(frostNorms.stationId, stationId)).limit(1);
   return rows[0] ?? null;
+}
+
+/**
+ * Insert or update curated plants for a market, keyed on scientific name.
+ *
+ * A re-import of the same sheet updates rows in place rather than adding
+ * duplicates, and returns each plant's id so the caller can record provenance.
+ * Called by the plant import job, never by a request.
+ */
+export async function upsertPlants(
+  db: Database,
+  market: string,
+  rows: readonly PlantRow[],
+  curatedAt: Date,
+): Promise<{ id: string; scientificName: string }[]> {
+  const written: { id: string; scientificName: string }[] = [];
+  for (const row of rows) {
+    const values = { ...row, market, curatedAt };
+    const result = await db
+      .insert(plants)
+      .values(values)
+      .onConflictDoUpdate({ target: [plants.scientificName, plants.market], set: values })
+      .returning({ id: plants.id, scientificName: plants.scientificName });
+    written.push(result[0]!);
+  }
+  return written;
 }

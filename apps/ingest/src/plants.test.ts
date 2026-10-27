@@ -126,6 +126,25 @@ describe("the committed plant sheet", () => {
     expect(parsePlantCsv(text).errors).toEqual([]);
   });
 
+  it("has a row for every candidate species", () => {
+    const candidates = readFileSync(new URL("../../../data/plants/candidates.csv", import.meta.url), "utf8")
+      .split("\n")
+      .slice(1)
+      .filter((l) => l.trim() !== "")
+      .map((l) => l.split(",")[0]);
+    const inSheet = new Set(parsePlantCsv(text).plants.map((p) => p.scientificName));
+    expect(candidates.filter((c) => !inSheet.has(c!))).toEqual([]);
+  });
+
+  it("never publishes a row that is still marked as a Claude draft", () => {
+    // A draft value is a starting point for the reviewer. Changing the status
+    // without replacing the curator's name would put unreviewed numbers in front
+    // of gardeners under a label that says so.
+    for (const p of parsePlantCsv(text).plants) {
+      if (p.curatedBy.startsWith("Claude draft")) expect(p.reviewStatus).toBe("draft");
+    }
+  });
+
   it("is never published without a named curator", () => {
     for (const p of parsePlantCsv(text).plants) {
       if (p.reviewStatus === "published") expect(p.curatedBy).not.toBe("");

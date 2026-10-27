@@ -10,13 +10,18 @@ import {
   getFrostNorms,
   lookupZoneByZip,
   recordProvenance,
+  upsertPlants,
 } from "./resolve-repo";
+import { listPublishedPlants } from "./repositories";
+import { toDomainPlant } from "./mappers";
+import { parsePlantCsv, plantSchema, PLANT_CSV_COLUMNS } from "@np/shared";
 import { multiPolygonFromWkt } from "./geometry";
 import {
   climateStations,
   dataProvenance,
   frostNorms,
   hardinessZones,
+  plants,
   soilMapUnits,
   soilProperties,
   users,
@@ -265,6 +270,47 @@ describeIfDb("resolve data layer", () => {
         await db.delete(soilProperties).where(eq(soilProperties.mukey, key));
         await db.delete(soilMapUnits).where(eq(soilMapUnits.mukey, key));
       }
+    }
+  });
+
+  it("imports plants from sheet text, serves only published ones, and updates rather than duplicates", async () => {
+    const market = `test-market-${Date.now()}`;
+    const row = (name: string, status: string) =>
+      [
+        name, "Test plant|Sample", "Testaceae", "6.0", "7.0", "8.0", "6", "24", "low",
+        "well_drained|moderately_well_drained", "4b", "8a", "60", "45", "5", "7", "native",
+        "yes", "high", "no", "yes", "", "A. Reviewer", status,
+      ].join(",");
+    const sheet = (...rows: string[]) => [PLANT_CSV_COLUMNS.join(","), ...rows].join("\n");
+
+    const first = parsePlantCsv(sheet(row("Testus publishedus", "published"), row("Testus draftus", "draft")));
+    expect(first.errors).toEqual([]);
+
+    try {
+      await upsertPlants(db, market, first.plants, new Date());
+      const served = await listPublishedPlants(db, market);
+      expect(served.map((p) => p.scientificName)).toEqual(["Testus publishedus"]);
+
+      // The stored row must satisfy the same schema the engine and API rely on.
+      const stored = await db.select().from(plants).where(eq(plants.market, market));
+      expect(stored).toHaveLength(2);
+      for (const r of stored) expect(() => plantSchema.parse(toDomainPlant(r))).not.toThrow();
+      expect(toDomainPlant(stored.find((r) => r.scientificName === "Testus publishedus")!)).toMatchObject({
+        sun: { minHours: 6, maxHours: 24 },
+        zoneMinOrdinal: 42,
+        zoneMaxOrdinal: 81,
+        drainageTolerated: ["well_drained", "moderately_well_drained"],
+        commonNames: ["Test plant", "Sample"],
+      });
+
+      // Importing the same sheet again, with one change, updates in place.
+      const second = parsePlantCsv(sheet(row("Testus publishedus", "published").replace(",6.0,7.0,8.0,", ",6.5,7.0,8.0,"), row("Testus draftus", "draft")));
+      await upsertPlants(db, market, second.plants, new Date());
+      const after = await db.select().from(plants).where(eq(plants.market, market));
+      expect(after).toHaveLength(2);
+      expect(after.find((r) => r.scientificName === "Testus publishedus")?.phMin).toBe(6.5);
+    } finally {
+      await db.delete(plants).where(eq(plants.market, market));
     }
   });
 });

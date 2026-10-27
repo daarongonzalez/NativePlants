@@ -1,6 +1,6 @@
 # M4 and M6 start: soil and the plant list
 
-Status: code written, not yet run against real data. October 2026.
+Status: soil loaded and checked on the dev database; plant path tested, plant sheet empty. 26 October 2026.
 
 ## What was built
 
@@ -36,62 +36,77 @@ placeholder confidence for every field. It now uses what was recorded when the
 profile was resolved, and says which fields are missing when the profile is
 incomplete.
 
-## First soil load, 24 October 2026 (dev branch)
+## Soil load, 24 October 2026 (dev branch)
 
-| Survey area | Map units | With soil layers |
+Nine survey areas, loaded by symbol in slices. Every area has its source citation.
+
+| Survey area | Map units | With soil layers | Soil layers |
+|---|---|---|---|
+| UT607 Davis-Weber | 178 | 156 | 763 |
+| UT608 Fairfield-Nephi (Cedar Valley) | 224 | 200 | 1,172 |
+| UT609 Morgan (incl. Ogden Valley) | 146 | 143 | 594 |
+| UT611 Tooele (part of Davis County) | 89 | 83 | 273 |
+| UT612 Salt Lake | 150 | 132 | 687 |
+| UT613 Summit (part of Salt Lake County) | 84 | 78 | 438 |
+| UT621 Utah County, Central | 143 | 139 | 674 |
+| UT622 Heber Valley (part of Utah County) | 151 | 147 | 668 |
+| UT627 Sanpete Valley (part of Utah County) | 194 | 188 | 784 |
+| **Total** | **1,359** | **1,266** | **6,053** |
+
+No invalid or empty shapes. About 50 MB of outlines. Average topsoil pH on the
+first three areas was 7.9, as expected for the Wasatch Front.
+
+**Spot checks.** 20 places across the four counties, all inside a map unit,
+including Eden and Huntsville (Ogden Valley), Eagle Mountain, Payson, Santaquin,
+Alpine, Emigration Canyon and Cottonwood Heights, each with measured layers.
+Downtown Salt Lake City, Ogden, Bountiful and Provo fall in "Urban land", which
+the survey does not measure, so those addresses get the "soil test
+recommended" message. Roughly a tenth of units are like this. A point on the
+Utah Lake shore (Saratoga Springs) fell in "Water".
+
+### What went wrong on the way, and the fixes
+
+| Load | Problem | Fix |
 |---|---|---|
-| UT607 Davis-Weber Area | 178 | 156 |
-| UT612 Salt Lake Area | 150 | 132 |
-| UT621 Utah County, Central Part | 143 | 139 |
+| First | 6 of 471 outlines were self-intersecting | Repaired as they are written |
+| First | Ogden Valley (Eden) in no loaded area; the name search found three | Load by area symbol (nine) |
+| Second | HTTP 502 after about 100 seconds: one request cannot run that long | Load in slices of about a minute, following a cursor |
+| Second | The workflow failed instantly on a URL stored without `https://` | The workflow adds the scheme |
+| Third | Cloudflare error 1102 (out of memory) on mountain and forest areas, whose outlines run to tens of megabytes per batch | 10 units per batch, outlines simplified by about 3 m at the source, retries with 5, 2, then 1 unit; the area keeps the size that worked |
 
-2,124 soil layers loaded. Average topsoil pH is 7.9, which is right for the
-Wasatch Front, and every unit that has layers has a drainage class. One
-provenance row per survey area.
+## Plant path, tested
 
-Spot checks of 18 places across the four counties: 17 landed in a map unit.
-Findings:
+The importer's database write had never been tested, only the sheet parsing. Two
+tests now cover it:
 
-- **Self-intersecting outlines.** 6 of 471 shapes were invalid, and they are
-  common valley soils (Chipman, Taylorsville). They were repaired on dev, and
-  the load now repairs every shape as it goes.
-- **Urban land.** Downtown Salt Lake City, Ogden, Bountiful and Provo fall in
-  "Urban land", which the survey does not measure. Those addresses get the
-  honest "soil test recommended" message rather than a number. Roughly a tenth
-  of units are like this.
-- **Coverage gap.** Eden, in Ogden Valley, was in no loaded survey area. The name
-  search found only three areas. The live check's list of every Utah survey
-  area showed six more that cover parts of our counties (UT608, UT609, UT611,
-  UT613, UT622, UT627; UT609 is the Morgan Area, which includes Ogden Valley).
-  The job now loads nine areas by symbol rather than searching by name.
+- **Database test** (runs in CI on PostGIS): sheet text goes in, one draft and
+  one published plant are stored, only the published one is served, every stored
+  row passes the same schema the API uses, and importing the sheet again with one
+  change updates in place rather than duplicating.
+- **Engine test**: sheet text goes through the importer's parser and into the
+  scoring engine. An acid-loving shade plant is ruled out with the right reason, a
+  sun lover outranks a part-shade plant on an unshaded yard, and the part-shade
+  plant moves to first once the gardener says the spot gets part sun.
 
-## Verified and not verified
+The plants in those tests are invented to exercise the rules and are not
+horticultural claims. The real sheet is still empty, so running **Run ingestion**
+with `plants` today reports "no rows yet" and fails on purpose. That confirms the
+route and the token work, nothing more.
 
-The build environment cannot reach the soil service, so the first real
-response is the first test of the field names, exactly as with Census and USGS.
+## Still to verify
 
-1. Run **Live source check**. It now includes three soil checks and prints the
-   raw responses, including which survey areas the name search finds.
-2. Merge, run **Deploy**, then **Run ingestion** with `soil`. Read the output:
-   it lists the survey areas it found, and any map units that had no shapes.
-3. Spot-check three addresses by hand against the
-   [Web Soil Survey](https://websoilsurvey.nrcs.usda.gov/).
-
-Things most likely to need adjusting after the first run:
-
-- **Survey area names.** The job finds areas by name prefix (Salt Lake, Utah
-  County, Davis, Weber). If a name differs, the output shows what was found.
-- **Time and size.** Hit on the second load: a single Worker request is cut off
-  at about 100 seconds. The soil load now runs in slices of about a minute, and
-  the workflow follows a cursor until each survey area is done, retrying a failed
-  slice up to three times.
-- **Memory.** Hit on the third load (Cloudflare error 1102, "exceeded resource
-  limits"): batches of 25 mountain and forest map units, whose outlines run to
-  tens of megabytes, were too much for a Worker. Batches are now 10 units, outlines
-  are simplified by about 3 m at the source (well inside the survey's own
-  accuracy), and a failed slice is retried with 5, then 2, then 1 unit per batch.
-  The survey area keeps the size that worked.
-- **Shape size.** Shapes are stored unsimplified. If the table is slow, simplify
-  on load.
+- **Against the Web Soil Survey.** The loaded values match the service we read
+  from, but nobody has compared three real addresses with the
+  [Web Soil Survey](https://websoilsurvey.nrcs.usda.gov/) by hand. Worth doing
+  once, with an address whose soil the gardener already knows.
+- **Simplified outlines.** Shapes are simplified by about 3 m. A spot check near a
+  boundary between two soil types would confirm that is invisible in practice.
+- **End to end through the deployed API.** Nobody has resolved a real address
+  through the live Workers, because that needs sign-in. It happens with the web
+  app.
+- **Production.** The schema is there, the data is not. The Hyperdrive config
+  still points at dev. Before launch: point it at production and run reference,
+  `soil` and `plants` loads there.
 
 ## Frost dates and sun hours
 

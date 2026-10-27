@@ -75,6 +75,11 @@ In rough order of importance:
 Your name goes in `curated_by` for every row you take responsibility for. Rows
 you have not signed off on stay `draft` and are never shown to gardeners.
 
+## Draft values
+
+The 33 candidate species are in the sheet with draft values from Claude. See
+[Draft plant values](plant-draft-review.md) for what to check first.
+
 ## Where to start
 
 `data/plants/candidates.csv` lists 33 species to consider. They are suggestions
