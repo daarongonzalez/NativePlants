@@ -1,3 +1,5 @@
+> **Retired, October 2026.** This component belongs to Nativo version 1. Do not use it for new work. Use Window, Card or StickyNote instead, and the layout rules in `design/nativo/README.md`.
+
 BentoTile is the outlined container for one idea inside a BentoGrid.
 
 **You provide:** a title, optional supporting text, optional media (image, number or list) and a fill: `cream` (default), `green`, `gold` or `clay`.

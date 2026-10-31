@@ -24,6 +24,14 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "workerd"
-    ]
+    ],
+    "overrides": {
+      "@cloudflare/workers-types": "^4.20241230.0"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "wrangler>@cloudflare/workers-types": "4"
+      }
+    }
   }
 }

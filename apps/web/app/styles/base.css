@@ -1,0 +1,81 @@
+/* Page-wide defaults for the playful direction. Tokens only. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--type-body-sm);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+  background: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: var(--underline-offset);
+}
+
+a:hover {
+  color: var(--clay);
+}
+
+:focus-visible {
+  outline: var(--border-2) solid var(--line);
+  outline-offset: var(--space-2);
+}
+
+.error-page {
+  max-width: var(--size-measure);
+  margin: 0 auto;
+  padding: var(--space-96) var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.error-page h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-h2);
+  line-height: 1;
+}
