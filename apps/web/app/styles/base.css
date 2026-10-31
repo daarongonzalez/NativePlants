@@ -74,7 +74,7 @@ a:hover {
 }
 
 .error-page h1 {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-h2);
   line-height: 1;

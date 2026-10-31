@@ -1,19 +1,18 @@
 /*
- * Nativo, playful direction (landing page 2a, October 2026).
+ * Nativo version 2: the house style (set by the landing page, October 2026).
  *
  * Load order: design/nativo/fonts.css, design/nativo/tokens.css,
  * packages/ui/src/tokens.css, then this file.
  *
- * This direction departs from the Nativo base on purpose: a chunky display
- * face, rounded corners, hard offset shadows, 2px outlines and a wider set of
- * light background colours. docs/design-system.md records each departure and
- * why. Components still use tokens only: no raw hex, pixel sizes or font names.
+ * design/nativo/tokens.css holds the core palette, base spacing and the type
+ * families. This file holds everything else the style needs: the light
+ * colours, radii, hard shadows, tilt, extra spacing, fixed sizes and the
+ * responsive type roles. design/nativo/README.md says how to use each one.
+ * Components use tokens only: no raw hex, pixel sizes or font names.
  *
  * Type sizes and page spacing are set per breakpoint here, so a component
  * names a role (var(--type-h1)) and gets the right size on phone and desktop.
  */
-
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&display=swap');
 
 :root {
   /* ---- Colour ------------------------------------------------------------ */
@@ -42,9 +41,6 @@
 
   /* Placeholder hatch for art that has not been drawn yet (Sage). */
   --placeholder-hatch: color-mix(in srgb, var(--green) 14%, transparent);
-
-  /* ---- Type families ----------------------------------------------------- */
-  --font-display-playful: "Bricolage Grotesque", var(--font-body);
 
   /* ---- Radius ------------------------------------------------------------ */
   --radius-pill: 999px;

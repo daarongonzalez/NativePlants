@@ -73,7 +73,7 @@
 .lp-wordmark,
 .lp-button,
 .lp-badge {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
 }
 
@@ -383,7 +383,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-footnote);
 }
@@ -456,7 +456,7 @@
   font-size: var(--type-caption);
 }
 .lp-stat__value {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-stat);
   line-height: 1.1;
@@ -698,7 +698,7 @@
   line-height: 1.4;
 }
 .lp-sage__name {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-caption);
   color: var(--green-deep);
@@ -815,7 +815,7 @@
   font-size: var(--type-caption);
 }
 .lp-planner__common {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-body-lg);
   line-height: 1.2;
@@ -972,7 +972,7 @@
   gap: var(--space-16);
 }
 .lp-price {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-price);
   line-height: 1;
@@ -1064,7 +1064,7 @@
   transform: var(--tilt-left-sm);
 }
 .lp-fact__figure {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-figure);
   line-height: 1;
@@ -1246,12 +1246,12 @@
 .lp-calc__size {
   min-width: var(--size-readout);
   text-align: center;
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-stat);
 }
 .lp-calc__total {
-  font-family: var(--font-display-playful);
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: var(--type-figure-total);
   line-height: 1;

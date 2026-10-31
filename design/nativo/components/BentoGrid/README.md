@@ -1,3 +1,5 @@
+> **Retired, October 2026.** This component belongs to Nativo version 1. Do not use it for new work. Use Window, Card or StickyNote instead, and the layout rules in `design/nativo/README.md`.
+
 BentoGrid is the 12-column frame that holds every tile on a Nativo page.
 
 **You provide:** the tiles as direct children, each with a column span (4, 5, 6, 7, 8 or 12) and, if taller than one row, a row span of 2.
