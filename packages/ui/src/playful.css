@@ -1,0 +1,203 @@
+/*
+ * Nativo, playful direction (landing page 2a, October 2026).
+ *
+ * Load order: design/nativo/fonts.css, design/nativo/tokens.css,
+ * packages/ui/src/tokens.css, then this file.
+ *
+ * This direction departs from the Nativo base on purpose: a chunky display
+ * face, rounded corners, hard offset shadows, 2px outlines and a wider set of
+ * light background colours. docs/design-system.md records each departure and
+ * why. Components still use tokens only: no raw hex, pixel sizes or font names.
+ *
+ * Type sizes and page spacing are set per breakpoint here, so a component
+ * names a role (var(--type-h1)) and gets the right size on phone and desktop.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&display=swap');
+
+:root {
+  /* ---- Colour ------------------------------------------------------------ */
+  --paper: #fffaf0;        /* card and window surfaces, input fields */
+  --sand: #f1e6cf;         /* "Why a native yard" band, window title bars */
+  --green-deep: #1d4433;   /* headings on meadow, green-card title bar */
+  --meadow: #a9d18e;       /* "three answers" band, sticky notes */
+  --sky: #c4e3e8;          /* speech bubble, badges, sticky notes */
+  --peach: var(--gold-light); /* sticky notes */
+  --soil: #c9a77a;         /* plot planner grid background */
+  --on-paper: var(--ink);
+  --on-dark: var(--paper); /* text on green and green-deep surfaces */
+  --rule-on-dark: color-mix(in srgb, var(--paper) 35%, transparent);
+
+  /* Plot planner tiles: a two-tone lawn checkerboard and a dug-up tile. */
+  --lawn-light: #a3d07c;
+  --lawn-dark: #8fc268;
+  --lawn-planted: #ecd9b0;
+  --tile-edge: inset 0 -3px 0 color-mix(in srgb, var(--ink) 12%, transparent);
+
+  /* Sample seed colours. Data, not decoration: one per sample plant. */
+  --seed-penstemon: var(--clay);
+  --seed-globemallow: #e0843f;
+  --seed-buckwheat: var(--gold);
+  --seed-flax: #7c9bd6;
+
+  /* Placeholder hatch for art that has not been drawn yet (Sage). */
+  --placeholder-hatch: color-mix(in srgb, var(--green) 14%, transparent);
+
+  /* ---- Type families ----------------------------------------------------- */
+  --font-display-playful: "Bricolage Grotesque", var(--font-body);
+
+  /* ---- Radius ------------------------------------------------------------ */
+  --radius-pill: 999px;
+  --radius-window-lg: 32px;
+  --radius-window: 28px;
+  --radius-card: 24px;
+  --radius-note-lg: 20px;
+  --radius-seed: 18px;
+  --radius-note: 16px;
+  --radius-stat: 16px;
+  --radius-stat-sm: 14px;
+  --radius-tile: 10px;
+  --radius-round: 50%;
+
+  /* ---- Hard shadows (offset, no blur) ------------------------------------ */
+  --shadow-1: 1px 1px 0 var(--ink);
+  --shadow-2: 2px 2px 0 var(--ink);
+  --shadow-3: 3px 3px 0 var(--ink);
+  --shadow-4: 4px 4px 0 var(--ink);
+  --shadow-5: 5px 5px 0 var(--ink);
+  --shadow-6: 6px 6px 0 var(--ink);
+  --shadow-8: 8px 8px 0 var(--ink);
+  --press: translate(2px, 2px); /* a pressed button moves into its shadow */
+  --lift: translate(-2px, -2px);
+  --press-down: translateY(2px); /* the address button sits flush, so it only sinks */
+  --underline-offset: 3px;
+
+  /* ---- Tilt, for sticky notes and badges ---------------------------------- */
+  --tilt-left-lg: rotate(-3deg);
+  --tilt-left: rotate(-2deg);
+  --tilt-left-md: rotate(-1.5deg);
+  --tilt-left-sm: rotate(-1deg);
+  --tilt-left-xs: rotate(-0.5deg);
+  --tilt-right-xs: rotate(1deg);
+  --tilt-right-sm: rotate(1.5deg);
+  --tilt-right: rotate(2deg);
+
+  /* ---- Extra space steps (Nativo has 4, 8, 16, 24, 32, 40, 64) ----------- */
+  --space-2: 2px;
+  --space-6: 6px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-20: 20px;
+  --space-28: 28px;
+  --space-36: 36px;
+  --space-44: 44px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-72: 72px;
+  --space-80: 80px;
+  --space-88: 88px;
+  --space-96: 96px;
+  --space-104: 104px;
+  --space-112: 112px;
+
+  /* ---- Fixed sizes ------------------------------------------------------- */
+  --size-stem: 3px;
+  --hatch: 6px;
+  --size-dot-sm: 12px;
+  --size-dot: 14px;
+  --size-badge-num: 24px;
+  --size-flower: 20px;
+  --size-seed-dot: 22px;
+  --size-titlebar: 44px;
+  --size-titlebar-lg: 48px;
+  --size-nav-button: 46px;
+  --size-avatar: 56px;
+  --size-input: 58px;
+  --size-round-button: 60px;
+  --size-seed: 68px;
+  --size-grass-phone: 52px;
+  --size-readout: 170px;
+  --size-note: 300px;
+  --size-measure: 560px;
+  --size-measure-sm: 440px;
+  --size-form: 600px;
+  --size-form-closing: 640px;
+  --size-heading-measure: 640px;
+
+  /* ---- Responsive roles: desktop values (phone values below) ------------- */
+  --page-gutter: var(--space-64);
+  --section-pad: var(--space-96);
+  --grid-gap: var(--space-40);
+  --card-pad: var(--space-28);
+
+  --type-h1: clamp(54px, 6.667vw, 96px);
+  --type-h2: clamp(40px, 4.444vw, 64px);
+  --type-h2-closing: clamp(44px, 5.556vw, 80px);
+  --type-h2-window: 56px;
+  --type-h3: 30px;
+  --type-h3-card: 26px;
+  --type-figure: clamp(56px, 6.111vw, 88px);
+  --type-figure-total: 88px;
+  --type-price: 56px;
+  --type-price-unit: 22px;
+  --type-stat: 30px;
+  --type-stat-sm: 20px;
+  --type-wordmark: 30px;
+  --type-wordmark-footer: 22px;
+  --type-lead: 21px;
+  --type-body-lg: 18px;
+  --type-body: 17px;
+  --type-body-sm: 16px;
+  --type-button-lg: 19px;
+  --type-button: 17px;
+  --type-label: 15px;
+  --type-caption: 14px;
+  --type-footnote: 13px;
+  --type-mono: 14px;
+  --type-mono-sm: 12px;
+  --type-tiny: 10px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-gutter: var(--space-20);
+    --section-pad: var(--space-48);
+    --grid-gap: var(--space-16);
+    --card-pad: var(--space-20);
+
+    --type-h2-window: 34px;
+    --type-h3: 24px;
+    --type-h3-card: 22px;
+    --type-figure: 56px;
+    --type-figure-total: 64px;
+    --type-price: 40px;
+    --type-price-unit: 16px;
+    --type-stat: 22px;
+    --type-stat-sm: 16px;
+    --type-wordmark: 24px;
+    --type-wordmark-footer: 20px;
+    --type-lead: 18px;
+    --type-body-lg: 16px;
+    --type-body: 15px;
+    --type-body-sm: 15px;
+    --type-button-lg: 18px;
+    --type-button: 15px;
+    --type-label: 13px;
+    --type-caption: 13px;
+    --type-footnote: 12px;
+    --type-mono: 13px;
+    --type-mono-sm: 11px;
+    --type-tiny: 9px;
+
+    --size-avatar: 44px;
+    --size-input: 56px;
+    --size-round-button: 52px;
+    --size-seed: 64px;
+    --size-titlebar: 40px;
+    --size-titlebar-lg: 44px;
+    --size-nav-button: 44px;
+    --size-note: 250px;
+    --hatch: 5px;
+  }
+}

@@ -9,7 +9,9 @@ connect that plan to a local nursery that has the plants in stock.
 
 ## Status
 
-Early. Research and planning only, no application code yet.
+Early. The backend (API, data ingestion, recommendation engine) and the
+landing page are built. The landing page lives in `apps/web`; run it with
+`pnpm --filter @np/web dev`.
 
 ## Docs
 

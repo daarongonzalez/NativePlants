@@ -51,6 +51,40 @@ exceptions to Nativo's rules.
 - **Soil horizon ramp.** Six browns matched to the depth bands. The ramp is
   data, not decoration; use it for the soil column and nothing else.
 
+## Playful direction (landing page 2a, October 2026)
+
+The landing page design (handoff "2a Combined" and "2a Mobile") sets the look
+for the app going forward. It keeps Nativo's palette core, Anaheim body type,
+ink outlines and the illustrations, and departs from the base system in the
+ways below. The tokens live in `packages/ui/src/playful.css`, which loads
+after the other three stylesheets.
+
+- **Display font.** Bricolage Grotesque 800 replaces Anta for headings,
+  buttons, badges and figures. Never use it below 800.
+- **Rounded corners.** Cards 24px, windows 28–32px, sticky notes 16–20px, stat
+  boxes 16px. Buttons, inputs, badges and chips are pills.
+- **Hard offset shadows.** No blur, always ink: 4px on the nav, 5px on forms,
+  5–6px on cards, 8px on the two hero windows, 2–3px on small buttons. A
+  pressed button moves 2px into its shadow.
+- **2px outlines.** Every card, window, input, button and band edge uses
+  `border-2`. Dashed borders appear only on placeholder art (Sage) and the
+  calculator's divider.
+- **More light colours.** `paper` (cards and inputs, never pure white),
+  `sand`, `meadow`, `sky`, `peach` and `green-deep` for headings on meadow.
+  `soil`, the two lawn greens and the seed colours are for the plot planner
+  only.
+- **Tilt.** Sticky notes and the opening badge rotate between −3° and +2°.
+  Nothing else tilts.
+- **Window cards.** A card with a 44–48px title bar and a mono label, like a
+  file name. Use them for interactive tools and for the three answers.
+
+Type sizes and page spacing are role tokens (`--type-h1`, `--page-gutter`)
+that change at the 768px breakpoint, so components name a role rather than
+a size.
+
+Still to settle: Sage needs character art (a dashed placeholder for now), and
+the HOA law wording needs checking before launch.
+
 ## Signature components
 
 These are the ones no generic design system has, because they come from this
@@ -87,7 +121,8 @@ list, and it teaches someone what their ground is like.
 - Photography treatment. Plant images are a major asset and their crop, ratio
   and background handling should be settled before the first curation pass, not
   after.
-- Logo and wordmark. Nativo has none yet.
+- Logo. The playful direction sets the name "nativo" in Bricolage Grotesque
+  as a stand-in wordmark.
 - Dark theme. Nativo and these additions are light only.
 - Print and PDF styling for the saved plant list a gardener takes to a nursery.
 - Map and pin-drop styling for the address confirm screen.
