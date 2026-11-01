@@ -69,6 +69,26 @@ mode worth catching.
 After that it runs itself monthly on the cron trigger in
 `apps/ingest/wrangler.toml`.
 
+## Putting the web app on your domain
+
+The deploy workflow publishes the landing page as a Worker named
+`nativeplants-web`. Its first address is
+`https://nativeplants-web.<your-subdomain>.workers.dev`. To serve it on your
+own domain, once:
+
+1. Cloudflare dashboard → **Workers & Pages** → `nativeplants-web` →
+   **Settings** → **Domains & Routes** → **Add** → **Custom domain**.
+2. Type the domain (for example `example.com`) and confirm. Cloudflare creates
+   the DNS record and the certificate itself. The domain must already be a zone
+   in this Cloudflare account.
+3. If the domain already has a DNS record (an old site or a parked page),
+   Cloudflare asks you to remove it first. Delete it under **DNS** →
+   **Records**, then add the custom domain again.
+4. Optional: add `www.example.com` the same way, so both addresses work.
+
+The domain is attached in the dashboard rather than in `wrangler.toml`, so the
+deploy token needs no zone permissions. A later deploy keeps the domain.
+
 ## Checking the result
 
 Ask in a session, and the Neon connector reports row counts, coverage gaps and
