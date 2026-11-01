@@ -1,6 +1,6 @@
 name: Deploy
 
-# Deploys both Workers to Cloudflare. Exists so the project can be operated
+# Deploys the three Workers (API, ingest, web) to Cloudflare. Exists so the project can be operated
 # entirely from GitHub and the Cloudflare dashboard, with no local toolchain.
 on:
   push:
@@ -54,3 +54,17 @@ jobs:
             RUN_TOKEN
         env:
           RUN_TOKEN: ${{ secrets.INGEST_RUN_TOKEN }}
+
+      # The web app is a React Router build: build it first, then wrangler
+      # deploys the output (it finds it through .wrangler/deploy/config.json).
+      # Its domain is attached in the Cloudflare dashboard, not here, so this
+      # token needs no zone permissions. See docs/operating-without-local.md.
+      - name: Build web
+        run: pnpm --filter @np/web build
+
+      - name: Deploy web
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
