@@ -36,7 +36,7 @@
   --layout-gutter: 24px;
   --layout-row: 176px;
   /* type families */
-  --font-display: "Anta", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Anaheim", system-ui, sans-serif;
   --font-body: "Anaheim", system-ui, sans-serif;
 }
 
@@ -44,14 +44,14 @@
   font-family: var(--font-display);
   font-size: 32px;
   line-height: 1.3;
-  font-weight: 400;
+  font-weight: 800;
 }
 
 .heading-h5 {
   font-family: var(--font-display);
   font-size: 24px;
   line-height: 1.4;
-  font-weight: 400;
+  font-weight: 800;
 }
 
 .text-medium {

@@ -1,0 +1,7 @@
+name = "nativeplants-web"
+main = "./workers/app.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true

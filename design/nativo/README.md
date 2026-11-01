@@ -1,57 +1,91 @@
-Nativo is earthy and grounded: deep green, clay and gold on a warm cream ground, drawn with plain 1px ink outlines. It should feel like an open field with a vineyard's solid rows and lines: spacious, and clearly structured. Keep it flat. No shadows, no gradients, no pure white.
+Nativo is earthy, warm and a little playful: deep green, gold and clay on a warm cream ground, drawn with chunky 2px ink outlines and hard ink shadows. It should feel like a friendly farming game laid over real data: cozy and inviting, but clearly structured and honest about its numbers.
+
+The landing page (`apps/web`) is the reference build. When a rule here is unclear, match it.
+
+Version 2, October 2026. Version 1 (flat, 1px lines, Anta, bento grid) is retired.
+
+## Where the tokens live
+- Load four stylesheets once, globally, in this order: `design/nativo/fonts.css`, `design/nativo/tokens.css`, `packages/ui/src/tokens.css`, `packages/ui/src/playful.css`.
+- `design/nativo/tokens.css`: the core palette, base spacing, radius, borders and type families.
+- `packages/ui/src/tokens.css`: product data tokens (mono face, warning colour, soil ramp, touch size).
+- `packages/ui/src/playful.css`: the light colours, radii, shadows, tilt, extra spacing, sizes and responsive type roles.
+- Components use tokens only. No raw hex colours, pixel sizes or font names.
 
 ## Color
 - Build every page on `cream`. Set text in `ink`.
-- Use `green` as the lead color: headers, primary buttons, large fills. Text on it is `on-green` (cream, 5.9:1). Never ink on green (3.2:1).
-- Use `gold` as the warm accent, one call-out per view. Text on it is `on-gold` (ink, 11.3:1).
-- Use `clay` for emphasis, errors and warm fills. It reads as text on cream (4.9:1). Text on a clay fill is `on-clay` (cream, 4.9:1). Never ink on clay (3.9:1).
-- Set warm text or icons on a `green` fill in `gold-light` (4.6:1). Never plain `gold` on green for text (3.5:1). Never `gold-light` on cream (1.3:1).
-- Do not add other hues. Five colors and one light gold are the whole palette; the `on-` and `line` tokens are aliases.
+- Use `paper` for every card, window, input and nav surface. It is the lightest colour in the system. Never use pure white.
+- Use `green` as the lead colour: primary buttons, accent words in headings, section headings on cream, and the closing band. Text on it is `paper` (6.3:1). Never ink on green (3.2:1).
+- Use `green-deep` for headings and big figures on `meadow`, `peach` and `sky`, and for title bars on green cards. Text on it is `paper` (10.5:1).
+- Use `gold` for money and for the selected state: rebate cards, the selected seed, secondary buttons. Text on it is `ink` (11.2:1).
+- Use the light grounds to separate sections and notes. All take `ink` text:
+  - `meadow`: a full-width band, sticky notes, tags. Headings on it are `green-deep`, never `green` (3.8:1).
+  - `sand`: a full-width band and the default window title bar.
+  - `sky`: speech bubbles, badges and sticky notes.
+  - `peach` (the same value as `gold-light`): sticky notes.
+- Use `clay` for list bullets and errors. It reads as text on cream (4.9:1).
+- Keep `soil`, the two lawn greens and the seed colours for the plot planner. The soil horizon ramp is data, never decoration.
+- Do not add other hues.
 
 ## Type
-- Set titles in `heading-h4` and sub-titles in `heading-h5`. Both are Anta, which has one weight. Never bold it.
-- Set body copy in `text-regular`, introductions in `text-medium`, and emphasis in `text-regular-medium`.
-- Load Anta and Anaheim from Google Fonts. The stacks in `--font-display` and `--font-body` fall back to the system sans.
-- Keep line heights as the styles set them: 1.3 for h4, 1.4 for h5, 1.5 for text.
+- Set display type in Bricolage Grotesque at weight 800, through `--font-display`: headings, buttons, badges, the wordmark and big figures. Never use it at another weight.
+- Set body copy in Anaheim (`--font-body`). Set every measured value, every scientific name, window labels and sources in IBM Plex Mono (`--np-font-mono`).
+- Use the type roles in `playful.css`, not sizes. Each role has a desktop and a phone value:
+  - `--type-h1` (96 / 54), `--type-h2` (64 / 40), `--type-h3` (30 / 24), `--type-h3-card` (26 / 22)
+  - `--type-figure` (88 / 56) for headline numbers, `--type-stat` (30 / 22) for stat boxes
+  - `--type-lead` (21 / 18), `--type-body-lg` (18 / 16), `--type-body` (17 / 15), `--type-body-sm` (16 / 15)
+  - `--type-button-lg`, `--type-button`, `--type-label`, `--type-caption`, `--type-footnote`, `--type-mono`, `--type-mono-sm`
+- Line heights: 0.94 for h1, 1 for h2 and figures, 1.1 for h3 and stats, 1.5 for paragraphs. Labels sit at the font's natural height.
+- Write the name "nativo" in lower case, in display type and `green`, until a logo exists.
 
 ## Borders
-- Outline every tile, card, input and panel with `border-1` in `line`. Structure comes from lines and open ground, never from shadows or tints.
-- Keep the outline on filled tiles (`green`, `gold`, `clay`) too, so the whole grid reads as one set of lines.
-- Divide rows inside a tile with a `border-1` line along the bottom of each row.
-- Use `border-2` only for focus rings and the selected state. A focus ring is solid `line`, offset 2px: 18.9:1 on cream, 3.2:1 on green and 3.9:1 on clay.
-- Keep every border ink. Do not use colored, dashed, dotted or double borders.
+- Outline every card, window, input, button, badge, chip and stat box with `border-2` in `line` (ink).
+- Put a `border-2` rule along the top and bottom of every full-width coloured band.
+- Use a `border-2` rule under every window title bar.
+- Keep borders solid ink. Dashed is allowed in three places only: placeholder art, a divider above a calculator's footnote, and the low-confidence chip.
 
 ## Corner radius
-- Round bento tiles and cards with `radius-lg`. It is deliberately modest; do not go larger.
-- Round badges, buttons, dots and any image or screenshot inside a tile with `radius-md`.
-- Round swatches, chips and inputs with `radius-sm`.
-- Keep the page, full-width bands and tables square with `radius-none`.
-- Make a child's radius smaller than its parent's. Do not use pills or circles for containers; round shapes appear only as 8px dots.
+- Pills (`--radius-pill`) for buttons, inputs, address forms, badges, chips, the nav bar and list rows.
+- Circles (`--radius-round`) for round buttons, number badges, avatars and dots.
+- `--radius-window-lg` (32) and `--radius-window` (28) for windows; `--radius-card` (24) for cards.
+- `--radius-note` (16) and `--radius-note-lg` (20) for sticky notes; `--radius-stat` (16) for stat boxes; `--radius-seed` (18) for planner slots and bubbles; `--radius-tile` (10) for planner tiles.
+- On phone, drop windows and cards one step (to `--radius-card` and `--radius-note-lg`).
+- Keep full-width bands square.
+
+## Shadows
+- Shadows are hard and offset, never blurred, always ink: `--shadow-2` up to `--shadow-8`.
+- Size them by weight: 2–3 for small buttons, seeds and list rows; 4 for the nav and sticky notes; 5 for forms and cards; 6 for windows and big notes; 8 for the one or two hero windows on a page. On phone, use one step smaller.
+- A pressed button moves into its shadow: `transform: var(--press)` with `--shadow-1`. A selected item lifts out of it: `var(--lift)` with a larger shadow.
+- No blurred shadows, glows or gradients. The only gradient-like fill is the hatch on placeholder art.
+
+## Tilt
+- Tilt sticky notes and the opening badge between `--tilt-left-lg` (−3°) and `--tilt-right` (+2°).
+- Never tilt windows, cards, buttons, inputs or anything with data a person must read closely.
+- Neighbouring notes tilt in opposite directions.
 
 ## Space
-- Space content on the `space-` steps. A tile has `space-32` padding on every side.
-- Leave `space-24` (`layout-gutter`) between tiles, `space-40` between a section heading and its grid, and `space-64` between page sections and between separate bento groups.
-- Inside a tile, put `space-8` between the title and its text and `space-16` between the text and any media.
-- Set secondary labels at `opacity-muted`.
+- Use the `space-` steps (2 to 112). Pages use `--page-gutter` (64 desktop, 20 phone) and `--section-pad` (96 desktop, 48 phone).
+- Card padding is `--card-pad` (28 desktop, 20 phone). Windows with a lot inside use `space-36`.
+- Leave `space-40` to `space-56` between a section heading and its content.
 
-## Bento layout
-- Frame the grid at `layout-content-width` (1312px): 12 columns of about 87px, `layout-gutter` (24px) between tiles on both axes, rows `layout-row` (176px) tall. The page is `layout-page-width` (1440px) with `space-64` padding.
-- Size tiles in whole columns and rows: 4, 5, 6, 7, 8 or 12 columns wide, 1 or 2 rows tall. Fill each row to exactly 12 columns, or leave the rest open on purpose.
-- Anchor every tile to the grid lines. Do not offset, overlap, rotate or let media cross a tile's border.
-- Keep it quiet: most tiles are `cream`. Use at most three filled tiles in a view, lead with `green`, use `gold` once, and never place two tiles of the same fill so they share an edge.
-- Leave breathing room: in any three rows, leave at least one open bay of 4 columns or more with no tile, and let the first row carry the lead tile with the most space.
-- Build each tile as one idea: title in `heading-h5` at the top left, supporting text in `text-regular` below it, media or data at the bottom. Align everything to the left.
-- Below 1024px, use 6 columns: tiles of 4 columns pair up (3 of 6) and every other tile spans all 6. Below 640px, stack every tile full width with `space-16` gaps and `space-24` page padding.
+## Layout
+- Frame each section at `layout-page-width` (1440) with `--page-gutter` either side, on a 12-column grid with 24–40px gaps.
+- Alternate plain `cream` sections with full-width bands (`meadow`, `sand`, `green`) so the page has a rhythm.
+- Windows and cards may stagger: drop a neighbour 20–80px so a row reads as a playful set rather than a table. Keep each item inside its own columns; never overlap two items, except a sticky note that tucks over a window's corner on phone.
+- Breakpoints: phone below 768px (the 390px design) and a stacked layout below 1024px. Between designed widths, let the layout flow.
+- Nothing tappable is smaller than 44px (`--np-touch-min`).
 
 ## Illustrations
-- Draw from four sets under Assets: Tree (2), Branch (13), Grass (12) and Leaf (9). Each drawing comes in `green` for cream and gold grounds and in `cream` for green and clay grounds.
-- Place one drawing per tile, at the bottom as its media, left-aligned and no wider than half the tile.
+- Draw from four sets under Assets: Tree (2), Branch (13), Grass (12) and Leaf (9).
+- Use the `-green` file on `cream`, `paper`, `sand`, `meadow`, `sky`, `peach` and `gold`. Use the `-cream` file on `green`, `green-deep` and `clay`.
+- Use one drawing per section or card, beside a heading or under a short intro. Give it `alt=""` when it is decoration.
 - Use them as given. Do not recolor, stretch, crop or rotate them.
 
 ## Components
-- Use `BentoGrid` for the frame, `BentoTile` for each tile and `Badge` for labels. Use them before drawing a new container.
-- Each has a live preview and its own guidelines under Components.
+- Build from the guides under Components: Window, Card, StickyNote, Button, Badge and Stat. Use them before drawing a new container.
+- BentoGrid and BentoTile are retired. Do not use them for new work.
+- The landing page holds a live example of each: `apps/web/app/components/landing/`.
 
-## Logo and icons
-- No logo has been provided. Write the name "Nativo" in `heading-h4`, `ink`, until one exists.
-- No icon set has been chosen. Color lists use a 16px droplet in `ink` at `opacity-muted` beside each token name. Draw icons in `ink` or `green` on cream.
+## Characters
+- Sage is the guide character. Sage speaks in a `sky` speech bubble with the name in display type, in `green-deep`.
+- Sage's art is not drawn yet. Until it is, show a dashed `green` circle with a hatch and the word "Sage" in mono.
+- Sage's voice is warm and a little cheeky, but never wrong about a number.

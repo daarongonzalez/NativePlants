@@ -215,12 +215,15 @@ The visual language is the **Nativo design system**. The full rules are in
 `design/nativo/README.md`, and every value is a token in
 `design/nativo/tokens.css`.
 
-**Mood.** Earthy and grounded, like an open field with a vineyard's solid rows.
-Spacious and clearly structured. Flat: no shadows, no gradients, no pure white.
+**Mood.** Earthy, warm and a little playful, like a cozy farming game laid
+over real data. Chunky ink outlines and hard ink shadows give it a hand-made,
+tactile feel. No blurred shadows, no gradients, no pure white. The landing page
+in `apps/web` is the reference.
 
-**Colour.** Cream ground, ink text. Green leads (headers, primary buttons).
-Gold is the warm accent, one call-out per view. Clay is for emphasis, errors and
-warnings. No other hues.
+**Colour.** Cream page, `paper` cards, ink text. Green leads (primary buttons,
+headings, the closing band); deep green sets headings on light green. Gold is
+for money and the selected state. Clay is for bullets and errors. Light
+grounds (meadow, sand, sky, peach) separate sections and colour sticky notes.
 
 - **Confidence.** Green for measured, gold for survey estimate, clay for
   modelled. Always shown with the written label. Low confidence also gets a
@@ -231,21 +234,22 @@ warnings. No other hues.
 - **Alert.** A single red-brown (`#9C3D26`) reserved for toxicity and invasive
   species warnings. Never for emphasis.
 
-**Type.** Anta for titles and sub-titles (one weight, never bold). Anaheim for
-body copy. IBM Plex Mono for every measured value, always with tabular figures. Mono
+**Type.** Bricolage Grotesque at weight 800 for headings, buttons, badges and
+big figures. Anaheim for body copy. IBM Plex Mono for every measured value, always with tabular figures. Mono
 signals "this is a measurement". It is why a plant's scientific name is mono
 italic and its common name is not.
 
-**Shape and space.** Plain 1px ink outlines on every tile, card and input.
-Tiles round at 16px, buttons and badges at 8px. Spacing steps of 4 to 64px on a
-12-column bento grid.
+**Shape and space.** 2px ink outlines on every card, window, input and button.
+Pill buttons, inputs and badges; cards round at 24px and windows at 28–32px.
+Hard offset ink shadows, 2 to 8px. Sticky notes tilt a few degrees. A 12-column
+grid with full-width coloured bands and staggered windows.
 
 **Illustration.** Tree, branch, grass and leaf drawings in `design/nativo/assets/`,
 in green or cream.
 
 **Product additions.** The mono face, the dashed low-confidence border, the
-alert colour and the soil ramp are the only exceptions to Nativo's rules. They
-live in `packages/ui/src/tokens.css`, which loads after Nativo's files.
+alert colour and the soil ramp live in `packages/ui/src/tokens.css`. The rest of
+the style's tokens live in `packages/ui/src/playful.css`.
 
 **Themes.** Light only for now.
 

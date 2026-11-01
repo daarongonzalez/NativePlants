@@ -1,16 +1,19 @@
-Badge is a small outlined label, optionally with a color swatch, for naming a token, status or category.
+Badge is a small pill label for a tag, a status or a plant name.
 
-**You provide:** a short label and, optionally, a swatch color.
+**You provide:** a short label and a fill: `sky`, `gold` or `meadow` for tags; `paper` for chips such as plant names.
 
 **Anatomy**
-- 40px tall, `border-1` in `line`, `radius-md`, on `cream`. Padding is `space-4` around the swatch and `space-8` on the right, with `space-8` between swatch and label.
-- Swatch 32px square with `radius-sm` and its own `border-1`.
-- Label in `text-regular`, `ink`.
+- Pill (`--radius-pill`), `border-2` in `line`, no shadow.
+- Tag badges: display type at `--type-label`, `space-2` by `space-14` padding.
+- Chips: body type at `--type-label`, `space-4` by `space-14` padding, `paper` fill. On a `green` window, chip text is `green-deep`.
+- The opening badge of a page may tilt (`--tilt-left`) and sit a size larger.
 
 **Do**
-- Keep labels to a few words.
-- Pair the swatch with a text label; color alone never carries meaning.
+- Keep labels to one or two words.
+- Pair colour with the written label; colour alone never carries meaning.
 
 **Don't**
-- Fill the badge. The fill belongs to the swatch.
-- Put it on a `green` or `clay` fill without checking that the outline still shows (it does on `cream` and `gold`).
+- Make a badge tappable. Use a Button for actions.
+- Tilt badges other than the opening one.
+
+Live example: the tags in "Why a native yard" and the plant chips in "your-plants".

@@ -5,14 +5,14 @@
 3. Load the two stylesheets once, globally, fonts first:
    - HTML: `<link rel="stylesheet" href="/design/nativo/fonts.css">` then `<link rel="stylesheet" href="/design/nativo/tokens.css">`
    - Any bundler: `import "design/nativo/fonts.css"; import "design/nativo/tokens.css";` (adjust the path to your setup)
-4. Open `design/nativo/components/BentoGrid/preview.html` in a browser to check that the tokens and fonts load.
+4. Then load `packages/ui/src/tokens.css` and `packages/ui/src/playful.css`, in that order. Run the landing page (`pnpm --filter @np/web dev`) to check that the tokens and fonts load.
 
 ## What is inside
 - `README.md`: the brand book and usage rules. Read this first.
 - `tokens.json`: every token with its usage note. The source of truth.
 - `tokens.css`: the same tokens as CSS variables and type classes (`.heading-h4`, `.text-regular`, and so on).
-- `fonts.css`: Anta and Anaheim from Google Fonts.
-- `components/`: guidelines and a live preview for BentoGrid, BentoTile and Badge, plus the Cover.
+- `fonts.css`: Bricolage Grotesque and Anaheim from Google Fonts.
+- `components/`: guidelines for Window, Card, StickyNote, Button, Badge and Stat. BentoGrid and BentoTile are retired; their previews show version 1.
 - `assets/`: 36 illustrations (Tree, Branch, Grass, Leaf), each as a green and a cream SVG.
 
 ## Keeping it current
