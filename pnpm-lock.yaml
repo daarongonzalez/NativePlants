@@ -79,6 +79,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@np/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@np/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@np/ui':
         specifier: workspace:*
         version: link:../../packages/ui

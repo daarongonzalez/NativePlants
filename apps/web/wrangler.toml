@@ -5,3 +5,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
+
+# The API Worker, called from loaders and actions on the server. A service
+# binding keeps the call inside Cloudflare: no public URL, no CORS.
+[[services]]
+binding = "API"
+service = "nativeplants-api"

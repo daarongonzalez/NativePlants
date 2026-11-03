@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import {
   PLOT_TILES,
   SAMPLE_PLANTS,
@@ -113,6 +114,10 @@ export function PlotPlanner() {
         Each square is 25 sq ft at $2.00 a sq ft · 200 sq ft minimum
         <span className="lp-only-desktop-inline"> · Utah Water Savers</span> · sample plants
       </p>
+
+      <Link to="/plan" className="lp-button lp-button--green lp-planner__real">
+        Plan your real yard
+      </Link>
     </Window>
   );
 }

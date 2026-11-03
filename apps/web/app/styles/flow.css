@@ -1,0 +1,969 @@
+/*
+ * The flow: address check, the report on your ground, and the plot planner.
+ * Builds on the landing page's lp-* pieces (windows, stats, notes, buttons,
+ * the plot) and adds only what these pages need. Tokens only.
+ *
+ * Breakpoints match the landing page: phone below 768px, stacked below 1024px.
+ */
+
+/* ---- Frame ---------------------------------------------------------------- */
+
+.fl-main {
+  padding-block: var(--space-32) var(--section-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-48);
+}
+
+.fl-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-24);
+  padding-block: var(--space-32) var(--space-48);
+  border-top: var(--border-2) solid var(--line);
+  font-size: var(--type-caption);
+}
+
+.fl-sr {
+  position: absolute;
+  width: var(--space-2);
+  height: var(--space-2);
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.fl-self-start {
+  align-self: flex-start;
+}
+
+.fl-muted {
+  opacity: 0.7;
+}
+
+/* ---- Steps ---------------------------------------------------------------- */
+
+.fl-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+.fl-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-16) 0 var(--space-6);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font-size: var(--type-label);
+}
+.fl-step__num {
+  width: var(--size-badge-num);
+  height: var(--size-badge-num);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-footnote);
+  background: var(--cream);
+}
+.fl-step--on {
+  background: var(--gold);
+  box-shadow: var(--shadow-3);
+  transform: var(--lift);
+}
+.fl-step--done .fl-step__num {
+  background: var(--meadow);
+}
+.fl-step--next {
+  opacity: 0.7;
+}
+
+/* ---- Page heading ---------------------------------------------------------------- */
+
+.fl-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+  max-width: var(--size-heading-measure);
+}
+.fl-head .lp-lead {
+  max-width: var(--size-measure);
+}
+.fl-head__address {
+  font-size: var(--type-mono);
+}
+
+.fl-source {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  line-height: 1.5;
+  opacity: 0.75;
+}
+.fl-source--dark,
+.lp-window--green .fl-source {
+  color: var(--on-dark);
+  opacity: 0.85;
+}
+
+.fl-button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-3);
+}
+.fl-button-link.lp-button--green,
+.fl-button-link.lp-button--green:hover {
+  color: var(--on-dark);
+}
+.fl-button-link.lp-button--gold,
+.fl-button-link.lp-button--gold:hover {
+  color: var(--on-gold);
+}
+.fl-button-link--sm {
+  font-size: var(--type-label);
+  padding: 0 var(--space-16);
+  box-shadow: var(--shadow-2);
+}
+.fl-button-link.lp-button--paper,
+.fl-button-link.lp-button--paper:hover {
+  color: var(--on-paper);
+}
+.fl-button-link--lg {
+  font-size: var(--type-button-lg);
+  min-height: var(--size-input);
+  padding: 0 var(--space-32);
+}
+
+/* Sticky notes: tilted asides, never data a person must read closely. */
+.fl-note {
+  border-radius: var(--radius-note-lg);
+  padding: var(--space-20) var(--space-24);
+  box-shadow: var(--shadow-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--type-body);
+  line-height: 1.4;
+}
+.fl-note--right {
+  transform: var(--tilt-right);
+}
+.fl-note--left {
+  transform: var(--tilt-left-md);
+}
+
+.fl-list {
+  margin: 0;
+  padding-left: var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.fl-list li::marker {
+  color: var(--clay);
+}
+
+.fl-error,
+.fl-warn-line {
+  color: var(--clay);
+  font-size: var(--type-body-sm);
+  line-height: 1.5;
+}
+
+/* ---- Step 1: address check ---------------------------------------------------------- */
+
+.fl-start {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+}
+.fl-start__window {
+  grid-column: 1 / span 8;
+}
+.fl-start .fl-note {
+  grid-column: 9 / span 4;
+  margin-top: var(--space-56);
+}
+.fl-start__address {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-h3);
+  line-height: 1.1;
+}
+.fl-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-10);
+}
+.fl-facts > div {
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-stat);
+  padding: var(--space-10) var(--space-14);
+  min-width: 0;
+}
+.fl-facts dt {
+  font-size: var(--type-caption);
+}
+.fl-facts dd {
+  margin: 0;
+  font-size: var(--type-body-sm);
+  overflow-wrap: anywhere;
+}
+.fl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+.fl-again {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.fl-address {
+  max-width: var(--size-form);
+}
+
+/* ---- Step 2: report ------------------------------------------------------------------- */
+
+.fl-report {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+}
+.fl-report__soil {
+  grid-column: 1 / span 7;
+}
+.fl-report__climate {
+  grid-column: 8 / span 5;
+  margin-top: var(--space-40);
+}
+.fl-report__sun {
+  grid-column: 1 / span 7;
+}
+.fl-report__caveats {
+  grid-column: 8 / span 5;
+  margin-top: var(--space-24);
+}
+
+.fl-values {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+.fl-value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.fl-value__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+.fl-value__label {
+  font-size: var(--type-label);
+}
+.fl-value__figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  font-size: var(--type-stat);
+  line-height: 1.1;
+}
+.fl-value__words {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.fl-value__unit {
+  font-size: var(--type-body);
+}
+.fl-value__meaning {
+  font-size: var(--type-body-sm);
+}
+
+.fl-conf {
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-10);
+  font-size: var(--type-footnote);
+  background: var(--paper);
+}
+.fl-conf[data-level="high"] {
+  background: var(--green);
+  color: var(--on-dark);
+}
+.fl-conf[data-level="medium"] {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+.fl-conf[data-level="low"] {
+  color: var(--clay);
+}
+
+.fl-soil-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: var(--space-28);
+}
+.fl-soil {
+  margin: 0;
+  display: grid;
+  grid-template-columns: var(--size-avatar) 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--space-12) var(--space-14);
+}
+.fl-soil__column {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--size-note);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-tile);
+  overflow: hidden;
+}
+.fl-soil__layer + .fl-soil__layer {
+  border-top: var(--border-2) solid var(--line);
+}
+.fl-soil__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  font-size: var(--type-mono-sm);
+}
+.fl-soil__legend li {
+  display: flex;
+  flex-direction: column;
+}
+.fl-soil figcaption {
+  grid-column: 1 / -1;
+}
+
+.fl-frost {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+.fl-track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.fl-track__label {
+  font-size: var(--type-label);
+}
+.fl-track__rail {
+  position: relative;
+  height: var(--space-14);
+  margin-block: var(--space-4) var(--space-44);
+  background: var(--sand);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+}
+.fl-track__mark {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, calc(-1 * var(--space-8)));
+}
+.fl-track__dot {
+  width: var(--size-dot);
+  height: var(--size-dot);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+  background: var(--gold);
+}
+.fl-track__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: var(--type-mono-sm);
+  white-space: nowrap;
+  margin-top: var(--space-4);
+}
+.fl-track__pct {
+  opacity: 0.7;
+}
+.fl-track__ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--type-mono-sm);
+  opacity: 0.6;
+}
+.fl-frost__read {
+  font-size: var(--type-body-sm);
+}
+
+.fl-sun__set {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.fl-sun__prompt {
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+}
+.fl-sun__help {
+  font-size: var(--type-body-sm);
+}
+.fl-sun__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10);
+}
+.fl-option {
+  min-height: var(--np-touch-min);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-10) var(--space-14);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.fl-option__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.fl-option__detail {
+  font-size: var(--type-caption);
+  line-height: 1.4;
+}
+/* Selected: gold and lifted, with a heavier shadow so it reads without colour too. */
+.fl-option--on {
+  background: var(--gold);
+  box-shadow: var(--shadow-4);
+  transform: var(--lift);
+}
+.fl-option:active {
+  transform: var(--press);
+  box-shadow: var(--shadow-1);
+}
+
+.fl-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.fl-cta-band {
+  margin-inline: calc(-1 * var(--page-gutter));
+  border-bottom: var(--border-2) solid var(--line);
+}
+.fl-cta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-40);
+  align-items: center;
+  padding: var(--space-64) var(--page-gutter);
+}
+.fl-cta__grass {
+  width: var(--size-readout);
+  height: auto;
+}
+.fl-cta__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+  max-width: var(--size-measure);
+}
+.fl-cta__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  color: var(--ink);
+}
+.fl-cta__stat .lp-stat {
+  box-shadow: var(--shadow-5);
+}
+
+/* ---- Step 3: plot planner ------------------------------------------------------------- */
+
+.fl-planner {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--grid-gap);
+  align-items: start;
+}
+.fl-planner__check {
+  position: sticky;
+  top: var(--space-24);
+  margin-top: var(--space-40);
+}
+.fl-planner__board .lp-window__body > * {
+  order: 0;
+}
+
+.fl-area,
+.fl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.fl-chip-button {
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-16);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-label);
+}
+.fl-chip-button {
+  min-width: var(--np-touch-min);
+}
+.fl-chip-button--sm {
+  font-family: var(--font-body);
+  font-weight: normal;
+  font-size: var(--type-caption);
+  padding: 0 var(--space-12);
+}
+.fl-chip-button--on {
+  background: var(--gold);
+  box-shadow: var(--shadow-3);
+  transform: var(--lift);
+}
+
+.fl-size {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12) var(--space-24);
+}
+.fl-size__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.fl-size__label {
+  font-size: var(--type-label);
+}
+.fl-size__step {
+  width: var(--np-touch-min);
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+  box-shadow: var(--shadow-2);
+}
+.fl-size__step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.fl-size__value {
+  min-width: var(--size-avatar);
+  text-align: center;
+}
+.fl-size__total {
+  font-size: var(--type-mono-sm);
+  opacity: 0.75;
+}
+
+/* Big yards scroll inside the plot rather than shrinking squares below 44px. */
+.fl-plot-scroll {
+  overflow-x: auto;
+  padding-bottom: var(--space-4);
+}
+.fl-plot {
+  min-width: min-content;
+}
+.fl-tile--dark {
+  background: var(--lawn-dark);
+}
+.fl-tile--mulch {
+  background: var(--lawn-planted);
+}
+.fl-tile--pavers {
+  background: var(--sand);
+}
+.fl-paver {
+  width: 60%;
+  height: 60%;
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-tile);
+  background: var(--paper);
+}
+/* Lawn in a strip under 8 ft: an outline as well as the error colour. */
+.fl-tile--narrow {
+  outline: var(--border-2) solid var(--clay);
+  outline-offset: calc(-1 * var(--space-4));
+}
+.fl-tile__plant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.fl-tile__plant .lp-flower__stem {
+  height: var(--space-6);
+}
+.fl-tile__tag {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-tiny);
+  line-height: 1;
+}
+
+.fl-palette {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.fl-materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.fl-material {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-14) 0 var(--space-8);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+  font-size: var(--type-label);
+}
+.fl-material__swatch {
+  width: var(--size-seed-dot);
+  height: var(--size-seed-dot);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+}
+.fl-material--mulch .fl-material__swatch {
+  background: var(--lawn-planted);
+}
+.fl-material--pavers .fl-material__swatch {
+  background: var(--sand);
+}
+.fl-material--lawn .fl-material__swatch {
+  background: var(--lawn-light);
+}
+.fl-material--on {
+  background: var(--gold);
+  box-shadow: var(--shadow-3);
+  transform: var(--lift);
+}
+.fl-fill {
+  font-size: var(--type-caption);
+  padding: 0 var(--space-14);
+  box-shadow: var(--shadow-2);
+}
+
+.fl-seeds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--size-seed), 1fr));
+  gap: var(--space-8);
+}
+.fl-seed {
+  width: auto;
+}
+
+.fl-chosen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: var(--size-seed);
+}
+.fl-chosen__facts {
+  font-size: var(--type-mono-sm);
+}
+.fl-chosen__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.fl-chip--draft {
+  background: var(--sky);
+}
+.fl-footnote {
+  order: 0;
+}
+
+.fl-check-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+.fl-check-stats .lp-stat {
+  background: var(--paper);
+}
+.fl-check-stats .lp-stat:last-child {
+  background: var(--gold);
+}
+
+.fl-rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.fl-rule {
+  display: grid;
+  grid-template-columns: var(--size-dot) minmax(0, 1fr) auto;
+  gap: var(--space-10);
+  align-items: start;
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  padding: var(--space-10) var(--space-14);
+}
+.fl-rule__mark {
+  width: var(--size-dot);
+  height: var(--size-dot);
+  margin-top: var(--space-4);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+  background: var(--paper);
+}
+.fl-rule--pass .fl-rule__mark {
+  background: var(--green);
+}
+.fl-rule--warn .fl-rule__mark {
+  background: var(--gold);
+}
+.fl-rule--fail .fl-rule__mark {
+  background: var(--clay);
+}
+.fl-rule--owner_to_confirm .fl-rule__mark {
+  background: var(--sky);
+}
+.fl-rule--inspector_checks .fl-rule__mark {
+  background: var(--sand);
+}
+.fl-rule__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.fl-rule__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-sm);
+}
+summary.fl-rule__title {
+  cursor: pointer;
+  min-height: var(--np-touch-min);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+summary.fl-rule__title::before {
+  content: "+";
+  font-family: var(--np-font-mono);
+}
+details[open] > summary.fl-rule__title::before {
+  content: "−";
+}
+summary.fl-rule__title::-webkit-details-marker {
+  display: none;
+}
+summary.fl-rule__title {
+  list-style: none;
+}
+.fl-rule__note {
+  font-size: var(--type-caption);
+  line-height: 1.4;
+}
+.fl-rule__result {
+  font-size: var(--type-footnote);
+  white-space: nowrap;
+}
+.fl-rule--fail .fl-rule__result {
+  color: var(--clay);
+}
+.fl-rule__source {
+  margin: var(--space-6) 0 0;
+  padding-left: var(--space-12);
+  border-left: var(--border-2) solid var(--line);
+  font-size: var(--type-caption);
+  line-height: 1.4;
+}
+
+.fl-check-button {
+  min-height: var(--size-input);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-button-lg);
+  box-shadow: var(--shadow-3);
+}
+.fl-check-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fl-result {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+}
+.fl-result > .lp-window {
+  grid-column: 1 / span 8;
+}
+.fl-result > .fl-note {
+  grid-column: 9 / span 4;
+  margin-top: var(--space-32);
+}
+.fl-shopping {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.fl-rest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+.fl-rest__intro {
+  max-width: var(--size-measure);
+}
+.fl-stages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap);
+  align-items: start;
+}
+.fl-stages > :nth-child(even) {
+  margin-top: var(--space-32);
+}
+
+/* ---- Stacked below 1024px ------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .fl-start__window,
+  .fl-start .fl-note,
+  .fl-report__soil,
+  .fl-report__climate,
+  .fl-report__sun,
+  .fl-report__caveats,
+  .fl-result > .lp-window,
+  .fl-result > .fl-note {
+    grid-column: 1 / -1;
+    margin-top: 0;
+  }
+  .fl-planner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fl-planner__check {
+    position: static;
+    margin-top: 0;
+  }
+  .fl-stages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fl-stages > :nth-child(even) {
+    margin-top: 0;
+  }
+  .fl-cta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- Phone ------------------------------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  .fl-main {
+    gap: var(--space-32);
+    padding-top: var(--space-20);
+  }
+  .fl-step__label {
+    font-size: var(--type-footnote);
+  }
+  .fl-step--next .fl-step__label {
+    display: none;
+  }
+  .fl-step--next {
+    padding-right: var(--space-6);
+  }
+  .fl-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fl-soil-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fl-sun__options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .fl-check-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* One sideways-scrolling row of plants, so the live check stays near the plot. */
+  .fl-seeds,
+  .fl-filters {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: var(--size-seed);
+    overflow-x: auto;
+    padding: var(--space-4) var(--space-4) var(--space-8);
+  }
+  .fl-filters {
+    grid-auto-columns: max-content;
+  }
+  .fl-check-stats .lp-stat:last-child {
+    grid-column: 1 / -1;
+  }
+  .fl-rule {
+    grid-template-columns: var(--size-dot) minmax(0, 1fr);
+  }
+  .fl-rule__result {
+    grid-column: 2;
+  }
+  .fl-note {
+    border-radius: var(--radius-note);
+    box-shadow: var(--shadow-3);
+  }
+  .fl-cta {
+    padding: var(--space-40) var(--page-gutter);
+    gap: var(--space-24);
+  }
+  .fl-cta__grass {
+    width: var(--size-round-button);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fl-option,
+  .fl-chip-button {
+    transition: none;
+  }
+}
