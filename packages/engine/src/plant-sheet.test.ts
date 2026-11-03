@@ -30,6 +30,9 @@ const base = {
   pollinator_value: "high",
   edible: "no",
   good_for_cutting: "no",
+  life_cycle: "perennial",
+  plant_form: "wildflower",
+  stays_under_24in: "yes",
   curated_by: "Test",
   review_status: "reviewed",
 };

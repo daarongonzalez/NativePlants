@@ -17,13 +17,14 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: "Which load to run. Soil and plants are opt-in; the default runs zones and frost."
+        description: "Which load to run. Soil, plants and rebates are opt-in; the default runs zones and frost."
         type: choice
         default: reference
         options:
           - reference
           - soil
           - plants
+          - rebates
 
 # Same group as the deploy workflow, so this queues behind a deploy in
 # progress rather than racing it.

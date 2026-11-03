@@ -278,7 +278,7 @@ describeIfDb("resolve data layer", () => {
     const row = (name: string, status: string) =>
       [
         name, "Test plant|Sample", "Testaceae", "6.0", "7.0", "8.0", "6", "24", "low",
-        "well_drained|moderately_well_drained", "4b", "8a", "60", "45", "5", "7", "native",
+        "well_drained|moderately_well_drained", "4b", "8a", "60", "45", "perennial", "wildflower", "yes", "5", "7", "native",
         "yes", "high", "no", "yes", "", "A. Reviewer", status,
       ].join(",");
     const sheet = (...rows: string[]) => [PLANT_CSV_COLUMNS.join(","), ...rows].join("\n");

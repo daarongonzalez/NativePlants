@@ -56,7 +56,6 @@ export async function resolveSite(
   options: { sunExposure?: SunExposure } = {},
 ): Promise<ResolveOutcome> {
   const { db, geocoder, elevation } = deps;
-  const retrievedAt = new Date().toISOString();
   const provenance: ProvenanceMap = {};
   const caveats: string[] = [];
 
@@ -86,6 +85,90 @@ export async function resolveSite(
       );
     }
   }
+
+  const assembled = await assembleProfile(
+    { db, elevation },
+    { latitude, longitude, zip, matchQuality },
+    options,
+  );
+  if (!assembled.ok) return assembled;
+  const { values, provenance: assembledProvenance, caveats: assembledCaveats, detail } = assembled;
+  Object.assign(provenance, assembledProvenance);
+  caveats.push(...assembledCaveats);
+
+  const profile = await createSiteProfile(db, owner, site.id, { ...values, provenance });
+
+  if (!profile) return { ok: false, reason: "site_not_found" };
+
+  return {
+    ok: true,
+    profileId: profile.id,
+    summary: {
+      matchedAddress,
+      latitude,
+      longitude,
+      zone: ordinalToZone(values.zoneOrdinal),
+      frostStationName: detail.frostStation?.name ?? null,
+      frostStationDistanceKm: detail.frostStation?.distanceKm ?? null,
+      soilMapUnit: detail.soil?.name ?? null,
+      caveats,
+    },
+  };
+}
+
+/** Profile values as stored on a snapshot, without provenance. */
+export interface ProfileValues {
+  zoneOrdinal: number;
+  frostStationId: string | null;
+  mukey: string | null;
+  ph: number | null;
+  sandPct: number | null;
+  siltPct: number | null;
+  clayPct: number | null;
+  drainageClass: string | null;
+  sunHoursSummer: number;
+}
+
+/** What the report screen shows beyond the stored values. */
+export interface ProfileDetail {
+  frostStation: {
+    name: string;
+    distanceKm: number;
+    normalsPeriod: string;
+    lastSpringP10: string;
+    lastSpringP50: string;
+    lastSpringP90: string;
+    firstFallP10: string;
+    firstFallP50: string;
+    firstFallP90: string;
+    frostFreeDays: number;
+  } | null;
+  soil: {
+    name: string;
+    surveyArea: string;
+    measured: boolean;
+    horizons: { depthTopCm: number; depthBottomCm: number; ph: number | null; sandPct: number | null; siltPct: number | null; clayPct: number | null }[];
+  } | null;
+}
+
+export type AssembleOutcome =
+  | { ok: true; values: ProfileValues; provenance: ProvenanceMap; caveats: string[]; detail: ProfileDetail }
+  | { ok: false; reason: "zone_unavailable" };
+
+/**
+ * Zone, frost, soil and sun for a point. Reads reference data only and writes
+ * nothing, so it serves both a saved site and a visitor who has not signed in.
+ */
+export async function assembleProfile(
+  deps: { db: Database; elevation: ElevationClient },
+  place: { latitude: number; longitude: number; zip: string | null; matchQuality: string },
+  options: { sunExposure?: SunExposure } = {},
+): Promise<AssembleOutcome> {
+  const { db, elevation } = deps;
+  const { latitude, longitude, zip, matchQuality } = place;
+  const retrievedAt = new Date().toISOString();
+  const provenance: ProvenanceMap = {};
+  const caveats: string[] = [];
 
   // 2. Hardiness zone. Keyed by ZIP, which is a USPS delivery route rather
   //    than a shape on the ground — hence never high confidence.
@@ -179,33 +262,52 @@ export async function resolveSite(
     );
   }
 
-  const profile = await createSiteProfile(db, owner, site.id, {
-    zoneOrdinal,
-    frostStationId,
-    mukey: hasSoilData ? soil!.mukey : null,
-    ph: topsoil?.ph ?? null,
-    sandPct: topsoil?.sandPct ?? null,
-    siltPct: topsoil?.siltPct ?? null,
-    clayPct: topsoil?.clayPct ?? null,
-    drainageClass: hasSoilData ? (soil!.drainageClass ?? null) : null,
-    sunHoursSummer,
-    provenance,
-  });
-
-  if (!profile) return { ok: false, reason: "site_not_found" };
-
   return {
     ok: true,
-    profileId: profile.id,
-    summary: {
-      matchedAddress,
-      latitude,
-      longitude,
-      zone: ordinalToZone(zoneOrdinal),
-      frostStationName,
-      frostStationDistanceKm,
-      soilMapUnit: soil?.name ?? null,
-      caveats,
+    values: {
+      zoneOrdinal,
+      frostStationId,
+      mukey: hasSoilData ? soil!.mukey : null,
+      ph: topsoil?.ph ?? null,
+      sandPct: topsoil?.sandPct ?? null,
+      siltPct: topsoil?.siltPct ?? null,
+      clayPct: topsoil?.clayPct ?? null,
+      drainageClass: hasSoilData ? (soil!.drainageClass ?? null) : null,
+      sunHoursSummer,
+    },
+    provenance,
+    caveats,
+    detail: {
+      frostStation:
+        station && frostStationDistanceKm !== null
+          ? {
+              name: station.name,
+              distanceKm: frostStationDistanceKm,
+              normalsPeriod: station.frost.normalsPeriod,
+              lastSpringP10: station.frost.lastSpringP10,
+              lastSpringP50: station.frost.lastSpringP50,
+              lastSpringP90: station.frost.lastSpringP90,
+              firstFallP10: station.frost.firstFallP10,
+              firstFallP50: station.frost.firstFallP50,
+              firstFallP90: station.frost.firstFallP90,
+              frostFreeDays: station.frost.frostFreeDays,
+            }
+          : null,
+      soil: soil
+        ? {
+            name: soil.name,
+            surveyArea: soil.surveyArea,
+            measured: hasSoilData,
+            horizons: soil.horizons.map((h) => ({
+              depthTopCm: h.depthTopCm,
+              depthBottomCm: h.depthBottomCm,
+              ph: h.ph,
+              sandPct: h.sandPct,
+              siltPct: h.siltPct,
+              clayPct: h.clayPct,
+            })),
+          }
+        : null,
     },
   };
 }

@@ -5,6 +5,8 @@ export interface Env {
   AUTH_KEYS: KVNamespace;
   FIREBASE_PROJECT_ID: string;
   MARKET: string;
+  /** "drafts" lets the plot planner offer draft plants, labelled; anything else means published only. */
+  PLANNER_PLANTS?: string;
 }
 
 export interface Variables {

@@ -139,6 +139,13 @@ export const plants = pgTable(
     matureHeightCm: real("mature_height_cm").notNull(),
     matureWidthCm: real("mature_width_cm").notNull(),
 
+    /** perennial | annual | biennial | bulb. Only perennials count towards rebate cover. */
+    lifeCycle: text("life_cycle"),
+    /** groundcover | wildflower | grass | shrub | tree | vine. Tree canopy does not count. */
+    plantForm: text("plant_form"),
+    /** Stays under 24 inches at maturity without pruning: the park strip rule. */
+    staysUnder24In: boolean("stays_under_24in"),
+
     bloomStartMonth: integer("bloom_start_month"),
     bloomEndMonth: integer("bloom_end_month"),
 
@@ -289,27 +296,206 @@ export const profileReports = pgTable(
   (t) => [index("profile_reports_site_idx").on(t.siteId)],
 );
 
-/** Unused in V1 beyond a display field; shape fixed now so it is not a rewrite. */
+/* ------------------------------------------------------------------ *
+ * Rebates, layer one: what a program says must be true.
+ *
+ * Written by the rebate import job from a file in git
+ * (data/rebates/), never by a request. Every row carries where it came from
+ * and when we last checked, because a rebate amount a gardener trusts has a
+ * financial consequence.
+ * ------------------------------------------------------------------ */
+
 export const rebatePrograms = pgTable(
   "rebate_programs",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    /** Stable key used by the app and the data file, e.g. "ut-landscape-incentive". */
+    code: text("code").notNull(),
     name: text("name").notNull(),
     utilityName: text("utility_name").notNull(),
     geom: multiPolygon("geom"),
     perSqftAmount: numeric("per_sqft_amount"),
     maxAward: numeric("max_award"),
+    /** Plain words on how the amount varies, e.g. by local water supplier. */
+    amountNote: text("amount_note"),
     requiresPreApproval: boolean("requires_pre_approval").notNull().default(true),
     requiresPlan: boolean("requires_plan").notNull().default(false),
     minPlantCoveragePct: integer("min_plant_coverage_pct"),
+    minAreaSqft: integer("min_area_sqft"),
+    /** Months from the first site visit to finish the project. */
+    completionMonths: integer("completion_months"),
+    /** Days allowed to correct a failed final inspection without penalty. */
+    correctionDays: integer("correction_days"),
+    /** Month-day, e.g. "10-15". Inspections are usually unavailable in this window. */
+    inspectionBlackoutStart: text("inspection_blackout_start"),
+    inspectionBlackoutEnd: text("inspection_blackout_end"),
+    payee: text("payee"),
     plantListUrl: text("plant_list_url"),
+    applicationUrl: text("application_url"),
     windowOpen: date("window_open"),
     windowClose: date("window_close"),
     status: text("status").notNull().default("active"),
+    /** Bumped whenever the rules change. Old checks keep the version they ran against. */
+    rulesVersion: text("rules_version").notNull().default("1"),
     sourceUrl: text("source_url").notNull(),
     /** Never show an amount without saying when we last checked. */
     verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull(),
     verifiedBy: text("verified_by").notNull(),
   },
-  (t) => [index("rebate_programs_geom_idx").using("gist", t.geom)],
+  (t) => [
+    uniqueIndex("rebate_programs_code_idx").on(t.code),
+    index("rebate_programs_geom_idx").using("gist", t.geom),
+  ],
+);
+
+/**
+ * Who a program covers. In Utah that is a list of participating communities
+ * and their water suppliers; shapes are added when a reliable source exists.
+ */
+export const rebateProgramAreas = pgTable(
+  "rebate_program_areas",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    programId: uuid("program_id")
+      .notNull()
+      .references(() => rebatePrograms.id, { onDelete: "cascade" }),
+    communityName: text("community_name").notNull(),
+    waterSupplier: text("water_supplier"),
+    /** Inspections are seasonal where secondary (untreated) irrigation water is used. */
+    hasSecondaryWater: boolean("has_secondary_water"),
+    geom: multiPolygon("geom"),
+    sourceUrl: text("source_url").notNull(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    uniqueIndex("rebate_program_areas_name_idx").on(t.programId, t.communityName),
+    index("rebate_program_areas_geom_idx").using("gist", t.geom),
+  ],
+);
+
+/**
+ * One row per rule, word for word from the program, with a plain-language
+ * version and who can check it:
+ *
+ *  - plan_check:     we can work it out from the plan
+ *  - owner_confirms: only the owner knows
+ *  - inspector_only: only the final visit settles it
+ *  - photo_check:    reserved for later, when a photo can settle it
+ *
+ * `parameters` holds the numbers (minimum area, cover share, heights), so a
+ * program change is a data edit, not a code change.
+ */
+export const rebateRules = pgTable(
+  "rebate_rules",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    programId: uuid("program_id")
+      .notNull()
+      .references(() => rebatePrograms.id, { onDelete: "cascade" }),
+    rulesVersion: text("rules_version").notNull(),
+    /** Stable within a program, e.g. "E6" (eligibility 6) or "C2" (completion 2). */
+    code: text("code").notNull(),
+    position: integer("position").notNull(),
+    /** application | site_visit | completion | paperwork */
+    stage: text("stage").notNull(),
+    checkType: text("check_type").notNull(),
+    /** Which automatic check reads this rule, if any, e.g. "min_area". */
+    checkKey: text("check_key"),
+    title: text("title").notNull(),
+    sourceText: text("source_text").notNull(),
+    plainText: text("plain_text").notNull(),
+    parameters: jsonb("parameters").notNull().default({}),
+    sourceUrl: text("source_url").notNull(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }).notNull(),
+    verifiedBy: text("verified_by").notNull(),
+  },
+  (t) => [uniqueIndex("rebate_rules_version_code_idx").on(t.programId, t.rulesVersion, t.code)],
+);
+
+/* ------------------------------------------------------------------ *
+ * Rebates, layer two: the tracker.
+ *
+ * What happens to each plan, for our own reporting. Anonymous by design: no
+ * address, no email, no user. A project is one area of one yard (front, back
+ * or park strip). A check is one press of "Check my plan". Outcomes come
+ * later, from the owner (follow-up emails) or the program, if it shares them.
+ * ------------------------------------------------------------------ */
+
+export const rebateProjects = pgTable(
+  "rebate_projects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    programId: uuid("program_id")
+      .notNull()
+      .references(() => rebatePrograms.id),
+    /** front | back | park_strip */
+    areaKind: text("area_kind").notNull(),
+    widthFt: integer("width_ft").notNull(),
+    depthFt: integer("depth_ft").notNull(),
+    /** ZIP only, for reporting by area. Never the street address. */
+    zip: text("zip"),
+    /** Set later if a signed-in gardener saves the project. Null while anonymous. */
+    siteId: uuid("site_id").references(() => sites.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("rebate_projects_program_idx").on(t.programId, t.createdAt)],
+);
+
+export const rebateChecks = pgTable(
+  "rebate_checks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => rebateProjects.id, { onDelete: "cascade" }),
+    rulesVersion: text("rules_version").notNull(),
+    /** likely | needs_changes */
+    overall: text("overall").notNull(),
+    eligibleSqft: integer("eligible_sqft").notNull(),
+    estimatedAmount: numeric("estimated_amount"),
+    coveragePct: real("coverage_pct"),
+    /** The plan as checked (the grid and the plants), so a check can be replayed. */
+    layout: jsonb("layout").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("rebate_checks_project_idx").on(t.projectId, t.createdAt)],
+);
+
+export const rebateCheckResults = pgTable(
+  "rebate_check_results",
+  {
+    checkId: uuid("check_id")
+      .notNull()
+      .references(() => rebateChecks.id, { onDelete: "cascade" }),
+    ruleId: uuid("rule_id")
+      .notNull()
+      .references(() => rebateRules.id),
+    /** pass | warn | fail | owner_to_confirm | inspector_checks */
+    result: text("result").notNull(),
+    measuredValue: real("measured_value"),
+    note: text("note"),
+  },
+  (t) => [
+    primaryKey({ columns: [t.checkId, t.ruleId] }),
+    index("rebate_check_results_rule_idx").on(t.ruleId, t.result),
+  ],
+);
+
+export const rebateOutcomes = pgTable(
+  "rebate_outcomes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => rebateProjects.id, { onDelete: "cascade" }),
+    /** applied | site_visit_approved | site_visit_declined | completed | final_passed | final_failed | corrected | paid | withdrawn */
+    stage: text("stage").notNull(),
+    /** owner | program */
+    reportedBy: text("reported_by").notNull(),
+    reportedAt: timestamp("reported_at", { withTimezone: true }).notNull().defaultNow(),
+    /** Rule codes the program said were not met, when a stage failed. */
+    failedRuleCodes: text("failed_rule_codes").array(),
+    note: text("note"),
+  },
+  (t) => [index("rebate_outcomes_project_idx").on(t.projectId, t.reportedAt)],
 );

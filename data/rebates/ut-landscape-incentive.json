@@ -1,0 +1,292 @@
+{
+  "code": "ut-landscape-incentive",
+  "name": "Landscape Incentive Program",
+  "utilityName": "Utah Water Savers, with participating local water suppliers",
+  "perSqftAmount": 2.0,
+  "maxAward": null,
+  "amountNote": "Rates and caps can differ by local water supplier. Confirm yours on the program's page before you plan your budget.",
+  "requiresPreApproval": true,
+  "requiresPlan": true,
+  "minPlantCoveragePct": 50,
+  "minAreaSqft": 200,
+  "completionMonths": 12,
+  "correctionDays": 60,
+  "inspectionBlackoutStart": "10-15",
+  "inspectionBlackoutEnd": "04-15",
+  "payee": "Property owner",
+  "plantListUrl": null,
+  "applicationUrl": "https://www.utahwatersavers.com/landscapeincentiveprogram",
+  "status": "active",
+  "rulesVersion": "2026-11",
+  "sourceUrl": "https://www.utahwatersavers.com/landscapeincentiveprogram",
+  "verifiedAt": "2026-11-01",
+  "verifiedBy": "Project owner: rules text copied from the program's published requirements on 1 November 2026. Rate as checked in October 2026.",
+  "areas": [],
+  "rules": [
+    {
+      "code": "E1",
+      "stage": "application",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Photos, a design and a description",
+      "sourceText": "The program application must include current photos of the existing landscape, a 2-dimensional landscape design showing the project area, and a project description of what will replace the lawn.",
+      "plainText": "Your application needs photos of the lawn as it is now, a drawing of the new design seen from above, and a short description of what replaces the lawn. Your plan from us covers the drawing and the description.",
+      "parameters": {}
+    },
+    {
+      "code": "E2",
+      "stage": "site_visit",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Living lawn at the first visit",
+      "sourceText": "Project area has existing, well-maintained, living lawn at initial site visit.",
+      "plainText": "The lawn you are replacing must still be alive and looked after when the program visits. Do not let it die or remove it first.",
+      "parameters": {}
+    },
+    {
+      "code": "E3",
+      "stage": "site_visit",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Approval before you start",
+      "sourceText": "Projects started or completed prior to receiving a site visit and approval to proceed from program coordinator are ineligible for this program.",
+      "plainText": "Do not start any work until after the site visit and the program coordinator's approval. Work started earlier is not paid for.",
+      "parameters": {}
+    },
+    {
+      "code": "E4",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Finish within 12 months",
+      "sourceText": "Project must be completed within 12 months of initial site visit. Irrigation must be turned on and operational for the completed project inspection visits. These visits are typically unavailable between October 15th and April 15th in cities with secondary irrigation water.",
+      "plainText": "Finish within 12 months of the first visit, with the irrigation running for the final inspection. In cities with secondary irrigation water, inspections usually stop from 15 October to 15 April, so plan the finish date around that.",
+      "parameters": {
+        "completionMonths": 12,
+        "blackoutStart": "10-15",
+        "blackoutEnd": "04-15"
+      }
+    },
+    {
+      "code": "E5",
+      "stage": "application",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Every area meets the rules",
+      "sourceText": "Projects may be specific areas or whole landscape conversions, but each project area must meet all terms of the program.",
+      "plainText": "You can convert one area or the whole yard, but every area must meet every rule. We check one area at a time, so check each area you convert.",
+      "parameters": {}
+    },
+    {
+      "code": "E6",
+      "stage": "application",
+      "checkType": "plan_check",
+      "checkKey": "min_area",
+      "title": "At least 200 sq ft",
+      "sourceText": "Project area is at least 200 square feet. This requirement can be met with multiple smaller areas (in aggregate).",
+      "plainText": "The converted area must add up to at least 200 sq ft. Several smaller areas can be added together.",
+      "parameters": {
+        "minSqft": 200
+      }
+    },
+    {
+      "code": "E7",
+      "stage": "application",
+      "checkType": "plan_check",
+      "checkKey": "excluded_materials",
+      "title": "Materials that are not paid for",
+      "sourceText": "No impervious hardscape (concrete, asphalt, pavers, etc.), water features (pools, hot tubs, fountains, etc.), rubber mulch, or artificial turf will be incentivized. These materials may be limited or banned in certain cities. Check your city code before installing these materials in your landscape.",
+      "plainText": "Concrete, asphalt, pavers, pools, hot tubs, fountains, rubber mulch and artificial turf are not paid for. Some cities limit or ban them, so check your city code.",
+      "parameters": {
+        "excluded": [
+          "impervious_hardscape",
+          "water_features",
+          "rubber_mulch",
+          "artificial_turf"
+        ]
+      }
+    },
+    {
+      "code": "E8",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Landscape fabric",
+      "sourceText": "Landscape fabric is allowed but is not recommended.",
+      "plainText": "Weed fabric is allowed, but the program advises against it.",
+      "parameters": {}
+    },
+    {
+      "code": "E9",
+      "stage": "application",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "A new lawn does not count",
+      "sourceText": "Replacement of traditional lawns with native or drought-tolerant lawns, while encouraged, does not qualify for the incentive.",
+      "plainText": "Swapping your lawn for a native or drought-tolerant lawn is encouraged, but it is not paid for.",
+      "parameters": {}
+    },
+    {
+      "code": "E10",
+      "stage": "paperwork",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Agreement and W-9",
+      "sourceText": "Following a project's completion, a program participation agreement and IRS W-9 form will be sent to the property owner(s). Both documents must be signed and returned before a project can receive an incentive. Incentives will be paid to property owner only.",
+      "plainText": "After the project is finished, the property owner signs a participation agreement and an IRS W-9 form. The payment goes to the property owner only.",
+      "parameters": {}
+    },
+    {
+      "code": "C1",
+      "stage": "completion",
+      "checkType": "plan_check",
+      "checkKey": "lawn_width",
+      "title": "No lawn narrower than 8 ft",
+      "sourceText": "Projects may not create or leave in place any areas, lengths, or widths of lawn less than eight feet. Any remaining lawn must be eight feet wide or wider.",
+      "plainText": "Any lawn you keep must be at least 8 ft wide everywhere. Narrow strips of lawn are not allowed.",
+      "parameters": {
+        "minFt": 8
+      }
+    },
+    {
+      "code": "C2",
+      "stage": "completion",
+      "checkType": "plan_check",
+      "checkKey": "coverage",
+      "title": "Half the area covered by plants",
+      "sourceText": "The project area must have 50% perennial plant coverage at maturity at the ground plane. This does not include tree canopy, annuals, or bulbs.",
+      "plainText": "When the plants are fully grown, perennials must cover at least half the ground. Tree canopy, annuals and bulbs do not count.",
+      "parameters": {
+        "minPct": 50,
+        "excludeForms": [
+          "tree"
+        ],
+        "countLifeCycles": [
+          "perennial"
+        ]
+      }
+    },
+    {
+      "code": "C3",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Plants in the ground",
+      "sourceText": "Plants are planted directly in the ground (not in pots, burlap, or cages). Plants in pots are allowed, but do not contribute to the 50% perennial plant coverage requirement.",
+      "plainText": "Plant straight into the ground. Potted plants are allowed but do not count towards the 50% cover.",
+      "parameters": {}
+    },
+    {
+      "code": "C4",
+      "stage": "completion",
+      "checkType": "inspector_only",
+      "checkKey": null,
+      "title": "3 to 4 inches of mulch",
+      "sourceText": "The project area is covered in 3-4 inches of organic (bark, compost, etc.) or inorganic mulch (gravel, chat, flagstone chips, etc.). Rubber mulch is not permitted.",
+      "plainText": "Cover the whole area with 3 to 4 inches of mulch: bark, compost, gravel, chat or flagstone chips. No rubber mulch.",
+      "parameters": {
+        "minInches": 3,
+        "maxInches": 4
+      }
+    },
+    {
+      "code": "C5",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Drip irrigation only",
+      "sourceText": "The converted area must be drip irrigated. Each drip irrigation zone is separated from any overhead spray irrigation.",
+      "plainText": "Water the new area with drip irrigation only, on zones kept separate from any sprinklers.",
+      "parameters": {}
+    },
+    {
+      "code": "C6",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "A filter and pressure reducer on each zone",
+      "sourceText": "Each drip irrigation zone/valve is equipped with a dedicated filter and pressure reducer. Filters and pressure reducers must be accessible for regular maintenance.",
+      "plainText": "Every drip zone needs its own filter and pressure reducer, placed where you can reach them for upkeep.",
+      "parameters": {}
+    },
+    {
+      "code": "C7",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "One type of drip per zone",
+      "sourceText": "Each drip irrigation zone/valve may only use one type of drip irrigation (point source or in-line).",
+      "plainText": "Use one kind of drip on each zone: either single emitters or in-line drip tubing, not both.",
+      "parameters": {}
+    },
+    {
+      "code": "C8",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "Emitters at 5 gallons an hour or less",
+      "sourceText": "Drip emitters cannot exceed 5 gallons per hour.",
+      "plainText": "No drip emitter may put out more than 5 gallons an hour.",
+      "parameters": {
+        "maxGph": 5
+      }
+    },
+    {
+      "code": "C9",
+      "stage": "completion",
+      "checkType": "owner_confirms",
+      "checkKey": null,
+      "title": "No sprays, bubblers or soaker hoses",
+      "sourceText": "Micro-sprays, bubblers, adjustable drip emitters, and soaker hoses are not permitted.",
+      "plainText": "Micro-sprays, bubblers, adjustable emitters and soaker hoses are not allowed.",
+      "parameters": {}
+    },
+    {
+      "code": "C10",
+      "stage": "completion",
+      "checkType": "plan_check",
+      "checkKey": "park_strip_height",
+      "title": "Park strip plants under 24 inches",
+      "sourceText": "Park strip project areas must have 50% perennial plant coverage at the ground level at maturity with no perennials exceeding 24 inches tall at maturity. Plants that must be pruned to stay below 24 inches are not allowed.",
+      "plainText": "In a park strip, every perennial must stay under 24 inches when fully grown, without pruning. The 50% cover rule applies too.",
+      "parameters": {
+        "maxInches": 24
+      }
+    },
+    {
+      "code": "C11",
+      "stage": "completion",
+      "checkType": "inspector_only",
+      "checkKey": null,
+      "title": "Working, leak-free irrigation at the final visit",
+      "sourceText": "For the final visit, irrigation must be operational and free of leaks. Filters and pressure reducers must be accessible and visible.",
+      "plainText": "At the final visit the irrigation must run with no leaks, and the filters and pressure reducers must be easy to see and reach.",
+      "parameters": {}
+    },
+    {
+      "code": "C12",
+      "stage": "completion",
+      "checkType": "plan_check",
+      "checkKey": "hardscape_share",
+      "title": "Hardscape limits",
+      "sourceText": "Hardscape cannot exceed 50% of the front yard landscaped area or 75% of the backyard landscaped area.",
+      "plainText": "Hardscape can cover no more than half of a front yard, or three quarters of a backyard.",
+      "parameters": {
+        "frontMaxPct": 50,
+        "backMaxPct": 75
+      }
+    },
+    {
+      "code": "C13",
+      "stage": "completion",
+      "checkType": "inspector_only",
+      "checkKey": null,
+      "title": "Time to fix anything that fails",
+      "sourceText": "Any portion of the installed project that does not meet the requirements at the final inspection may be corrected within 60 days from the inspection or within the remainder of the designated time frame, whichever is greater, without penalty.",
+      "plainText": "If part of the project fails the final inspection, you have 60 days to fix it, or the rest of your 12 months if that is longer.",
+      "parameters": {
+        "correctionDays": 60
+      }
+    }
+  ]
+}

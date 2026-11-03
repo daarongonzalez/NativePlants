@@ -21,6 +21,9 @@ function row(overrides: Partial<Record<(typeof PLANT_CSV_COLUMNS)[number], strin
     zone_max: "8a",
     mature_height_cm: "60",
     mature_width_cm: "45",
+    life_cycle: "perennial",
+    plant_form: "wildflower",
+    stays_under_24in: "yes",
     bloom_start_month: "5",
     bloom_end_month: "7",
     native_status: "native",
@@ -111,6 +114,30 @@ describe("parsePlantCsv", () => {
 
   it("does not guess at a yes/no it cannot read", () => {
     expect(parsePlantCsv(sheet(row({ deer_resistant: "sometimes" }))).errors[0]).toMatch(/must be yes or no/);
+  });
+
+  it("reads the rebate fields", () => {
+    const { plants } = parsePlantCsv(sheet(row()));
+    expect(plants[0]).toMatchObject({ lifeCycle: "perennial", plantForm: "wildflower", staysUnder24In: true });
+  });
+
+  it("lets a draft leave the rebate fields blank, but not a reviewed plant", () => {
+    const blank = { life_cycle: "", plant_form: "", stays_under_24in: "" };
+    expect(parsePlantCsv(sheet(row({ ...blank, review_status: "draft" }))).errors).toEqual([]);
+    const { errors } = parsePlantCsv(sheet(row({ ...blank, review_status: "reviewed" })));
+    expect(errors).toHaveLength(3);
+    expect(errors[0]).toMatch(/needs life_cycle/);
+  });
+
+  it("rejects a plant marked under 24 inches that grows taller", () => {
+    const { errors } = parsePlantCsv(sheet(row({ mature_height_cm: "90", stays_under_24in: "yes" })));
+    expect(errors[0]).toMatch(/stays_under_24in is yes but mature_height_cm is over 61/);
+  });
+
+  it("rejects an unknown life cycle or plant form", () => {
+    const { errors } = parsePlantCsv(sheet(row({ life_cycle: "forever", plant_form: "blob" })));
+    expect(errors.join(" ")).toMatch(/life_cycle "forever"/);
+    expect(errors.join(" ")).toMatch(/plant_form "blob"/);
   });
 
   it("keeps a toxicity note when one is given", () => {

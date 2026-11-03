@@ -33,6 +33,10 @@ export function toDomainPlant(row: PlantRow): Plant {
     matureHeightCm: row.matureHeightCm,
     matureWidthCm: row.matureWidthCm,
 
+    lifeCycle: (row.lifeCycle as Plant["lifeCycle"]) ?? null,
+    plantForm: (row.plantForm as Plant["plantForm"]) ?? null,
+    staysUnder24In: row.staysUnder24In,
+
     bloomStartMonth: row.bloomStartMonth,
     bloomEndMonth: row.bloomEndMonth,
 
