@@ -1,14 +1,15 @@
 # Rebate Program Discovery
 
-Status: **parked** — researched and shelved deliberately, September 2026.
+Status: **Utah brought into V1**, November 2026. Everything beyond Utah stays
+parked. The Utah plan is in [plan-2026-11.md](../plan-2026-11.md).
 
-> **On the shelf until V1 ships.** This is a real asset and a strong acquisition
-> channel, and it is exactly the kind of work that quietly becomes a second
-> product and delays the first. Nothing here gets built until V1 is live in one
-> market. The Utah slice (one statewide program, ~60 communities) is the only
-> part that comes forward early, and only as a display field.
+> **Utah only, in V1.** The rules database, eligibility check and tracker for
+> the Utah program are now in scope. The national registry described below is
+> still parked: it is exactly the kind of work that quietly becomes a second
+> product and delays the first.
 >
-> Revisit trigger: V1 shipped and converting in the Wasatch Front.
+> Revisit trigger for the wider registry: V1 shipped and converting in the
+> Wasatch Front.
 
 ## The short answer
 
