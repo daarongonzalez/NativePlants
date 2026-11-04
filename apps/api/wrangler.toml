@@ -27,6 +27,9 @@ id = "1cb0f9131fe848c899674e965b755592"
 # No API key, no service account, no secret anywhere in this Worker.
 FIREBASE_PROJECT_ID = "nativeplants-eb3c5"
 MARKET = "wasatch-front"
+# The plot planner offers draft plants, labelled as drafts, until the reviewer
+# publishes the sheet. Set to "published" (or remove) once they have.
+PLANNER_PLANTS = "drafts"
 
 [observability]
 enabled = true

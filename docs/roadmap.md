@@ -55,11 +55,20 @@ Where this stops being a lookup tool and becomes a product.
 - Stripe Connect checkout, or a handoff to the nursery if the marketplace
   model does not pencil out.
 
+## Phase 5 — The full rebate service
+
+- Photo checks for the items only an owner can confirm today.
+- Every rebate step handled for the homeowner, from application to payment.
+- Introductions to participating nurseries and trades, built on the same
+  project record.
+- Groundwork is already in the V1 rebate tables. See
+  [plan-2026-11.md](plan-2026-11.md).
+
 ## Deliberately later
 
 - Native mobile apps. The web app is enough for a long time.
-- Photo analysis of yards. Expensive, and the value only shows up after
-  planning exists.
+- Photo analysis of yards, beyond the rebate checks in Phase 5. Expensive,
+  and the value only shows up after planning exists.
 - Anywhere outside the US. Soil and plant data get much harder immediately.
 - AI chat. Tempting and easy to add badly. The structured recommendation has to
   be trustworthy first.

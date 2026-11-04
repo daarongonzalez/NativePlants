@@ -29,6 +29,9 @@ Only rows marked `published` are shown to gardeners.
 | `drainage_tolerated` | One or more of `excessively_drained`, `somewhat_excessively_drained`, `well_drained`, `moderately_well_drained`, `somewhat_poorly_drained`, `poorly_drained`, `very_poorly_drained`, separated by `\|` |
 | `zone_min`, `zone_max` | Hardiness zones such as `4b`, coldest first |
 | `mature_height_cm`, `mature_width_cm` | Size at maturity |
+| `life_cycle` | `perennial`, `annual`, `biennial` or `bulb`. Only perennials count towards the Utah rebate's 50% plant cover. Blank allowed on drafts only |
+| `plant_form` | `groundcover`, `wildflower`, `grass`, `shrub`, `tree` or `vine`. Tree canopy does not count towards the cover. Blank allowed on drafts only |
+| `stays_under_24in` | `yes` only if it stays under 24 inches when grown **without pruning** (the park strip rule). Cannot be `yes` if `mature_height_cm` is over 61. Blank allowed on drafts only |
 | `bloom_start_month`, `bloom_end_month` | 1 to 12, both or neither |
 | `native_status` | `native`, `regionally_native`, `adapted` or `introduced` |
 | `deer_resistant`, `edible`, `good_for_cutting` | `yes` or `no` |

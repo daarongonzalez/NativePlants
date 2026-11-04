@@ -15,6 +15,13 @@
       "when": 1792822187932,
       "tag": "0001_add_site_sun_exposure",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793677445759,
+      "tag": "0002_rebates",
+      "breakpoints": true
     }
   ]
 }

@@ -19,6 +19,7 @@ import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
 import { toDomainProfile } from "./profile";
+import { publicRoutes } from "./public";
 import { resolveSite } from "./resolve";
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -26,6 +27,9 @@ const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use("*", cors({ origin: ["http://localhost:5173"], credentials: true }));
 
 app.get("/v1/health", (c) => c.json({ ok: true, market: c.env.MARKET }));
+
+// No sign-in: the first answer is free. Mounted before the protected routes.
+app.route("/v1/public", publicRoutes);
 
 const protectedRoutes = new Hono<{ Bindings: Env; Variables: Variables }>();
 protectedRoutes.use("*", requireAuth);

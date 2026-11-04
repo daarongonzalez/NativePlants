@@ -1,17 +1,13 @@
-import type { FormEvent } from "react";
-import { Responsive } from "./primitives";
+import { Form } from "react-router";
 
 export type AddressState = {
   addr: string;
-  submitted: boolean;
   setAddr: (value: string) => void;
-  submit: () => void;
 };
 
 /**
- * The address pill. Appears twice on the page with shared state. On submit
- * it will move on to the Address Confirm (pin) step; until that page exists
- * it confirms the address in place.
+ * The address pill. Appears twice on the page with shared state, and starts
+ * the flow: it opens the address check at /start.
  */
 export function AddressForm({
   state,
@@ -22,34 +18,22 @@ export function AddressForm({
   placeholder: string;
   tone: "green" | "gold";
 }) {
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    state.submit();
-  };
   return (
-    <form className={`lp-address lp-address--${tone}`} onSubmit={onSubmit}>
+    <Form method="get" action="/start" className={`lp-address lp-address--${tone}`}>
       <input
         className="lp-address__input"
+        name="address"
         value={state.addr}
         onChange={(e) => state.setAddr(e.target.value)}
         placeholder={placeholder}
         aria-label="Street address"
         autoComplete="street-address"
+        required
+        minLength={5}
       />
       <button type="submit" className={`lp-button lp-button--${tone} lp-address__button`}>
         Check my ground
       </button>
-    </form>
-  );
-}
-
-export function AddressConfirmation({ state, full }: { state: AddressState; full: boolean }) {
-  if (!state.submitted) return null;
-  const place = state.addr.trim() || "your address";
-  return (
-    <p className="lp-address__done" role="status">
-      Off we go to {place}!
-      {full && <Responsive desktop=" Next you'll pop a pin on your yard." phone="" />}
-    </p>
+    </Form>
   );
 }

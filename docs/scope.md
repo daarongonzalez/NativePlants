@@ -1,6 +1,7 @@
 # V1 Scope Boundary
 
-Status: authoritative. September 2026.
+Status: authoritative. September 2026, revised 3 November 2026 (see
+[Changes](#changes)).
 
 This is the single list. When something is proposed and someone asks "is that in
 V1?", the answer is here and nowhere else. Anything not listed as in-scope is
@@ -10,7 +11,7 @@ out of scope, including good ideas.
 
 | Capability | Notes |
 |---|---|
-| Gardener sign-in | Firebase, email + Google |
+| Gardener sign-in | Backend only. Sign-in screens wait; email delivers the plan instead (November 2026) |
 | Address entry and geocoding | Census geocoder, with a draggable pin |
 | Hardiness zone | From our own ingested table |
 | Frost probability bands | NOAA 1991–2020, 10/50/90 percent |
@@ -20,9 +21,15 @@ out of scope, including good ideas.
 | Site profile report screen | The hero artifact; gets real design time |
 | Plant recommendations | 60–100 curated species, one market |
 | Reasons on every recommendation | Plain language, from the scoring engine |
-| Goal filters | Pollinators, low water, deer resistant, cut flowers, edible |
+| Goal filters | Pollinators, low water, deer resistant. Edible and cut flowers wait (November 2026) |
 | Saved plant list | Printable — this is what goes to a nursery in V1 |
 | Profile error reporting | A gardener telling us we got it wrong |
+| Address-to-plan flow | Address, pin, profile (free), the plan-and-rebate game, then email to get the plan. See [plan-2026-11.md](plan-2026-11.md) |
+| Rebate rules database | Utah only. Programs, participating areas and every rule, with source text and a last-checked date |
+| Rebate eligibility check | Each rule marked pass, warn, fail or owner to confirm. Never a promise of approval |
+| Rebate tracker | Our check results plus outcomes owners report, from application to payment |
+| Plan by email | Needs the privacy policy, terms and consent wording first |
+| Starter content pages | About, FAQ, the Utah rebate page and the first blog posts, written to be quoted by answer engines |
 
 **Market:** Wasatch Front only — Salt Lake, Utah, Davis and Weber counties.
 
@@ -70,7 +77,8 @@ media, no vision calls. The `plant_media` table serves catalogue images only.
 | Garden layout and bed drawing | Phase 3. Depends on the profile being trusted first |
 | Nursery accounts and inventory | Phase 4. Needs signed partners, not code |
 | Payments and subscriptions | Phase 4. Marketplace vs referral is undecided |
-| Rebate registry | Parked — see [rebate-programs.md](research/rebate-programs.md). Utah appears as a display field only |
+| Rebate registry beyond Utah | Parked — see [rebate-programs.md](research/rebate-programs.md). Utah came into V1 in November 2026 |
+| Photo checks and a full rebate service | Later. The data model leaves room for both; see [plan-2026-11.md](plan-2026-11.md) |
 | Native mobile apps | The web app is enough for a long time |
 | Any market outside the Wasatch Front | Curation sets the pace, not code |
 | AI chat | The structured recommendation must be trustworthy before anything speaks for it |
@@ -101,3 +109,18 @@ Distinct from user uploads and **not** parked. V1 needs plant images.
 Scope changes are fine. Silent scope changes are not. Anything added here needs
 a line saying what moved out to make room, because the constraint is calendar
 time and reviewer attention, not ambition.
+
+## Changes
+
+### 3 November 2026
+
+**Added:** the Utah rebate rules database and tracker, the address-to-plan
+flow with email delivery, the eligibility check, and starter content pages.
+Reasons and order of work: [plan-2026-11.md](plan-2026-11.md).
+
+**Moved out to make room (proposed, to be confirmed):**
+
+- Sign-in screens for gardeners. Email delivers the plan instead. The backend
+  sign-in already built stays.
+- The edible and cut-flower filters. V1 leads with native, water-wise planting.
+

@@ -1,8 +1,10 @@
 import { FrostNormalsJob } from "./frost";
 import { HardinessZoneJob } from "./zones";
 import { PlantImportJob } from "./plants";
+import { RebateImportJob } from "./rebates";
 import { SoilJob } from "./soil";
 import plantsCsv from "../../../data/plants/wasatch-plants.csv";
+import utahRebate from "../../../data/rebates/ut-landscape-incentive.json";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 import { WASATCH_FRONT_ZIPS } from "./wasatch-zips";
 import { WASATCH_FRONT_FROST } from "./data/wasatch-frost";
@@ -46,14 +48,18 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    // Soil is heavy and the plant import is a deliberate act, so both are
-    // opt-in rather than part of the default run.
+    // Soil is heavy, and the plant and rebate imports are deliberate acts, so
+    // all three are opt-in rather than part of the default run.
     const job = url.searchParams.get("job");
 
     if (job === "soil") return runSoil(env, url.searchParams.get("cursor"));
 
     const results =
-      job === "plants" ? await runJobs(env, [new PlantImportJob(plantsCsv)]) : await runAll(env);
+      job === "plants"
+        ? await runJobs(env, [new PlantImportJob(plantsCsv)])
+        : job === "rebates"
+          ? await runJobs(env, [new RebateImportJob([utahRebate])])
+          : await runAll(env);
     return Response.json({ results });
   },
 } satisfies ExportedHandler<IngestEnv>;

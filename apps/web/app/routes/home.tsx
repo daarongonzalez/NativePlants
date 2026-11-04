@@ -24,19 +24,10 @@ export function meta(_: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [addr, setAddrValue] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [addr, setAddr] = useState("");
 
-  // Shared by both address forms. Editing the field clears the confirmation.
-  const address: AddressState = {
-    addr,
-    submitted,
-    setAddr: (value) => {
-      setAddrValue(value);
-      setSubmitted(false);
-    },
-    submit: () => setSubmitted(true),
-  };
+  // Shared by both address forms, so typing in one fills the other.
+  const address: AddressState = { addr, setAddr };
 
   return (
     <div className="lp">

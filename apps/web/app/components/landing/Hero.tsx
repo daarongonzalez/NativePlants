@@ -1,4 +1,4 @@
-import { AddressConfirmation, AddressForm, type AddressState } from "./AddressForm";
+import { AddressForm, type AddressState } from "./AddressForm";
 import { PlotPlanner } from "./PlotPlanner";
 import { Responsive } from "./primitives";
 
@@ -33,7 +33,6 @@ export function Hero({ address }: { address: AddressState }) {
           tone="green"
           placeholder="Where's your yard? e.g. 300 S State St"
         />
-        <AddressConfirmation state={address} full />
         <Psst placement="side" />
       </div>
       <div className="lp-hero__planner">

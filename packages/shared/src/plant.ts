@@ -23,6 +23,21 @@ export const nativeStatusSchema = z.enum([
 export type NativeStatus = z.infer<typeof nativeStatusSchema>;
 
 /**
+ * Rebate fields. Utah's Landscape Incentive Program counts only perennials at
+ * the ground plane towards its 50% cover rule (no tree canopy, annuals or
+ * bulbs), and park strips allow nothing over 24 inches at maturity, so the
+ * catalogue has to say which is which.
+ */
+export const lifeCycleSchema = z.enum(["perennial", "annual", "biennial", "bulb"]);
+export type LifeCycle = z.infer<typeof lifeCycleSchema>;
+
+export const plantFormSchema = z.enum(["groundcover", "wildflower", "grass", "shrub", "tree", "vine"]);
+export type PlantForm = z.infer<typeof plantFormSchema>;
+
+/** 24 inches, the park strip height limit, in the catalogue's unit. */
+export const PARK_STRIP_MAX_HEIGHT_CM = 61;
+
+/**
  * A curated plant record.
  *
  * Every tolerance is a RANGE with an optimum, not a single value. "Full sun"
@@ -49,6 +64,12 @@ export const plantSchema = z.object({
 
   matureHeightCm: z.number().positive(),
   matureWidthCm: z.number().positive(),
+
+  /** Null only on drafts that have not been filled in yet. */
+  lifeCycle: lifeCycleSchema.nullable(),
+  plantForm: plantFormSchema.nullable(),
+  /** True only if it stays under 24 inches at maturity without pruning. */
+  staysUnder24In: z.boolean().nullable(),
 
   bloomStartMonth: z.number().int().min(1).max(12).nullable(),
   bloomEndMonth: z.number().int().min(1).max(12).nullable(),

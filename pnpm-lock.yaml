@@ -79,6 +79,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@np/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@np/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@np/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -135,6 +141,9 @@ importers:
         specifier: ^8.16.3
         version: 8.23.0
     devDependencies:
+      '@np/engine':
+        specifier: workspace:*
+        version: link:../engine
       '@types/pg':
         specifier: ^8.11.10
         version: 8.23.1

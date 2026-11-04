@@ -1,5 +1,15 @@
 import { drainageClassSchema } from "./site";
-import { nativeStatusSchema, waterUseSchema, type NativeStatus, type WaterUse } from "./plant";
+import {
+  PARK_STRIP_MAX_HEIGHT_CM,
+  lifeCycleSchema,
+  nativeStatusSchema,
+  plantFormSchema,
+  waterUseSchema,
+  type LifeCycle,
+  type NativeStatus,
+  type PlantForm,
+  type WaterUse,
+} from "./plant";
 import { zoneToOrdinal } from "./units";
 
 /**
@@ -30,6 +40,9 @@ export const PLANT_CSV_COLUMNS = [
   "zone_max",
   "mature_height_cm",
   "mature_width_cm",
+  "life_cycle",
+  "plant_form",
+  "stays_under_24in",
   "bloom_start_month",
   "bloom_end_month",
   "native_status",
@@ -57,6 +70,9 @@ export interface PlantRow {
   zoneMaxOrdinal: number;
   matureHeightCm: number;
   matureWidthCm: number;
+  lifeCycle: LifeCycle | null;
+  plantForm: PlantForm | null;
+  staysUnder24In: boolean | null;
   bloomStartMonth: number | null;
   bloomEndMonth: number | null;
   nativeStatus: NativeStatus;
@@ -208,6 +224,23 @@ export function parsePlantCsv(text: string): PlantCsvResult {
     const heightCm = number("mature_height_cm", 1, 6000);
     const widthCm = number("mature_width_cm", 1, 6000);
 
+    // Rebate fields: may be blank on a draft, never on a reviewed plant.
+    const lifeCycleRaw = get("life_cycle");
+    const plantFormRaw = get("plant_form");
+    const under24Raw = get("stays_under_24in");
+    const lifeCycle = lifeCycleSchema.safeParse(lifeCycleRaw);
+    const plantForm = plantFormSchema.safeParse(plantFormRaw);
+    const under24 = under24Raw === "" ? null : parseBool(under24Raw);
+    if (lifeCycleRaw !== "" && !lifeCycle.success) problems.push(`life_cycle "${lifeCycleRaw}" must be one of perennial, annual, biennial, bulb`);
+    if (plantFormRaw !== "" && !plantForm.success) problems.push(`plant_form "${plantFormRaw}" must be one of groundcover, wildflower, grass, shrub, tree, vine`);
+    if (under24Raw !== "" && under24 === null) problems.push(`stays_under_24in "${under24Raw}" must be yes or no`);
+    if (under24 === true && heightCm > PARK_STRIP_MAX_HEIGHT_CM) problems.push(`stays_under_24in is yes but mature_height_cm is over ${PARK_STRIP_MAX_HEIGHT_CM}`);
+    if (get("review_status") !== "draft") {
+      for (const [c, raw] of [["life_cycle", lifeCycleRaw], ["plant_form", plantFormRaw], ["stays_under_24in", under24Raw]] as const) {
+        if (raw === "") problems.push(`a reviewed or published plant needs ${c}`);
+      }
+    }
+
     const bloomStart = month("bloom_start_month");
     const bloomEnd = month("bloom_end_month");
     if ((bloomStart === null) !== (bloomEnd === null)) problems.push("give both bloom months or neither");
@@ -256,6 +289,9 @@ export function parsePlantCsv(text: string): PlantCsvResult {
       zoneMaxOrdinal: zoneMax!,
       matureHeightCm: heightCm,
       matureWidthCm: widthCm,
+      lifeCycle: lifeCycle.success ? lifeCycle.data : null,
+      plantForm: plantForm.success ? plantForm.data : null,
+      staysUnder24In: under24,
       bloomStartMonth: bloomStart,
       bloomEndMonth: bloomEnd,
       nativeStatus: nativeStatus.success ? nativeStatus.data : "native",

@@ -665,6 +665,20 @@
 .lp-footnote {
   order: 5;
 }
+.lp-planner__real {
+  order: 6;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-3);
+}
+.lp-planner__real,
+.lp-planner__real:hover {
+  color: var(--on-dark);
+}
 
 .lp-sage {
   display: grid;
