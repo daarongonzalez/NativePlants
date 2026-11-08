@@ -1,6 +1,5 @@
 import { Form, Link, redirect } from "react-router";
 import type { Route } from "./+types/start";
-import landingStyles from "../styles/landing.css?url";
 import flowStyles from "../styles/flow.css?url";
 import { api } from "../lib/api.server";
 import { MATCH_LABELS, placeToParams, type AddressMatch } from "../lib/flow";
@@ -8,7 +7,6 @@ import { FlowShell } from "../components/flow/Shell";
 import { Window } from "../components/landing/primitives";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "stylesheet", href: landingStyles },
   { rel: "stylesheet", href: flowStyles },
 ];
 

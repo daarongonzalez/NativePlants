@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useFetcher, type ShouldRevalidateFunctionArgs } from "react-router";
 import type { Route } from "./+types/plan";
-import landingStyles from "../styles/landing.css?url";
 import flowStyles from "../styles/flow.css?url";
 import type { RebateCheck, RuleOutcome, RuleStage } from "@np/shared";
 import { api } from "../lib/api.server";
@@ -15,12 +14,12 @@ import {
   type ProgramResponse,
 } from "../lib/flow";
 import type { Plan } from "../lib/planner";
+import { savePlanPlants, updateList } from "../lib/plant-list";
 import { FlowShell } from "../components/flow/Shell";
 import { Planner, RESULT_LABELS } from "../components/flow/Planner";
 import { Window } from "../components/landing/primitives";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "stylesheet", href: landingStyles },
   { rel: "stylesheet", href: flowStyles },
 ];
 
@@ -93,12 +92,14 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
   const { place, data, error } = loaderData;
   const fetcher = useFetcher<typeof action>();
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
+  const [listSaved, setListSaved] = useState<"idle" | "saved" | "failed">("idle");
 
   const result = fetcher.data;
   useEffect(() => {
     if (result?.ok && result.projectId) {
       saveProject(result.projectId);
       setCheckedAt(new Date().toISOString());
+      setListSaved("idle");
     }
   }, [result]);
 
@@ -108,6 +109,14 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
         <section className="fl-head">
           <h1 className="lp-h2">The planner is resting</h1>
           <p className="lp-lead">{error}</p>
+          <div className="fl-actions">
+            <a href={place ? `/plan?${placeToParams(place)}` : "/plan"} className="lp-button lp-button--green fl-button-link">
+              Try again
+            </a>
+            <Link to="/rebates/utah" className="lp-button lp-button--paper fl-button-link">
+              Read the rules meanwhile
+            </Link>
+          </div>
         </section>
       </FlowShell>
     );
@@ -186,6 +195,38 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
                 </ul>
               </div>
             )}
+            {recorded.plants.length > 0 && (
+              <div className="fl-actions">
+                {listSaved === "saved" ? (
+                  <Link to="/list" className="lp-button lp-button--gold fl-button-link">
+                    Saved · open my list
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="lp-button lp-button--gold fl-button-link"
+                    onClick={() => {
+                      const byId = new Map(plants.map((p) => [p.id, p]));
+                      const items = recorded.plants.flatMap((t) => {
+                        const plant = byId.get(t.plantId);
+                        return plant ? [{ plant, count: t.plantCount }] : [];
+                      });
+                      setListSaved(updateList((l) => savePlanPlants(l, items)) ? "saved" : "failed");
+                    }}
+                  >
+                    Save these plants to my list
+                  </button>
+                )}
+                <button type="button" className="lp-button lp-button--paper fl-button-link" onClick={() => window.print()}>
+                  Print this plan
+                </button>
+              </div>
+            )}
+            {listSaved === "failed" && (
+              <p className="fl-error" role="alert">
+                Your browser would not save the list. Private windows sometimes block saving. You can still print this plan.
+              </p>
+            )}
             <p className="fl-source">
               Checked {checkedAt ? formatDate(checkedAt) : "just now"} against rules version {program.rulesVersion}.
               Only the program can approve a project.
@@ -193,7 +234,7 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
           </Window>
           <aside className="lp-note lp-note--peach fl-note fl-note--right">
             <span className="lp-note__kicker">COMING NEXT</span>
-            <p>Soon you can send this plan to your inbox, with the plant list, the checklist and the program's deadlines.</p>
+            <p>Soon you can send this plan to your inbox, with the plant list, the checklist and the program's deadlines. For now, save it to your list or print it.</p>
           </aside>
         </section>
       )}

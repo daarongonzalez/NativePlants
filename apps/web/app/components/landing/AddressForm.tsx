@@ -1,4 +1,4 @@
-import { Form } from "react-router";
+import { Form, useNavigation } from "react-router";
 
 export type AddressState = {
   addr: string;
@@ -18,6 +18,8 @@ export function AddressForm({
   placeholder: string;
   tone: "green" | "gold";
 }) {
+  const navigation = useNavigation();
+  const looking = navigation.state !== "idle" && navigation.location?.pathname === "/start";
   return (
     <Form method="get" action="/start" className={`lp-address lp-address--${tone}`}>
       <input
@@ -31,8 +33,8 @@ export function AddressForm({
         required
         minLength={5}
       />
-      <button type="submit" className={`lp-button lp-button--${tone} lp-address__button`}>
-        Check my ground
+      <button type="submit" className={`lp-button lp-button--${tone} lp-address__button`} disabled={looking}>
+        {looking ? "Looking it up…" : "Check my ground"}
       </button>
     </Form>
   );

@@ -34,7 +34,7 @@ export function NativeYard() {
             Why a native yard
           </h2>
           <p className="lp-body-lg lp-only-desktop">
-            They grew up here. Alkaline soil and dry summers don't bother them one bit.
+            They grew up where you live. Your soil and your summers don't bother them one bit.
           </p>
           <img src={tree} alt="" className="lp-native__tree lp-only-desktop" />
         </div>
@@ -48,14 +48,14 @@ export function NativeYard() {
               </p>
             </article>
           ))}
-          {/* Confirm the HOA law wording before launch. */}
+          {/* Confirm the HOA law wording before launch. Utah is the example. */}
           <aside className="lp-card lp-note--peach lp-card--note">
             <span className="lp-note__kicker">GOOD TO KNOW</span>
-            <h3 className="lp-h3-card">Your HOA can't say no</h3>
+            <h3 className="lp-h3-card">Your HOA may not get a say</h3>
             <p className="lp-body-sm">
               <Responsive
-                desktop="Since 2023, Utah HOAs can require no more than half a yard to be non-water-wise."
-                phone="Since 2023, HOAs can require no more than half a yard be non-water-wise."
+                desktop="Some states limit what an HOA can require. In Utah, since 2023, an HOA can require no more than half a yard to be non-water-wise."
+                phone="Some states limit HOAs. In Utah, they can require no more than half a yard be non-water-wise."
               />
             </p>
           </aside>

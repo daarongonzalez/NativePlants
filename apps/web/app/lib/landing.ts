@@ -63,7 +63,7 @@ export function sageLine(yard: readonly Tile[]): string {
   if (sqft === 0) return "Pick a seed below, then tap a patch of grass. Go on, it doesn't bite!";
   if (sqft === PLOT_TILES * SQFT_PER_TILE) return "A whole native yard! The bees are writing you a thank-you note.";
   if (sqft < REBATE_MIN_SQFT) return `Nice! Just ${REBATE_MIN_SQFT - sqft} more sq ft and the rebate kicks in.`;
-  return `That's ${formatDollars(rebateFor(sqft))} from Utah. Ready to try your real yard? Pop your address in.`;
+  return `That's ${formatDollars(rebateFor(sqft))} at Utah's rate. Ready to try your real yard? Pop your address in.`;
 }
 
 export const clampLawn = (sqft: number) => Math.min(LAWN_MAX, Math.max(LAWN_MIN, sqft));

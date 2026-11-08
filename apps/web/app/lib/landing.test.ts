@@ -32,7 +32,7 @@ describe("plot planner", () => {
     yard = tapTile(yard, 0, 0);
     expect(sageLine(yard)).toBe("Nice! Just 175 more sq ft and the rebate kicks in.");
     for (let i = 1; i < 8; i++) yard = tapTile(yard, i, 0);
-    expect(sageLine(yard)).toBe("That's $400 from Utah. Ready to try your real yard? Pop your address in.");
+    expect(sageLine(yard)).toBe("That's $400 at Utah's rate. Ready to try your real yard? Pop your address in.");
     yard = yard.map(() => 1);
     expect(sageLine(yard)).toMatch(/whole native yard/);
   });

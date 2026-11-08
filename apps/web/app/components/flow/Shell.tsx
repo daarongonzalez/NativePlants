@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Nav } from "../landing/Nav";
+import { SiteFooter } from "../site/SiteFooter";
 
 export const STEPS = ["Your address", "Your ground", "Plan and rebate", "Get your plan"] as const;
 
@@ -32,10 +33,7 @@ export function FlowShell({ step, children }: { step: 1 | 2 | 3; children: React
         <FlowSteps current={step} />
         {children}
       </main>
-      <footer className="lp-wrap fl-footer">
-        <span className="lp-wordmark lp-wordmark--footer">nativo</span>
-        <span>Advice, not a guarantee. Only the rebate program can approve a project.</span>
-      </footer>
+      <SiteFooter note="Advice, not a guarantee. Only the rebate program can approve a project." />
     </div>
   );
 }

@@ -1,0 +1,797 @@
+/*
+ * Site-wide pieces: the footer, content pages (About, FAQ, rebates, guides,
+ * privacy, terms), the plant list, loading and error states, and print.
+ * Loaded once from root.tsx, after the design system and base.css.
+ * Builds on the landing page's lp-* pieces. Tokens only.
+ *
+ * Breakpoints match the landing page: phone below 768px, stacked below 1024px.
+ */
+
+/* ---- Footer ---------------------------------------------------------------- */
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-24);
+  row-gap: var(--space-8);
+  padding-block: var(--space-32) var(--space-48);
+  border-top: var(--border-2) solid var(--line);
+  font-size: var(--type-caption);
+}
+.site-footer__note {
+  flex: 1 1 var(--size-measure-sm);
+}
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-20);
+}
+.site-footer__links a,
+.lp-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--np-touch-min);
+  min-width: var(--np-touch-min);
+}
+
+/* ---- Content page frame -------------------------------------------------------- */
+
+.ct-main {
+  padding-block: var(--space-48) var(--section-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-56);
+}
+
+.ct-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+  max-width: var(--size-heading-measure);
+}
+.ct-head .lp-h1,
+.ct-head .lp-h2 {
+  text-wrap: balance;
+}
+
+.ct-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-8) var(--space-16);
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+}
+.ct-byline__sep {
+  opacity: 0.5;
+}
+
+.ct-draft {
+  background: var(--sky);
+  border: var(--border-2) dashed var(--line);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-12);
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+}
+
+.ct-placeholder {
+  background: var(--gold-light);
+  padding-inline: var(--space-4);
+  font-family: var(--np-font-mono);
+  font-size: 0.9em;
+}
+
+/* One drawing per section: beside a heading, or under the aside's notes. */
+.ct-head__art {
+  height: var(--space-72);
+  width: auto;
+}
+.ct-aside__art {
+  height: var(--space-112);
+  width: auto;
+  align-self: center;
+}
+
+/* Text column beside an optional aside: notes, a contents list. */
+.ct-layout {
+  display: grid;
+  grid-template-columns: minmax(0, var(--size-heading-measure)) var(--size-note);
+  gap: var(--space-64);
+  align-items: start;
+}
+.ct-layout--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ct-aside {
+  position: sticky;
+  top: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+/* ---- Prose ---------------------------------------------------------------------------- */
+
+.ct-prose {
+  max-width: var(--size-heading-measure);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  font-size: var(--type-body-lg);
+  line-height: 1.5;
+}
+.ct-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-h3);
+  line-height: 1.1;
+  color: var(--green);
+  margin-top: var(--space-32);
+  scroll-margin-top: var(--space-24);
+}
+.ct-prose h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-h3-card);
+  line-height: 1.2;
+  margin-top: var(--space-16);
+}
+.ct-prose > :first-child {
+  margin-top: 0;
+}
+.ct-prose p {
+  text-wrap: pretty;
+}
+.ct-prose ul,
+.ct-prose ol {
+  margin: 0;
+  padding-left: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.ct-prose ul li::marker {
+  color: var(--clay);
+}
+.ct-prose ol li::marker {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--green);
+}
+.ct-prose blockquote {
+  margin: 0;
+  padding: var(--space-12) var(--space-20);
+  border-left: var(--border-2) solid var(--line);
+  background: var(--paper);
+  font-size: var(--type-body);
+}
+.ct-prose .np-value,
+.ct-mono {
+  font-family: var(--np-font-mono);
+  font-size: 0.9em;
+}
+
+/* The short answer at the top of a guide: what an answer engine should quote. */
+.ct-answer {
+  max-width: var(--size-heading-measure);
+}
+.ct-answer .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.ct-answer ul {
+  margin: 0;
+  padding-left: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--type-body-lg);
+}
+.ct-answer li::marker {
+  color: var(--clay);
+}
+
+/* Sticky notes in the aside. Neighbours tilt opposite ways. */
+.ct-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-20) var(--space-24);
+  border-radius: var(--radius-note);
+  box-shadow: var(--shadow-4);
+  font-size: var(--type-body);
+}
+.ct-note--left {
+  transform: var(--tilt-left-sm);
+}
+.ct-note--right {
+  transform: var(--tilt-right-xs);
+}
+
+/* Contents list in the aside. */
+.ct-toc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ct-toc a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--np-touch-min);
+  color: var(--ink);
+}
+
+/* Sources at the foot of a page. */
+.ct-sources {
+  max-width: var(--size-heading-measure);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-top: var(--space-24);
+  border-top: var(--border-2) solid var(--line);
+}
+.ct-sources ol {
+  margin: 0;
+  padding-left: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* ---- Cards and lists of links ------------------------------------------------------------- */
+
+.ct-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-24);
+  align-items: start;
+}
+.ct-cards > :nth-child(even) {
+  margin-top: var(--space-32);
+}
+.ct-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+.ct-card-link:hover {
+  color: inherit;
+}
+.ct-card-link:hover .lp-h3-card {
+  color: var(--green);
+  text-decoration: underline;
+}
+.ct-card-link .lp-card {
+  height: 100%;
+}
+.ct-card__meta {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  opacity: 0.75;
+}
+
+/* ---- FAQ ------------------------------------------------------------------------------- */
+
+.ct-faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  max-width: var(--size-heading-measure);
+}
+.ct-faq__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.ct-faq__group + .ct-faq__group {
+  margin-top: var(--space-32);
+}
+.ct-faq__item {
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note-lg);
+  box-shadow: var(--shadow-3);
+}
+.ct-faq__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  min-height: var(--np-touch-min);
+  padding: var(--space-12) var(--space-20);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+  line-height: 1.2;
+}
+.ct-faq__item summary::-webkit-details-marker {
+  display: none;
+}
+.ct-faq__item summary::after {
+  content: "+";
+  flex: none;
+  width: var(--size-badge-num);
+  height: var(--size-badge-num);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  font-size: var(--type-label);
+}
+.ct-faq__item[open] summary::after {
+  content: "−";
+  background: var(--meadow);
+}
+.ct-faq__answer {
+  padding: 0 var(--space-20) var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--type-body);
+}
+
+/* ---- Rebate program page ------------------------------------------------------------- */
+
+.ct-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+.ct-stages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-24);
+  align-items: start;
+}
+.ct-stages .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.ct-rule {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.ct-rule + .ct-rule {
+  padding-top: var(--space-16);
+  border-top: var(--border-2) solid var(--line);
+}
+.ct-rule__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+  line-height: 1.2;
+}
+.ct-rule__who {
+  align-self: flex-start;
+}
+.ct-rule__source {
+  margin: 0;
+  padding: var(--space-8) var(--space-16);
+  border-left: var(--border-2) solid var(--line);
+  background: var(--cream);
+  font-size: var(--type-body-sm);
+}
+.ct-self-start {
+  align-self: flex-start;
+}
+.ct-program .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.ct-rule details summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--np-touch-min);
+  cursor: pointer;
+  font-size: var(--type-caption);
+  text-decoration: underline;
+  text-underline-offset: var(--underline-offset);
+}
+
+/* ---- Data register (About) ------------------------------------------------------------ */
+
+.ct-anchor {
+  scroll-margin-top: var(--space-24);
+}
+.ct-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body);
+}
+.ct-table th,
+.ct-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-12) var(--space-16) var(--space-12) 0;
+  border-bottom: var(--border-2) solid var(--line);
+}
+.ct-table tbody tr:last-child th,
+.ct-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.ct-table thead th {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  font-weight: normal;
+}
+.ct-table tbody th {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.ct-table td:last-child {
+  font-size: var(--type-body-sm);
+}
+
+/* ---- Plant list ------------------------------------------------------------------------ */
+
+.ct-list,
+.ct-prose .ct-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.ct-list__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-16);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note-lg);
+  box-shadow: var(--shadow-3);
+  padding: var(--space-12) var(--space-12) var(--space-12) var(--space-20);
+}
+.ct-list__name {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.ct-list__common {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+}
+.ct-list__facts {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+}
+.ct-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+.ct-qty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.ct-qty .lp-button {
+  width: var(--np-touch-min);
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-2);
+}
+.ct-qty__value {
+  min-width: var(--space-32);
+  text-align: center;
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono);
+}
+
+.ct-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+  max-width: var(--size-heading-measure);
+}
+
+.ct-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-3);
+}
+.ct-button.lp-button--green,
+.ct-button.lp-button--green:hover {
+  color: var(--on-dark);
+}
+.ct-button.lp-button--gold,
+.ct-button.lp-button--gold:hover,
+.ct-button.lp-button--paper,
+.ct-button.lp-button--paper:hover {
+  color: var(--ink);
+}
+.ct-button:disabled {
+  opacity: var(--opacity-muted);
+  cursor: not-allowed;
+}
+
+.ct-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+}
+
+.ct-saved {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+}
+
+/* Shown only on paper: the print header on the plant list. */
+.print-only {
+  display: none;
+}
+
+/* ---- Loading ------------------------------------------------------------------------------- */
+
+.site-loading {
+  position: fixed;
+  top: var(--space-16);
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-20);
+  background: var(--gold);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-3);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-label);
+  /* Wait a beat, so quick page changes do not flash the pill. */
+  animation: site-appear 1ms 250ms both;
+}
+@keyframes site-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.site-loading__dot {
+  width: var(--size-dot-sm);
+  height: var(--size-dot-sm);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+  background: var(--green);
+  animation: site-pulse 900ms ease-in-out infinite alternate;
+}
+@keyframes site-pulse {
+  from {
+    transform: scale(0.7);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-loading__dot {
+    animation: none;
+  }
+}
+
+/* ---- Error page --------------------------------------------------------------------------- */
+
+.site-error {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--size-note);
+  gap: var(--space-48);
+  align-items: start;
+}
+.site-error .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+}
+.site-error__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+.site-error__note {
+  transform: var(--tilt-right);
+  padding: var(--space-20) var(--space-24);
+  border-radius: var(--radius-note);
+  box-shadow: var(--shadow-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.site-error__note a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--np-touch-min);
+}
+.site-error__code {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+}
+
+/* ---- Breakpoints ----------------------------------------------------------------------------- */
+
+@media (max-width: 1023px) {
+  .ct-layout,
+  .site-error {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-40);
+  }
+  .ct-aside {
+    position: static;
+  }
+  .ct-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ct-stages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .ct-note {
+    box-shadow: var(--shadow-3);
+    padding: var(--space-16) var(--space-20);
+  }
+  .ct-main {
+    padding-block: var(--space-32) var(--section-pad);
+    gap: var(--space-40);
+  }
+  .ct-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-16);
+  }
+  .ct-cards > :nth-child(even) {
+    margin-top: 0;
+  }
+  .ct-faq__item {
+    box-shadow: var(--shadow-2);
+  }
+  .ct-table thead {
+    display: none;
+  }
+  .ct-table,
+  .ct-table tbody,
+  .ct-table tr,
+  .ct-table th,
+  .ct-table td {
+    display: block;
+  }
+  .ct-table tr {
+    padding-block: var(--space-12);
+    border-bottom: var(--border-2) solid var(--line);
+  }
+  .ct-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  .ct-table th,
+  .ct-table td,
+  .ct-table tbody tr:last-child th,
+  .ct-table tbody tr:last-child td {
+    border: none;
+    padding: var(--space-2) 0;
+  }
+  .ct-faq__item summary {
+    padding: var(--space-10) var(--space-16);
+  }
+  .ct-faq__answer {
+    padding: 0 var(--space-16) var(--space-16);
+  }
+  .ct-list__row {
+    grid-template-columns: minmax(0, 1fr);
+    box-shadow: var(--shadow-2);
+    padding: var(--space-12) var(--space-16);
+  }
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: var(--type-footnote);
+  }
+  .site-footer__note {
+    flex: none;
+  }
+}
+
+/* ---- Print ------------------------------------------------------------------------------------ */
+
+@media print {
+  /* Paper is the page: no grounds, no shadows, no tilt, ink on whatever stock is in the printer. */
+  body,
+  .lp,
+  .lp-band,
+  .lp-window,
+  .lp-window__bar,
+  .lp-card,
+  .lp-note,
+  .lp-stat,
+  .ct-list__row,
+  .ct-faq__item,
+  .fl-step {
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    color: var(--ink) !important;
+  }
+  .lp-nav-wrap,
+  .site-footer,
+  .lp-closing-band,
+  .site-loading,
+  .no-print,
+  .fl-steps,
+  .fl-cta-band,
+  .fl-sun__set,
+  .lp-address,
+  .lp-button,
+  .fl-button-link,
+  .ct-button,
+  .ct-aside {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  .ct-main,
+  .fl-main {
+    padding-block: 0;
+    gap: var(--space-24);
+  }
+  .ct-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ct-list__row,
+  .lp-window,
+  .fl-stage,
+  .ct-faq__item {
+    break-inside: avoid;
+  }
+  .ct-faq__answer {
+    display: flex !important;
+  }
+  a {
+    color: var(--ink);
+  }
+  .ct-sources a::after {
+    content: " (" attr(href) ")";
+  }
+  @page {
+    margin: 16mm;
+  }
+}

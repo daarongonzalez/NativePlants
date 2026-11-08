@@ -27,7 +27,7 @@ export function RebateCalculator() {
         <h2 id="money-title" className="lp-h2-window">
           What's your lawn worth?
         </h2>
-        <p className="lp-body-lg lp-only-desktop">Bigger than our little plot? Set your actual lawn size.</p>
+        <p className="lp-body-lg lp-only-desktop">Bigger than our little plot? Set your actual lawn size. We use Utah's rate as the example.</p>
         <div className="lp-calc__row">
           <div className="lp-calc__stepper">
             <button

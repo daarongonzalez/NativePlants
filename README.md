@@ -45,6 +45,8 @@ landing page are built. The landing page lives in `apps/web`; run it with
 - [Setup](docs/setup.md) — accounts and provisioning
 - [Scope additions and next steps](docs/plan-2026-11.md) — November 2026:
   the rebate database, the address-to-plan flow and content pages
+- [Launch review](docs/launch-review.md) — the new pages and launch polish,
+  and every fact still to confirm
 - [Scope boundary](docs/scope.md) — the authoritative in/out list for V1
 - [V1 spec](docs/v1-spec.md) — scope, data model, build order, and the full
   asset checklist
