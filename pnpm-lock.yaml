@@ -91,6 +91,9 @@ importers:
       '@rive-app/react-webgl2':
         specifier: 4.38.1
         version: 4.38.1(react@19.3.1)
+      '@rive-app/webgl2':
+        specifier: 2.49.2
+        version: 2.49.2
       isbot:
         specifier: ^5.1.31
         version: 5.2.2
