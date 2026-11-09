@@ -1,4 +1,4 @@
-import { createDatabase, recordProvenance, upsertPlants } from "@np/db";
+import { createDatabase, loadImageCandidates, recordProvenance, upsertPlants, type ImageCandidate } from "@np/db";
 import { parsePlantCsv } from "@np/shared";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 
@@ -20,7 +20,15 @@ import type { IngestEnv, IngestJob, IngestResult } from "./types";
 export class PlantImportJob implements IngestJob {
   readonly name = "plants";
 
-  constructor(private readonly csv: string) {}
+  /**
+   * @param csv the plant sheet
+   * @param images photo candidates by scientific name, from
+   *   data/plants/image-candidates.json. Loaded after the plants, for review.
+   */
+  constructor(
+    private readonly csv: string,
+    private readonly images: Record<string, ImageCandidate[]> = {},
+  ) {}
 
   async run(env: IngestEnv): Promise<IngestResult> {
     const { plants, errors } = parsePlantCsv(this.csv);
@@ -38,19 +46,27 @@ export class PlantImportJob implements IngestJob {
     const written = await upsertPlants(db, env.MARKET, plants, retrievedAt);
     const byName = new Map(plants.map((p) => [p.scientificName, p]));
 
-    for (const { id, scientificName } of written) {
+    for (const { id, scientificName, reviewStatus } of written) {
       const p = byName.get(scientificName)!;
       await recordProvenance(db, [
         {
           tableName: "plants",
           recordId: id,
           source: "curated",
-          citation: `Curated by ${p.curatedBy || "unassigned"}; review status ${p.reviewStatus}. Source: data/plants/wasatch-plants.csv`,
+          citation: `Curated by ${p.curatedBy || "unassigned"}; review status ${reviewStatus} (set on the review page). Source: data/plants/wasatch-plants.csv`,
           retrievedAt,
         },
       ]);
     }
 
-    return { job: this.name, rowsWritten: plants.length, rowsSkipped: 0, warnings: [] };
+    const photos = await loadImageCandidates(db, env.MARKET, this.images);
+    const warnings = [
+      `${photos.written} photo candidates loaded for review.`,
+      ...photos.unknownPlants.map((n) => `Photos found for ${n}, which is not in the sheet: skipped.`),
+    ];
+    const drafts = written.filter((w) => w.reviewStatus === "draft").length;
+    if (drafts > 0) warnings.push(`${drafts} plants are waiting for review.`);
+
+    return { job: this.name, rowsWritten: plants.length, rowsSkipped: 0, warnings };
   }
 }

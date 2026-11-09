@@ -32,6 +32,8 @@ landing page are built. The landing page lives in `apps/web`; run it with
   what was built and what is still unverified
 - [Plant curation](docs/plant-curation.md) — how the plant list is edited and
   loaded
+- [Plant review](docs/plant-review.md) — the reviewer's page, photo
+  candidates, and the Cloudflare Access setup
 - [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to
   get the backend working end to end
 - [Design brief](docs/design-brief.md) — a one-file summary of the product

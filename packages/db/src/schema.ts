@@ -163,7 +163,21 @@ export const plants = pgTable(
 
     curatedBy: text("curated_by").notNull(),
     curatedAt: timestamp("curated_at", { withTimezone: true }).notNull().defaultNow(),
+    /**
+     * draft | reviewed | published. Set by the reviewer on the review page,
+     * not by the plant sheet: the sheet's value only seeds a new row. A load
+     * that changes a plant's facts puts it back to draft (see factsHash).
+     */
     reviewStatus: text("review_status").notNull().default("draft"),
+    /**
+     * A fingerprint of the plant's facts as last loaded from the sheet. When
+     * it changes, any earlier approval no longer covers what is shown, so the
+     * plant goes back to draft for another look.
+     */
+    factsHash: text("facts_hash"),
+    /** Who last approved or failed this plant on the review page, and when. */
+    reviewedBy: text("reviewed_by"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   },
   (t) => [
     uniqueIndex("plants_scientific_market_idx").on(t.scientificName, t.market),
@@ -171,19 +185,66 @@ export const plants = pgTable(
   ],
 );
 
-/** Licence and credit travel with every image. CC images require attribution. */
+/**
+ * Licence and credit travel with every image. CC images require attribution.
+ *
+ * Photos arrive as candidates (found by scripts/find-plant-images.mjs, linked
+ * at their source) and only an approved one is ever shown to gardeners. An
+ * approved photo is copied into our own storage (r2Key) before launch.
+ */
 export const plantMedia = pgTable(
   "plant_media",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     plantId: uuid("plant_id").notNull().references(() => plants.id, { onDelete: "cascade" }),
-    r2Key: text("r2_key").notNull(),
+    /** Our own copy. Null until an approved photo is copied in. */
+    r2Key: text("r2_key"),
     credit: text("credit").notNull(),
     license: text("license").notNull(),
+    /** The photo's page at its source, for the credit link. */
     sourceUrl: text("source_url"),
     isPrimary: boolean("is_primary").notNull().default(false),
+    /** Where the candidate came from, e.g. "inaturalist", and its id there. */
+    source: text("source"),
+    sourcePhotoId: text("source_photo_id"),
+    /** The image at its source, used until our own copy exists. */
+    remoteUrl: text("remote_url"),
+    thumbUrl: text("thumb_url"),
+    /** habit (4:3, the whole plant) | detail (1:1, flower or leaf). Set by the reviewer. */
+    kind: text("kind"),
+    /** candidate | approved | rejected */
+    reviewStatus: text("review_status").notNull().default("candidate"),
+    reviewNote: text("review_note"),
+    reviewedBy: text("reviewed_by"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   },
-  (t) => [index("plant_media_plant_idx").on(t.plantId)],
+  (t) => [
+    index("plant_media_plant_idx").on(t.plantId),
+    uniqueIndex("plant_media_source_idx").on(t.plantId, t.source, t.sourcePhotoId),
+  ],
+);
+
+/**
+ * Every review decision, kept as a record. The plant row holds the current
+ * status; this holds who decided what, when, against which version of the
+ * facts, and what they wrote.
+ */
+export const plantReviews = pgTable(
+  "plant_reviews",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    plantId: uuid("plant_id").notNull().references(() => plants.id, { onDelete: "cascade" }),
+    reviewerEmail: text("reviewer_email").notNull(),
+    /** pass | fail */
+    decision: text("decision").notNull(),
+    notes: text("notes"),
+    /** ok | problem | none: whether the garden game's drawing and words match the plant. */
+    spriteCheck: text("sprite_check"),
+    /** The facts this decision was made against. */
+    factsHash: text("facts_hash"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("plant_reviews_plant_idx").on(t.plantId, t.createdAt)],
 );
 
 /* ------------------------------------------------------------------ *

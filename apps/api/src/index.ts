@@ -19,6 +19,7 @@ import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
 import { toDomainProfile } from "./profile";
+import { adminRoutes } from "./admin";
 import { publicRoutes } from "./public";
 import { resolveSite } from "./resolve";
 
@@ -30,6 +31,9 @@ app.get("/v1/health", (c) => c.json({ ok: true, market: c.env.MARKET }));
 
 // No sign-in: the first answer is free. Mounted before the protected routes.
 app.route("/v1/public", publicRoutes);
+
+// Reviewers only: Cloudflare Access, checked again here. Mounted before the signed-in routes.
+app.route("/v1/admin", adminRoutes());
 
 const protectedRoutes = new Hono<{ Bindings: Env; Variables: Variables }>();
 protectedRoutes.use("*", requireAuth);

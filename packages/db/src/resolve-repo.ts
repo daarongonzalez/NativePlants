@@ -1,5 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import type { PlantRow } from "@np/shared";
+import { plantFactsHash, type PlantRow } from "@np/shared";
 import type { Database } from "./client";
 import type { Owner } from "./repositories";
 import {
@@ -250,21 +250,52 @@ export async function getFrostNorms(db: Database, stationId: string) {
  * duplicates, and returns each plant's id so the caller can record provenance.
  * Called by the plant import job, never by a request.
  */
+/**
+ * Loads the plant sheet. The sheet owns the facts; the review page owns the
+ * review status.
+ *
+ * - A new plant takes its status from the sheet.
+ * - An existing plant keeps the status the reviewer gave it, unless its facts
+ *   changed: then an earlier approval no longer covers what is shown, and it
+ *   goes back to draft for another look.
+ */
 export async function upsertPlants(
   db: Database,
   market: string,
   rows: readonly PlantRow[],
   curatedAt: Date,
-): Promise<{ id: string; scientificName: string }[]> {
-  const written: { id: string; scientificName: string }[] = [];
+): Promise<{ id: string; scientificName: string; reviewStatus: string }[]> {
+  const written: { id: string; scientificName: string; reviewStatus: string }[] = [];
   for (const row of rows) {
-    const values = { ...row, market, curatedAt };
+    const factsHash = plantFactsHash(row);
+    const values = { ...row, market, curatedAt, factsHash };
+    const { reviewStatus: _fromSheet, ...facts } = values;
+    const changed = sql`${plants.factsHash} is distinct from ${factsHash}`;
     const result = await db
       .insert(plants)
       .values(values)
-      .onConflictDoUpdate({ target: [plants.scientificName, plants.market], set: values })
-      .returning({ id: plants.id, scientificName: plants.scientificName });
-    written.push(result[0]!);
+      .onConflictDoUpdate({
+        target: [plants.scientificName, plants.market],
+        set: {
+          ...facts,
+          reviewStatus: sql`case when ${changed} then 'draft' else ${plants.reviewStatus} end`,
+          reviewedBy: sql`case when ${changed} then null else ${plants.reviewedBy} end`,
+          reviewedAt: sql`case when ${changed} then null else ${plants.reviewedAt} end`,
+        },
+        // Only touch rows whose facts or curator changed, so an unchanged sheet is a no-op.
+        setWhere: sql`${changed} or ${plants.curatedBy} is distinct from ${row.curatedBy}`,
+      })
+      .returning({ id: plants.id, scientificName: plants.scientificName, reviewStatus: plants.reviewStatus });
+    if (result[0]) {
+      written.push(result[0]);
+    } else {
+      // Unchanged: the update was skipped, so read the row back for the caller.
+      const [kept] = await db
+        .select({ id: plants.id, scientificName: plants.scientificName, reviewStatus: plants.reviewStatus })
+        .from(plants)
+        .where(and(eq(plants.scientificName, row.scientificName), eq(plants.market, market)));
+      if (kept) written.push(kept);
+    }
   }
   return written;
 }

@@ -17,6 +17,8 @@ export default [
   route("blog/:slug", "routes/blog.$slug.tsx"),
   route("privacy", "routes/privacy.tsx"),
   route("terms", "routes/terms.tsx"),
+  // The plant review, for the reviewer only. Cloudflare Access guards /admin.
+  route("admin/review", "routes/admin.review.tsx"),
   route("sitemap.xml", "routes/sitemap.ts"),
   route("robots.txt", "routes/robots.ts"),
   // Anything else is a 404, shown with the site's own error page.

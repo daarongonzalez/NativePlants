@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PLANT_CSV_COLUMNS, parseCsv, parsePlantCsv } from "@np/shared";
+import { PLANT_CSV_COLUMNS, parseCsv, parsePlantCsv, plantFactsHash } from "@np/shared";
 
 const header = PLANT_CSV_COLUMNS.join(",");
 
@@ -176,5 +176,25 @@ describe("the committed plant sheet", () => {
     for (const p of parsePlantCsv(text).plants) {
       if (p.reviewStatus === "published") expect(p.curatedBy).not.toBe("");
     }
+  });
+});
+
+describe("plantFactsHash", () => {
+  const plant = (overrides: Parameters<typeof row>[0] = {}) => parsePlantCsv(sheet(row(overrides))).plants[0]!;
+
+  it("is stable for the same facts", () => {
+    expect(plantFactsHash(plant())).toBe(plantFactsHash(plant()));
+    expect(plantFactsHash(plant())).toMatch(/^v1:[0-9a-f]{16}$/);
+  });
+
+  it("ignores who curated the plant and its review status", () => {
+    expect(plantFactsHash(plant({ curated_by: "Someone else", review_status: "draft" }))).toBe(plantFactsHash(plant()));
+  });
+
+  it("changes when any fact a gardener sees changes", () => {
+    const base = plantFactsHash(plant());
+    expect(plantFactsHash(plant({ ph_min: "6.5" }))).not.toBe(base);
+    expect(plantFactsHash(plant({ toxicity_note: "Toxic to cats" }))).not.toBe(base);
+    expect(plantFactsHash(plant({ common_names: "Test plant" }))).not.toBe(base);
   });
 });

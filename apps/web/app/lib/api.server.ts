@@ -10,12 +10,12 @@ import type { AppLoadContext } from "react-router";
 export async function api<T>(
   context: AppLoadContext,
   path: string,
-  init: { method?: "GET" | "POST"; body?: unknown } = {},
+  init: { method?: "GET" | "POST"; body?: unknown; headers?: Record<string, string> } = {},
 ): Promise<{ ok: true; data: T } | { ok: false; status: number; error: string }> {
   const { env } = context.cloudflare;
   const request = new Request(`${env.API_URL ?? "https://api.internal"}${path}`, {
     method: init.method ?? "GET",
-    headers: init.body === undefined ? {} : { "Content-Type": "application/json" },
+    headers: { ...(init.body === undefined ? {} : { "Content-Type": "application/json" }), ...init.headers },
     body: init.body === undefined ? null : JSON.stringify(init.body),
   });
 
