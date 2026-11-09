@@ -1,5 +1,5 @@
 import { AddressForm, type AddressState } from "./AddressForm";
-import { PlotPlanner } from "./PlotPlanner";
+import { GardenGame } from "./GardenGame";
 import { Responsive } from "./primitives";
 
 function Psst({ placement }: { placement: "side" | "top" }) {
@@ -37,7 +37,7 @@ export function Hero({ address }: { address: AddressState }) {
       </div>
       <div className="lp-hero__planner">
         <Psst placement="top" />
-        <PlotPlanner />
+        <GardenGame />
       </div>
     </section>
   );

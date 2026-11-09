@@ -663,6 +663,21 @@
   padding: var(--space-20);
 }
 
+/* Nativo Garden (Rive): the canvas keeps the game's 800 x 500 shape and fills the window. */
+.lp-garden .lp-window__body {
+  padding: 0;
+}
+.lp-garden__stage {
+  aspect-ratio: 8 / 5;
+  width: 100%;
+  background: var(--cream);
+}
+.lp-garden__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .lp-planner__stats {
   order: 4;
 }
