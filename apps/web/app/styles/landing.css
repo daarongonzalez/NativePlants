@@ -186,7 +186,17 @@
   font-size: var(--type-body-lg);
 }
 .lp-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--np-touch-min);
+  min-width: var(--np-touch-min);
   color: var(--ink);
+  text-decoration: none;
+}
+.lp-nav__links a.lp-nav__list,
+.lp-nav__links a.lp-nav__list:hover {
+  color: var(--on-gold);
   text-decoration: none;
 }
 .lp-nav__links a:hover {
@@ -1401,7 +1411,8 @@
 }
 .lp-footer__links {
   display: flex;
-  gap: var(--space-20);
+  flex-wrap: wrap;
+  column-gap: var(--space-20);
 }
 .lp-footer__links a {
   display: inline-flex;

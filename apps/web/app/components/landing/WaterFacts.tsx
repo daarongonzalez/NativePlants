@@ -28,12 +28,12 @@ export function WaterFacts() {
     <section id="why-it-matters" className="lp-section lp-wrap lp-water" aria-labelledby="water-title">
       <div className="lp-water__head">
         <h2 id="water-title" className="lp-h2 lp-h2--green">
-          Utah's water is stretched thin
+          Water is stretched thin
         </h2>
         <p className="lp-body-lg">
           <Responsive
-            desktop="Most of a Utah home's water goes on the yard, and most of that goes on grass that isn't built for a desert."
-            phone="Most of a home's water goes on the yard, mostly on grass that isn't built for a desert."
+            desktop="In dry places, most of a home's water goes on the yard, and most of that goes on grass that isn't built for the climate. Take Utah, where we're starting:"
+            phone="Most of a home's water goes on the yard, mostly on grass. Take Utah:"
           />
         </p>
       </div>

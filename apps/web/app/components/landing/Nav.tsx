@@ -1,23 +1,32 @@
+import { Link } from "react-router";
+
+/**
+ * The top bar on every page. Sign-in screens wait until after V1, so the
+ * button opens the plant list, which lives in this browser.
+ */
 export function Nav() {
   return (
     <header className="lp-nav-wrap">
       <nav className="lp-nav" aria-label="Main">
-        <a href="/" className="lp-wordmark">
+        <Link to="/" className="lp-wordmark">
           nativo
-        </a>
+        </Link>
         <div className="lp-nav__links">
-          <a href="/#why-it-matters" className="lp-only-desktop">
-            Why it matters
-          </a>
-          <a href="/#native-yards" className="lp-only-desktop">
-            Native yards
-          </a>
-          <a href="/#rebates" className="lp-only-desktop">
+          <Link to="/rebates" className="lp-only-desktop">
             Rebates
-          </a>
-          <button type="button" className="lp-button lp-button--gold lp-button--nav">
-            Sign in
-          </button>
+          </Link>
+          <Link to="/blog" className="lp-only-desktop">
+            Guides
+          </Link>
+          <Link to="/faq" className="lp-only-desktop">
+            FAQ
+          </Link>
+          <Link to="/about" className="lp-only-desktop">
+            About
+          </Link>
+          <Link to="/list" className="lp-button lp-button--gold lp-button--nav lp-nav__list">
+            My plant list
+          </Link>
         </div>
       </nav>
     </header>

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Route } from "./+types/home";
-import landingStyles from "../styles/landing.css?url";
 import type { AddressState } from "../components/landing/AddressForm";
 import { Closing } from "../components/landing/Closing";
 import { Hero } from "../components/landing/Hero";
@@ -10,15 +9,13 @@ import { RebateCalculator } from "../components/landing/RebateCalculator";
 import { ThreeAnswers } from "../components/landing/ThreeAnswers";
 import { WaterFacts } from "../components/landing/WaterFacts";
 
-export const links: Route.LinksFunction = () => [{ rel: "stylesheet", href: landingStyles }];
-
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "Nativo · Native plants for the Wasatch Front" },
+    { title: "Nativo · Native plants and lawn rebates for your yard" },
     {
       name: "description",
       content:
-        "One street address unlocks your soil and climate, Utah's water-wise lawn rebate, and a ranked list of native plants for your yard.",
+        "One street address unlocks your soil and climate, the lawn rebate your water provider offers, and native plants that suit your yard. Now serving the Wasatch Front.",
     },
   ];
 }

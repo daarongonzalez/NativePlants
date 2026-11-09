@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 import { checkPlan, narrowLawnSquares, plantsPerSquare } from "@np/engine";
 import {
   AREA_KIND_LABELS,
@@ -23,6 +24,7 @@ import {
   type Brush,
   type Plan,
 } from "../../lib/planner";
+import { addPlant, updateList, useSavedList } from "../../lib/plant-list";
 import { Flower, Stat, Window } from "../landing/primitives";
 
 const FORM_FILTERS = [
@@ -75,6 +77,8 @@ export function Planner({
     plants[0] ? { kind: "plant", plantId: plants[0].id } : { kind: "mulch" },
   );
   const [filter, setFilter] = useState<Filter>("all");
+  const { list: saved } = useSavedList();
+  const savedIds = useMemo(() => new Set(saved.map((p) => p.id)), [saved]);
 
   const byId = useMemo(() => new Map(plants.map((p) => [p.id, p])), [plants]);
   const check = useMemo(() => checkPlan(program, plan, plants), [program, plan, plants]);
@@ -268,6 +272,19 @@ export function Planner({
                   {selectedPlant.staysUnder24In === true && <span className="lp-chip">Park strip safe</span>}
                   {selectedPlant.reviewStatus !== "published" && <span className="lp-chip fl-chip--draft">Draft data</span>}
                 </span>
+                {savedIds.has(selectedPlant.id) ? (
+                  <Link to="/list" className="lp-button lp-button--paper fl-save fl-save--on">
+                    On your list · view it
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="lp-button lp-button--gold fl-save"
+                    onClick={() => updateList((l) => addPlant(l, selectedPlant))}
+                  >
+                    Save to my list
+                  </button>
+                )}
               </>
             ) : (
               <span className="lp-body-sm">{MATERIALS.find((m) => isOn(m.brush))?.detail}</span>

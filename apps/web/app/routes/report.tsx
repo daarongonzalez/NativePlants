@@ -1,6 +1,5 @@
 import { Link, redirect } from "react-router";
 import type { Route } from "./+types/report";
-import landingStyles from "../styles/landing.css?url";
 import flowStyles from "../styles/flow.css?url";
 import { sunExposureSchema, textureClass } from "@np/shared";
 import grass from "../../../../design/nativo/assets/Grass/grass-07-cream.svg?url";
@@ -22,9 +21,16 @@ import { AttributedValue } from "../components/flow/Attributed";
 import { FrostBand, SoilColumn, SunQuestion } from "../components/flow/ReportParts";
 import { Stat, Window } from "../components/landing/primitives";
 
+function PrintButton() {
+  return (
+    <button type="button" className="lp-button lp-button--paper fl-button-link fl-button-link--sm" onClick={() => window.print()}>
+      Print this report
+    </button>
+  );
+}
+
 
 export const links: Route.LinksFunction = () => [
-  { rel: "stylesheet", href: landingStyles },
   { rel: "stylesheet", href: flowStyles },
 ];
 
@@ -98,6 +104,7 @@ export default function Report({ loaderData }: Route.ComponentProps) {
         </h1>
         <p className="fl-head__address np-value">{place.address}</p>
         <p className="lp-body">Built just now from public soil and climate data. Every number says where it came from.</p>
+        <PrintButton />
       </section>
 
       <div className="fl-report">
