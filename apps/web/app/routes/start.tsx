@@ -2,6 +2,7 @@ import { Form, Link, redirect } from "react-router";
 import type { Route } from "./+types/start";
 import flowStyles from "../styles/flow.css?url";
 import { api } from "../lib/api.server";
+import { shareImageMeta } from "../lib/meta";
 import { MATCH_LABELS, placeToParams, type AddressMatch } from "../lib/flow";
 import { FlowShell } from "../components/flow/Shell";
 import { Window } from "../components/landing/primitives";
@@ -11,7 +12,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function meta(_: Route.MetaArgs) {
-  return [{ title: "Is this your yard? · nativo" }, { name: "robots", content: "noindex" }];
+  return [{ title: "Is this your yard? · nativo" }, { name: "robots", content: "noindex" }, ...shareImageMeta];
 }
 
 /** Step 1: find the address. Nothing is saved; the match travels in the link to the report. */

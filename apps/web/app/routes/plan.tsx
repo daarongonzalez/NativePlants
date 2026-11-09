@@ -4,6 +4,7 @@ import type { Route } from "./+types/plan";
 import flowStyles from "../styles/flow.css?url";
 import type { RebateCheck, RuleOutcome, RuleStage } from "@np/shared";
 import { api } from "../lib/api.server";
+import { shareImageMeta } from "../lib/meta";
 import {
   PROGRAM_CODE,
   formatDate,
@@ -27,6 +28,7 @@ export function meta(_: Route.MetaArgs) {
   return [
     { title: "Plan your rebate · nativo" },
     { name: "description", content: "Lay out a water-wise yard square by square and check it against Utah's Landscape Incentive Program rules as you go." },
+    ...shareImageMeta,
   ];
 }
 

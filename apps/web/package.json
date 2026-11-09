@@ -10,7 +10,8 @@
     "deploy": "pnpm build && wrangler deploy",
     "typegen": "wrangler types && react-router typegen",
     "typecheck": "react-router typegen && tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "og": "NODE_PATH=$(npm root -g) node og/render.mjs"
   },
   "dependencies": {
     "@np/engine": "workspace:*",
