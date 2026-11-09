@@ -88,6 +88,12 @@ importers:
       '@np/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@rive-app/react-webgl2':
+        specifier: 4.38.1
+        version: 4.38.1(react@19.3.1)
+      '@rive-app/webgl2':
+        specifier: 2.49.2
+        version: 2.49.2
       isbot:
         specifier: ^5.1.31
         version: 5.2.2
@@ -1492,6 +1498,14 @@ packages:
 
   '@remix-run/node-fetch-server@0.13.3':
     resolution: {integrity: sha512-UfjOXed/DQteaM5VyTfqTeGpHwyL2J5aoRGY6cydip4tt1ehNNeSwuXCC7AEGE0RWBs/7bgKxYkL/B/+UDe4AA==}
+
+  '@rive-app/react-webgl2@4.38.1':
+    resolution: {integrity: sha512-ed4s9L8xPaU8xF6crrO+a/DGk3Uxi9fX/ilVBHl35DMfcj2E6542QnQC4QJMIsWx/byiwGg29M0StJPXNPq8rg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
+
+  '@rive-app/webgl2@2.49.2':
+    resolution: {integrity: sha512-pOx18ccH4W0Zc/xRqpAa59ZQMTeDq0DrjXP4aSWX1cUSvNjEOQQYWtRqNjwJ7FM6PzCmIsAoqV/dKffwvKJuCA==}
 
   '@rollup/rollup-android-arm-eabi@4.63.1':
     resolution: {integrity: sha512-UZ8sUxPTiHWYX9QNdJedb1kDZSpS1t/VPWBWGSgqHNi9w3Cu6IXvu2mzbhiTiPvtrqgTQJ+zqiAq2iPIPilpaQ==}
@@ -3480,6 +3494,13 @@ snapshots:
       typescript: 5.9.3
 
   '@remix-run/node-fetch-server@0.13.3': {}
+
+  '@rive-app/react-webgl2@4.38.1(react@19.3.1)':
+    dependencies:
+      '@rive-app/webgl2': 2.49.2
+      react: 19.3.1
+
+  '@rive-app/webgl2@2.49.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.63.1':
     optional: true
