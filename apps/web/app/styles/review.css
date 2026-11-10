@@ -1,0 +1,574 @@
+/*
+ * The plant review page. Builds on the landing page's lp-* pieces and the
+ * flow's chips. Tokens only.
+ *
+ * Breakpoints match the landing page: phone below 768px, stacked below 1024px.
+ */
+
+/* ---- Frame ------------------------------------------------------------------ */
+
+.rv-bar {
+  gap: var(--space-16);
+}
+.rv-bar__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+.rv-bar__page {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono);
+}
+.rv-bar__who {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  padding-right: var(--space-16);
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.rv-main {
+  padding-block: var(--space-32) var(--section-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-32);
+}
+
+.rv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-16) var(--space-32);
+}
+.rv-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: var(--size-readout);
+}
+.rv-progress__text {
+  font-size: var(--type-mono);
+}
+.rv-progress__track {
+  display: block;
+  height: var(--space-14);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+.rv-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--green);
+  transition: width 200ms ease-out;
+}
+.rv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.rv-chip {
+  min-height: var(--np-touch-min);
+}
+.rv-chip .np-value {
+  margin-left: var(--space-4);
+  font-size: var(--type-mono-sm);
+}
+
+.rv-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--size-note);
+  gap: var(--space-40);
+  align-items: start;
+}
+
+.rv-button {
+  font-family: var(--font-display);
+  font-weight: 800;
+  box-shadow: var(--shadow-3);
+}
+.rv-button:disabled {
+  opacity: var(--opacity-muted);
+  cursor: progress;
+}
+
+.rv-unavailable .lp-window__body,
+.rv-done .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-16);
+}
+
+/* ---- The card --------------------------------------------------------------------- */
+
+.rv-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  touch-action: pan-y;
+}
+.rv-card--pass .rv-plant {
+  outline: var(--border-2) solid var(--green);
+  outline-offset: var(--space-4);
+}
+.rv-card--fail .rv-plant {
+  outline: var(--border-2) solid var(--clay);
+  outline-offset: var(--space-4);
+}
+.rv-swipe {
+  position: absolute;
+  top: var(--space-16);
+  z-index: 2;
+  padding: var(--space-6) var(--space-16);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-button-lg);
+  box-shadow: var(--shadow-3);
+}
+.rv-swipe--pass {
+  left: var(--space-16);
+  background: var(--green);
+  color: var(--on-dark);
+}
+.rv-swipe--fail {
+  right: var(--space-16);
+  background: var(--clay);
+  color: var(--on-clay);
+}
+
+.rv-plant .lp-window__body,
+.rv-photos .lp-window__body,
+.rv-sprite .lp-window__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.rv-plant__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+.rv-plant__names {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.rv-plant__sci {
+  font-size: var(--type-body-lg);
+}
+.rv-plant__aka {
+  font-size: var(--type-caption);
+}
+
+.rv-state {
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-14);
+  font-size: var(--type-label);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.rv-state--todo {
+  background: var(--sky);
+}
+.rv-state--changed {
+  background: var(--gold-light);
+}
+.rv-state--failed {
+  background: var(--clay);
+  color: var(--on-clay);
+}
+.rv-state--passed {
+  background: var(--meadow);
+}
+
+.rv-last {
+  padding: var(--space-10) var(--space-16);
+  background: var(--cream);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  font-size: var(--type-body-sm);
+}
+.rv-last--changed {
+  background: var(--gold-light);
+}
+
+/* Facts: four small groups, two across on wide screens. */
+.rv-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-24) var(--space-32);
+}
+.rv-facts__title {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  font-weight: normal;
+  text-transform: uppercase;
+  margin-bottom: var(--space-8);
+}
+.rv-facts dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rv-fact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: var(--space-12);
+  padding-block: var(--space-6);
+  border-bottom: var(--border-2) solid var(--sand);
+}
+.rv-fact dt {
+  font-size: var(--type-caption);
+}
+.rv-fact dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-sm);
+}
+.rv-fact--warn dd {
+  color: var(--clay);
+}
+
+/* ---- Photos -------------------------------------------------------------------------- */
+
+.rv-photo-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-20);
+}
+.rv-photo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-10);
+  background: var(--cream);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-seed);
+}
+.rv-photo--approved {
+  background: var(--meadow);
+}
+.rv-photo--rejected .rv-photo__img img {
+  opacity: var(--opacity-muted);
+}
+.rv-photo__img {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-tile);
+  overflow: hidden;
+}
+.rv-photo__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.rv-photo__choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+.rv-photo__choice {
+  min-height: var(--np-touch-min);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-label);
+  box-shadow: var(--shadow-2);
+}
+.rv-photo__choice:active {
+  transform: var(--press);
+  box-shadow: var(--shadow-1);
+}
+.rv-photo__choice--on.rv-photo__choice--habit,
+.rv-photo__choice--on.rv-photo__choice--detail {
+  background: var(--gold);
+}
+.rv-photo__choice--on.rv-photo__choice--rejected {
+  background: var(--clay);
+  color: var(--on-clay);
+}
+.rv-photo__credit {
+  font-size: var(--type-caption);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.rv-photo__license {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  padding: 0 var(--space-8);
+}
+.rv-photo__source,
+.rv-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--np-touch-min);
+  font-size: var(--type-caption);
+}
+
+/* ---- Garden game drawing ------------------------------------------------------------- */
+
+.rv-warn,
+.rv-ok {
+  padding: var(--space-10) var(--space-16);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  font-size: var(--type-body-sm);
+}
+.rv-warn {
+  background: var(--gold-light);
+}
+.rv-ok {
+  background: var(--meadow);
+}
+.rv-sprite__check {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+/* ---- Decision ------------------------------------------------------------------------------ */
+
+.rv-decide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-20);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-5);
+}
+.rv-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.rv-notes__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-label);
+}
+.rv-notes textarea {
+  font: inherit;
+  font-size: var(--type-body);
+  padding: var(--space-10) var(--space-16);
+  background: var(--cream);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  resize: vertical;
+  min-height: var(--size-input);
+}
+.rv-gaps {
+  font-size: var(--type-caption);
+  color: var(--clay);
+}
+/* Only the buttons stay in reach while scrolling the card. */
+.rv-actionbar {
+  position: sticky;
+  bottom: var(--space-16);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-12);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-5);
+}
+.rv-actionbar__msg {
+  padding-inline: var(--space-8);
+}
+.rv-decide__buttons {
+  display: grid;
+  grid-template-columns: 1fr auto 1.4fr;
+  gap: var(--space-12);
+}
+.rv-decide__buttons .rv-button {
+  min-height: var(--size-input);
+  font-size: var(--type-button-lg);
+}
+.rv-button--fail {
+  background: var(--clay);
+  color: var(--on-clay);
+}
+
+/* ---- The plant index --------------------------------------------------------------------- */
+
+.rv-index {
+  position: sticky;
+  top: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+.rv-index__details {
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-4);
+  overflow: hidden;
+}
+.rv-index__summary {
+  display: flex;
+  align-items: center;
+  min-height: max(var(--size-titlebar), var(--np-touch-min));
+  padding: 0 var(--space-20);
+  background: var(--sand);
+  border-bottom: var(--border-2) solid var(--line);
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono);
+  cursor: pointer;
+}
+.rv-index__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-8);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.rv-index__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  min-height: var(--np-touch-min);
+  padding: var(--space-6) var(--space-10);
+  border: var(--border-2) solid transparent;
+  border-radius: var(--radius-note);
+  text-align: left;
+}
+.rv-index__item:hover {
+  background: var(--cream);
+}
+.rv-index__item--on {
+  background: var(--gold);
+  border-color: var(--line);
+}
+.rv-index__name {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--type-body-sm);
+}
+.rv-index__name .np-sci-name {
+  font-size: var(--type-caption);
+}
+.rv-dot {
+  flex: none;
+  width: var(--size-dot);
+  height: var(--size-dot);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-round);
+}
+.rv-dot--todo {
+  background: var(--sky);
+}
+.rv-dot--changed {
+  background: var(--gold-light);
+}
+.rv-dot--failed {
+  background: var(--clay);
+}
+.rv-dot--passed {
+  background: var(--green);
+}
+
+/* ---- Saved message --------------------------------------------------------------------------- */
+
+.rv-toast {
+  position: fixed;
+  left: 50%;
+  top: var(--space-16);
+  z-index: 10;
+  transform: translateX(-50%);
+}
+.rv-toast__pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-20);
+  background: var(--green-deep);
+  color: var(--on-dark);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-3);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-label);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-progress__fill {
+    transition: none;
+  }
+  .rv-card {
+    transform: none !important;
+  }
+}
+
+/* ---- Breakpoints ------------------------------------------------------------------------------ */
+
+@media (max-width: 1023px) {
+  .rv-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rv-index {
+    position: static;
+    order: -1;
+  }
+  .rv-index__details:not([open]) .rv-index__summary {
+    border-bottom: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .rv-main {
+    padding-block: var(--space-20) var(--section-pad);
+    gap: var(--space-20);
+  }
+  .rv-bar__who {
+    display: none;
+  }
+  .rv-facts,
+  .rv-photo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rv-decide {
+    padding: var(--space-16);
+    box-shadow: var(--shadow-3);
+  }
+  .rv-actionbar {
+    bottom: var(--space-8);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-3);
+  }
+  .rv-decide__buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rv-decide__buttons .lp-button--paper {
+    display: none;
+  }
+  .rv-keys {
+    display: none;
+  }
+  .rv-index__details {
+    box-shadow: var(--shadow-3);
+  }
+}

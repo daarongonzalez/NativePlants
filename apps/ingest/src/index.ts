@@ -5,6 +5,8 @@ import { RebateImportJob } from "./rebates";
 import { SoilJob } from "./soil";
 import plantsCsv from "../../../data/plants/wasatch-plants.csv";
 import utahRebate from "../../../data/rebates/ut-landscape-incentive.json";
+import imageCandidates from "../../../data/plants/image-candidates.json";
+import type { ImageCandidate } from "@np/db";
 import type { IngestEnv, IngestJob, IngestResult } from "./types";
 import { WASATCH_FRONT_ZIPS } from "./wasatch-zips";
 import { WASATCH_FRONT_FROST } from "./data/wasatch-frost";
@@ -56,7 +58,7 @@ export default {
 
     const results =
       job === "plants"
-        ? await runJobs(env, [new PlantImportJob(plantsCsv)])
+        ? await runJobs(env, [new PlantImportJob(plantsCsv, photoCandidates())])
         : job === "rebates"
           ? await runJobs(env, [new RebateImportJob([utahRebate])])
           : await runAll(env);
@@ -89,6 +91,12 @@ async function runSoil(env: IngestEnv, rawCursor: string | null): Promise<Respon
       { status: 200 },
     );
   }
+}
+
+/** The photo candidates file, reshaped to plant name → candidates. */
+function photoCandidates(): Record<string, ImageCandidate[]> {
+  const file = imageCandidates as { plants: Record<string, { candidates: ImageCandidate[] }> };
+  return Object.fromEntries(Object.entries(file.plants).map(([name, p]) => [name, p.candidates]));
 }
 
 async function runAll(env: IngestEnv): Promise<IngestResult[]> {

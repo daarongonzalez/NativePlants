@@ -307,3 +307,30 @@ export function parsePlantCsv(text: string): PlantCsvResult {
 
   return { plants, errors };
 }
+
+/**
+ * A fingerprint of a plant's facts: everything a gardener is told, and
+ * nothing about who curated it or its review status. When the fingerprint of
+ * a loaded row differs from the stored one, an earlier approval no longer
+ * covers what is shown, so the plant goes back for review.
+ *
+ * Not for security, only change detection: two 32-bit FNV-1a hashes over a
+ * stable text form of the facts.
+ */
+export function plantFactsHash(row: PlantRow): string {
+  const { curatedBy: _curatedBy, reviewStatus: _reviewStatus, ...facts } = row;
+  const text = JSON.stringify(
+    Object.keys(facts)
+      .sort()
+      .map((k) => [k, facts[k as keyof typeof facts]]),
+  );
+  const fnv = (seed: number) => {
+    let h = seed >>> 0;
+    for (let i = 0; i < text.length; i++) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16).padStart(8, "0");
+  };
+  return `v1:${fnv(0x811c9dc5)}${fnv(0x01000193)}`;
+}

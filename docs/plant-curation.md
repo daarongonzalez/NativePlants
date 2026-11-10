@@ -14,7 +14,11 @@ name on it.
 The import checks every row. If any row has a problem, **nothing is loaded** and
 every problem is listed with its row number. Fix them all and run it again.
 
-Only rows marked `published` are shown to gardeners.
+Only published plants are shown to gardeners. **Review now happens on the
+review page** ([plant-review.md](plant-review.md)): the reviewer approves a
+plant there, which publishes it. The sheet's `review_status` only sets the
+status of a plant loaded for the first time, and a load that changes an
+approved plant's facts sends it back to draft for another look.
 
 ## Columns
 
