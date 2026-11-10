@@ -1,0 +1,143 @@
+<!doctype html>
+<!--
+  Share card for link previews (iMessage, Slack, LinkedIn and others).
+  Source for apps/web/public/og.png. Re-draw it with: pnpm --filter @np/web og
+  The canvas is fixed at 1200 x 630, the size every link-preview service asks for.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1200">
+<link rel="stylesheet" href="../../../design/nativo/fonts.css">
+<link rel="stylesheet" href="../../../design/nativo/tokens.css">
+<link rel="stylesheet" href="../../../packages/ui/src/tokens.css">
+<link rel="stylesheet" href="../../../packages/ui/src/playful.css">
+<link rel="stylesheet" href="../app/styles/landing.css">
+<style>
+  html, body { margin: 0; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  .og {
+    box-sizing: border-box;
+    width: 1200px;   /* fixed canvas: link-preview standard */
+    height: 630px;
+    padding: 0;
+    display: flex;
+  }
+  .og__card {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .og__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-24);
+    padding: var(--space-40) var(--space-56) var(--space-32);
+  }
+  .og__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .og__wordmark {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--type-h3);
+    color: var(--green);
+    line-height: 1;
+  }
+  .og__title {
+    margin: 0;
+    font-size: var(--type-h1);
+    max-width: 12ch;
+  }
+  .og__band {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    background: var(--meadow);
+    border-top: var(--border-2) solid var(--line);
+    padding: 0 var(--space-56) var(--space-20);
+  }
+  .og__url {
+    font-family: var(--np-font-mono);
+    font-size: var(--type-mono);
+    color: var(--green-deep);
+  }
+  .og__main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 40%;
+    align-items: center;
+    gap: var(--space-40);
+  }
+  .og__facts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    margin-right: var(--space-20);
+  }
+  .og__fact {
+    background: var(--paper);
+    border: var(--border-2) solid var(--line);
+    border-radius: var(--radius-note-lg);
+    box-shadow: var(--shadow-4);
+    padding: var(--space-20) var(--space-24);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+  /* Stagger like the landing page's card grid. */
+  .og__fact:nth-child(even) {
+    margin-left: var(--space-24);
+    margin-right: calc(-1 * var(--space-24));
+  }
+  .og__fact .lp-h3 {
+    margin: 0;
+  }
+  .og__fact .lp-badge {
+    font-size: var(--type-body-sm);
+    padding: var(--space-4) var(--space-16);
+  }
+</style>
+</head>
+<body>
+  <div class="og">
+    <div class="og__card">
+      <div class="og__body">
+        <div class="og__top">
+          <span class="og__wordmark">nativo</span>
+          <span class="lp-badge lp-badge--sky lp-badge--tilt">Now serving the Wasatch Front</span>
+        </div>
+        <div class="og__main">
+          <h1 class="lp-h1 og__title">Native plants and <span class="lp-accent">lawn rebates</span> for your yard</h1>
+          <div class="og__facts">
+            <article class="og__fact">
+              <span class="lp-badge lp-badge--sky">Water</span>
+              <h2 class="lp-h3">Far less of it</h2>
+            </article>
+            <article class="og__fact">
+              <span class="lp-badge lp-badge--gold">Weekends</span>
+              <h2 class="lp-h3">Less work</h2>
+            </article>
+            <article class="og__fact">
+              <span class="lp-badge lp-badge--meadow">Visitors</span>
+              <h2 class="lp-h3">Bees and birds return</h2>
+            </article>
+          </div>
+        </div>
+      </div>
+      <div class="og__band">
+        <span class="og__url">grownativo.com</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

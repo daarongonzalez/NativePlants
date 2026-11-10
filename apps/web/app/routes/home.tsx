@@ -8,15 +8,20 @@ import { NativeYard } from "../components/landing/NativeYard";
 import { RebateCalculator } from "../components/landing/RebateCalculator";
 import { ThreeAnswers } from "../components/landing/ThreeAnswers";
 import { WaterFacts } from "../components/landing/WaterFacts";
+import { shareImageMeta } from "../lib/meta";
+
+const TITLE = "Nativo · Native plants and lawn rebates for your yard";
+const DESCRIPTION =
+  "One street address unlocks your soil and climate, the lawn rebate your water provider offers, and native plants that suit your yard. Now serving the Wasatch Front.";
 
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "Nativo · Native plants and lawn rebates for your yard" },
-    {
-      name: "description",
-      content:
-        "One street address unlocks your soil and climate, the lawn rebate your water provider offers, and native plants that suit your yard. Now serving the Wasatch Front.",
-    },
+    { title: TITLE },
+    { name: "description", content: DESCRIPTION },
+    { property: "og:title", content: TITLE },
+    { property: "og:description", content: DESCRIPTION },
+    { property: "og:site_name", content: "Nativo" },
+    ...shareImageMeta,
   ];
 }
 

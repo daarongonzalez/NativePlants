@@ -4,6 +4,7 @@ import flowStyles from "../styles/flow.css?url";
 import { sunExposureSchema, textureClass } from "@np/shared";
 import grass from "../../../../design/nativo/assets/Grass/grass-07-cream.svg?url";
 import { api } from "../lib/api.server";
+import { shareImageMeta } from "../lib/meta";
 import {
   DRAINAGE_LABELS,
   PROGRAM_CODE,
@@ -35,7 +36,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function meta(_: Route.MetaArgs) {
-  return [{ title: "Your ground · nativo" }, { name: "robots", content: "noindex" }];
+  return [{ title: "Your ground · nativo" }, { name: "robots", content: "noindex" }, ...shareImageMeta];
 }
 
 /** Step 2: the site profile, built fresh from public data and not saved. */

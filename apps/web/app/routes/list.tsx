@@ -6,6 +6,7 @@ import flowStyles from "../styles/flow.css?url";
 import { PageHead } from "../components/site/Content";
 import { PageShell } from "../components/site/SiteChrome";
 import { formatDate, inches } from "../lib/flow";
+import { shareImageMeta } from "../lib/meta";
 import { removePlant, setQuantity, totalPlants, updateList, useSavedList, writeList } from "../lib/plant-list";
 
 export const links: Route.LinksFunction = () => [{ rel: "stylesheet", href: flowStyles }];
@@ -15,6 +16,7 @@ export function meta(_: Route.MetaArgs) {
     { title: "My plant list · nativo" },
     { name: "description", content: "The plants you've saved, ready to print and take to a nursery." },
     { name: "robots", content: "noindex" },
+    ...shareImageMeta,
   ];
 }
 
