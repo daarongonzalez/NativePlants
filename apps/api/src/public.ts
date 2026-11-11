@@ -11,9 +11,10 @@ import {
 } from "@np/db";
 import { checkPlan } from "@np/engine";
 import { ordinalToZone, planLayoutSchema, sunExposureSchema } from "@np/shared";
-import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
+import { CensusGeocodeClient, UsgsElevationClient, UtahYardSources } from "@np/sources";
 import type { Env, Variables } from "./env";
 import { assembleProfile } from "./resolve";
+import { estimateYard } from "./yard";
 
 /**
  * Routes for visitors who have not signed in.
@@ -132,4 +133,55 @@ publicRoutes.post("/rebates/:code/checks", async (c) => {
   });
 
   return c.json({ projectId: saved?.projectId ?? null, checkId: saved?.checkId ?? null, check }, 201);
+});
+
+const yardSchema = z.object({
+  latitude: z.number().min(36.9).max(42.1),
+  longitude: z.number().min(-114.1).max(-109),
+  /** The matched address, to pick the right lot when several are near the point. */
+  address: z.string().trim().max(300).nullable().default(null),
+});
+
+/**
+ * The yard estimate for a point: the lot, its buildings, and how much of the
+ * open ground is planted or bare, from county records and an aerial photo.
+ * Nothing is saved. Answers are cached briefly at the edge, keyed by the
+ * request, so the report and the planner do not ask the sources twice.
+ */
+publicRoutes.post("/yard", async (c) => {
+  const body = yardSchema.safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: "We need a location in Utah to estimate your yard." }, 400);
+  const place = {
+    latitude: Math.round(body.data.latitude * 1e6) / 1e6,
+    longitude: Math.round(body.data.longitude * 1e6) / 1e6,
+    address: body.data.address,
+  };
+
+  const cacheKey = new Request(
+    `https://cache.internal/yard?lat=${place.latitude}&lon=${place.longitude}&a=${encodeURIComponent(place.address ?? "")}`,
+  );
+  const cache = typeof caches !== "undefined" ? (caches as unknown as { default?: Cache }).default : undefined;
+  const hit = await cache?.match(cacheKey).catch(() => undefined);
+  if (hit) return new Response(hit.body, hit);
+
+  let outcome;
+  try {
+    outcome = await estimateYard(new UtahYardSources(), place);
+  } catch (error) {
+    console.error("yard estimate failed", error);
+    return c.json({ error: "We could not reach the county records just now. Your plan still works: enter your sizes by hand." }, 503);
+  }
+  if (!outcome.ok) {
+    const message =
+      outcome.reason === "lot_too_large"
+        ? "This lot is too large to estimate. Plan one area at a time and enter its size by hand."
+        : "We could not find a lot at this address in the county records. You can still enter your sizes by hand.";
+    return c.json({ error: message }, 422);
+  }
+
+  const res = c.json({ estimate: outcome.estimate });
+  res.headers.set("Cache-Control", "public, max-age=3600");
+  // Only cache a full answer: one without the photo should be retried next time.
+  if (cache && outcome.estimate.photo.read) c.executionCtx.waitUntil(cache.put(cacheKey, res.clone()).catch(() => undefined));
+  return res;
 });
