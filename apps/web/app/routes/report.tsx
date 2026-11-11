@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link, redirect } from "react-router";
 import type { Route } from "./+types/report";
 import flowStyles from "../styles/flow.css?url";
-import { sunExposureSchema, textureClass } from "@np/shared";
+import { sunExposureSchema, textureClass, type YardEstimate } from "@np/shared";
 import grass from "../../../../design/nativo/assets/Grass/grass-07-cream.svg?url";
 import { api } from "../lib/api.server";
 import { shareImageMeta } from "../lib/meta";
@@ -20,6 +21,8 @@ import {
 import { FlowShell } from "../components/flow/Shell";
 import { AttributedValue } from "../components/flow/Attributed";
 import { FrostBand, SoilColumn, SunQuestion } from "../components/flow/ReportParts";
+import { YardPanel } from "../components/flow/YardPanel";
+import { choiceToParams, suggestedZone, ZONE_LABELS, type YardChoice, defaultLawn, plannerStart } from "../lib/yard";
 import { Stat, Window } from "../components/landing/primitives";
 
 function PrintButton() {
@@ -46,7 +49,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   if (!place) throw redirect("/");
   const sun = sunExposureSchema.safeParse(params.get("sun")).data ?? null;
 
-  const [profile, program] = await Promise.all([
+  const [profile, program, yard] = await Promise.all([
     api<ProfileResponse>(context, "/v1/public/profile", {
       method: "POST",
       body: {
@@ -58,6 +61,11 @@ export async function loader({ request, context }: Route.LoaderArgs) {
       },
     }),
     api<ProgramResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}`),
+    // The yard estimate: from county records and an aerial photo. Optional: the report works without it.
+    api<{ estimate: YardEstimate }>(context, "/v1/public/yard", {
+      method: "POST",
+      body: { latitude: place.latitude, longitude: place.longitude, address: place.address || null },
+    }),
   ]);
 
   return {
@@ -66,13 +74,21 @@ export async function loader({ request, context }: Route.LoaderArgs) {
     profile: profile.ok ? profile.data : null,
     error: profile.ok ? null : profile.error,
     program: program.ok ? program.data.program : null,
+    yard: yard.ok ? yard.data.estimate : null,
+    yardError: yard.ok ? null : yard.error,
   };
 }
 
 export default function Report({ loaderData }: Route.ComponentProps) {
-  const { place, sun, profile, error, program } = loaderData;
+  const { place, sun, profile, error, program, yard, yardError } = loaderData;
   const placeParams = Object.fromEntries(new URLSearchParams(placeToParams(place)));
-  const planHref = `/plan?${placeToParams(place)}`;
+  const suggested = yard ? suggestedZone(yard) : null;
+  const [choice, setChoice] = useState<YardChoice | null>(() => {
+    if (!suggested) return null;
+    const lawnSqft = defaultLawn(suggested);
+    return { zone: suggested.kind, zoneSqft: suggested.areaSqft, lawnSqft, ...plannerStart(lawnSqft, suggested) };
+  });
+  const planHref = `/plan?${placeToParams(place, choice ? choiceToParams(choice) : {})}`;
 
   if (!profile) {
     return (
@@ -198,6 +214,16 @@ export default function Report({ loaderData }: Route.ComponentProps) {
         )}
       </div>
 
+      {yard ? (
+        <YardPanel estimate={yard} initialZone={suggested?.kind ?? null} onChoose={setChoice} />
+      ) : (
+        <aside className="lp-note lp-note--peach fl-note fl-note--right">
+          <span className="lp-note__kicker">YOUR YARD</span>
+          <p>{yardError ?? "We could not estimate your yard just now."}</p>
+          <p>You can still plan: set your area's size in the planner.</p>
+        </aside>
+      )}
+
       <div className="lp-band lp-band--green fl-cta-band">
         <section className="fl-cta" aria-labelledby="cta-title">
           <img src={grass} alt="" className="fl-cta__grass" />
@@ -210,6 +236,12 @@ export default function Report({ loaderData }: Route.ComponentProps) {
               Lay out your yard square by square. We check it against Utah's rules as you go and add up what the
               program could pay.
             </p>
+            {choice && (
+              <p className="lp-body fl-cta__choice">
+                Starting with your {ZONE_LABELS[choice.zone].toLowerCase()}: about {choice.lawnSqft.toLocaleString("en-US")} sq ft
+                of lawn, as a {choice.widthFt} × {choice.depthFt} ft plot.
+              </p>
+            )}
             <Link to={planHref} className="lp-button lp-button--gold fl-button-link fl-button-link--lg">
               Open the plot planner
             </Link>

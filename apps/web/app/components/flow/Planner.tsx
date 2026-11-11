@@ -66,13 +66,18 @@ export function Planner({
   plants,
   onCheck,
   checking,
+  initial,
 }: {
   program: RebateProgramSummary;
   plants: PlanPlant[];
   onCheck: (plan: Plan, check: RebateCheck) => void;
   checking: boolean;
+  /** Where to start: from the yard estimate, when there is one. */
+  initial?: { areaKind: AreaKind; widthFt: number; depthFt: number } | null;
 }) {
-  const [plan, setPlan] = useState<Plan>(() => newPlan("front"));
+  const [plan, setPlan] = useState<Plan>(() =>
+    initial ? resize(newPlan(initial.areaKind), initial.widthFt, initial.depthFt) : newPlan("front"),
+  );
   const [brush, setBrush] = useState<Brush>(() =>
     plants[0] ? { kind: "plant", plantId: plants[0].id } : { kind: "mulch" },
   );

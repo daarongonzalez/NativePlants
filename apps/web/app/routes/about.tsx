@@ -42,6 +42,24 @@ const SOURCES = [
     cadence: "Published every ten years.",
   },
   {
+    what: "Lot outline, building size, year built",
+    source: "County parcel records, published by the Utah Geospatial Resource Center",
+    url: "https://gis.utah.gov/products/sgid/cadastre/parcels/",
+    cadence: "Counties update them once a year, after the tax roll. Looked up live for each address.",
+  },
+  {
+    what: "Building outlines",
+    source: "Microsoft building footprints, via the Utah Geospatial Resource Center",
+    url: "https://gis.utah.gov/products/sgid/location/building-footprints/",
+    cadence: "Traced from 2018 imagery, and lined up with the newer photo for each lot.",
+  },
+  {
+    what: "Planted and bare ground",
+    source: "USDA National Agriculture Imagery Program aerial photo, via the US Geological Survey",
+    url: "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPPlus/ImageServer",
+    cadence: "Flown every two to three years. Read live for each address; its infrared shows what is growing.",
+  },
+  {
     what: "Elevation, for frost",
     source: "US Geological Survey elevation service",
     url: "https://apps.nationalmap.gov/epqs/",

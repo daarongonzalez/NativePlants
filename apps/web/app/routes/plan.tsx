@@ -16,6 +16,7 @@ import {
 } from "../lib/flow";
 import type { Plan } from "../lib/planner";
 import { savePlanPlants, updateList } from "../lib/plant-list";
+import { ZONE_LABELS, ZONE_TO_AREA, choiceFromParams, type YardChoice } from "../lib/yard";
 import { FlowShell } from "../components/flow/Shell";
 import { Planner, RESULT_LABELS } from "../components/flow/Planner";
 import { Window } from "../components/landing/primitives";
@@ -36,9 +37,11 @@ export function meta(_: Route.MetaArgs) {
 export async function loader({ request, context }: Route.LoaderArgs) {
   const params = new URL(request.url).searchParams;
   const place = placeFromParams(params);
+  const yard = choiceFromParams(params);
   const result = await api<ProgramResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}`);
   return {
     place,
+    yard,
     data: result.ok ? result.data : null,
     error: result.ok ? null : result.error,
   };
@@ -66,6 +69,20 @@ export async function action({ request, context }: Route.ActionArgs) {
   return result.ok ? { ok: true as const, ...result.data } : { ok: false as const, error: result.error };
 }
 
+/** Where the plot's starting size came from, so the numbers can be traced back. */
+function YardNote({ yard }: { yard: YardChoice }) {
+  return (
+    <aside className="lp-note lp-note--meadow fl-note fl-note--left fl-yard-note">
+      <span className="lp-note__kicker">FROM YOUR YARD ESTIMATE</span>
+      <p>
+        Your {ZONE_LABELS[yard.zone].toLowerCase()} has about {formatNumber(yard.lawnSqft)} sq ft of lawn to replace. We started
+        your plot at {yard.widthFt} × {yard.depthFt} ft ({formatNumber(yard.widthFt * yard.depthFt)} sq ft). Change the size to match
+        your tape measure.
+      </p>
+    </aside>
+  );
+}
+
 const STAGE_LABELS: Record<RuleStage, string> = {
   application: "When you apply",
   site_visit: "At the first site visit",
@@ -91,7 +108,7 @@ function saveProject(id: string) {
 }
 
 export default function PlanPage({ loaderData }: Route.ComponentProps) {
-  const { place, data, error } = loaderData;
+  const { place, yard, data, error } = loaderData;
   const fetcher = useFetcher<typeof action>();
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [listSaved, setListSaved] = useState<"idle" | "saved" | "failed">("idle");
@@ -164,7 +181,15 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
         )}
       </section>
 
-      <Planner program={program} plants={plants} onCheck={onCheck} checking={fetcher.state !== "idle"} />
+      {yard && <YardNote yard={yard} />}
+
+      <Planner
+        program={program}
+        plants={plants}
+        onCheck={onCheck}
+        checking={fetcher.state !== "idle"}
+        initial={yard ? { areaKind: ZONE_TO_AREA[yard.zone], widthFt: yard.widthFt, depthFt: yard.depthFt } : null}
+      />
 
       {result && !result.ok && (
         <p className="fl-error" role="alert">
@@ -180,6 +205,15 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
                 ? "Your plan meets every rule we can check"
                 : "A few things to change before you apply"}
             </h2>
+            {yard && (
+              <p className="lp-body">
+                For your {ZONE_LABELS[yard.zone].toLowerCase()}: about {formatNumber(yard.lawnSqft)} sq ft of lawn to replace, out of{" "}
+                {formatNumber(yard.zoneSqft)} sq ft of open ground (our estimate).
+                {recorded.eligibleSqft < yard.lawnSqft * 0.8
+                  ? ` This plan covers ${formatNumber(recorded.eligibleSqft)} sq ft of it: plan the rest as another area, or make this one bigger.`
+                  : ""}
+              </p>
+            )}
             <p className="lp-body">
               {formatNumber(recorded.eligibleSqft)} sq ft that counts · about {Math.round(recorded.coveragePct)}% plant cover
               when grown · an estimated {formatDollars(recorded.estimatedAmount)}.

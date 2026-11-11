@@ -95,6 +95,14 @@ export const FAQ_GROUPS: FaqGroup[] = [
     title: "Plants and your ground",
     items: [
       {
+        q: "How do you estimate my yard?",
+        a: "We find your lot in the county's public records, which give its outline and the house's size. Building outlines show where the house sits. Then we read a public aerial photo: its infrared band shows which ground is growing (lawn, trees and beds) and which is bare or paved. The side facing the street is the front yard. It is an estimate, not a survey: you adjust how much lawn you would replace, and the rebate program measures your area at its first site visit.",
+      },
+      {
+        q: "Why does my yard estimate look wrong?",
+        a: "The photo can be a few years old and is about 2 ft a pixel, so new patios, removed lawn or tall trees may not show. Trees count as planted, and roof edges can read as bare. Building outlines date from 2018 and can miss additions. Use the estimate as a starting point and change the lawn figure to what you see.",
+      },
+      {
         q: "Where do the soil and climate numbers come from?",
         a: "Soil comes from the USDA county soil surveys, hardiness zones from the USDA Plant Hardiness Zone Map, and frost dates from NOAA's 1991 to 2020 climate normals. Sun is calculated from your latitude. Every number on your report names its source.",
       },

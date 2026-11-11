@@ -11,7 +11,7 @@ import type { PolicyPage } from "./types";
 export const PRIVACY: PolicyPage = {
   title: "Privacy policy",
   description: "What Nativo collects, why, who else sees it and how long it is kept. In plain language.",
-  updated: "2026-11-08",
+  updated: "2026-11-11",
   draft: true,
   intro: (
     <p>
@@ -45,6 +45,12 @@ export const PRIVACY: PolicyPage = {
             Your plant list is stored in your own browser, on your own device, using its local storage. It never reaches
             our servers. Clearing your browser data deletes it.
           </p>
+          <h3>Your yard estimate</h3>
+          <p>
+            To estimate your yard, we look up the lot at your location in public county records and measure it on a public
+            aerial photo. We do not save the estimate. The figures you choose (which part of the yard, how much lawn) travel
+            in the web address to the planner, the same way your address does.
+          </p>
           <h3>What we do not collect</h3>
           <ul>
             <li>No accounts, passwords or sign-in.</li>
@@ -68,6 +74,16 @@ export const PRIVACY: PolicyPage = {
             <li>
               <strong>US Geological Survey elevation service:</strong> receives the location (not the address), and returns
               its elevation, which affects frost dates.
+            </li>
+            <li>
+              <strong>Utah Geospatial Resource Center (UGRC):</strong> its county lot records and building outlines are
+              hosted on Esri's ArcGIS Online. To find your lot, they receive the location and the matched street address,
+              and return the lot's outline and its public tax-roll details. We use only the outline, building size, floors
+              and year built.
+            </li>
+            <li>
+              <strong>US Geological Survey aerial photo service:</strong> receives the map coordinates around your lot, and
+              returns the photo we measure. Your browser also loads the photo shown on the report directly from this service.
             </li>
             <li>
               <strong>Cloudflare:</strong> hosts the site. Like any web host, it handles every request, including the web
