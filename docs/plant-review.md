@@ -1,6 +1,6 @@
 # Plant review
 
-Status: built 9 November 2026. Waiting on the setup steps below.
+Status: built 9 November 2026. Set up 11 November 2026, apart from the plant load and the reviewer secret (see below).
 
 A private page where the horticultural reviewer goes through the catalogue one
 plant at a time: reads the facts in plain words, picks the photos, checks the
@@ -112,10 +112,17 @@ each drawing beside its facts.
    - Policy: Allow, include the reviewer's email (and yours)
    - Login method: One-time PIN is enough: Access emails a code, no password
 5. **Copy two values into `apps/api/wrangler.toml`:**
-   - `ACCESS_TEAM_DOMAIN`: your team domain, such as `nativo.cloudflareaccess.com`
+   - `ACCESS_TEAM_DOMAIN`: your team domain (Zero Trust → Settings), such as
+     `apostrophe.cloudflareaccess.com`
    - `ACCESS_AUD`: the application's Audience (AUD) tag, from its overview page
-6. **Set `REVIEWER_EMAILS`** in the same file: the same emails as the policy,
-   separated by commas. Deploy the API again.
+6. **Add `REVIEWER_EMAILS` as a Worker secret**, not in `wrangler.toml`:
+   Workers → nativeplants-api → Settings → Variables and Secrets → Add →
+   Secret. Use the same emails as the Access policy, separated by commas. A
+   secret keeps personal emails out of the repository and survives deploys.
+
+Done on 11 November 2026: the database change on both Neon branches, the
+Access application for `grownativo.com/admin` (team `apostrophe`), and the two
+values in step 5.
 
 Until steps 4 to 6 are done, the review routes answer "not set up yet" and
 show no plant data. They stay closed by default.

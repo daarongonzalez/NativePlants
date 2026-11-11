@@ -30,12 +30,16 @@ MARKET = "wasatch-front"
 # The plot planner offers draft plants, labelled as drafts, until the reviewer
 # publishes the sheet. Set to "published" (or remove) once they have.
 PLANNER_PLANTS = "drafts"
-# The plant review page (/admin/review on the web app), behind Cloudflare
-# Access. Until all three are set, the review routes answer 503. None of them
-# is a secret. See docs/plant-review.md for the setup steps.
-ACCESS_TEAM_DOMAIN = ""
-ACCESS_AUD = ""
-REVIEWER_EMAILS = ""
+# The plant review page (https://grownativo.com/admin/review), behind
+# Cloudflare Access. Neither value is a secret: they name the Access team and
+# application, they do not unlock them. See docs/plant-review.md.
+ACCESS_TEAM_DOMAIN = "apostrophe.cloudflareaccess.com"
+ACCESS_AUD = "9975273ae9391bb90520881b0f8cdff8ca6d61ac7ac9592fdc8cd18aaaadd9f1"
+# REVIEWER_EMAILS is a Worker secret, set in the Cloudflare dashboard (Workers
+# -> nativeplants-api -> Settings -> Variables and Secrets), so personal email
+# addresses stay out of the repository. Do not add it here: a setting in this
+# file and a secret cannot share a name. Until it is set, the review routes
+# answer 503.
 
 [observability]
 enabled = true
