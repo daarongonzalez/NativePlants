@@ -109,3 +109,25 @@ measured values.
   this session has no database access. The flow pages need one real run after
   deploy.
 - No real phone was used: the checks ran in a desktop browser at phone width.
+
+## Rate limits and error alerts (added 15 November 2026)
+
+**Rate limits**, per visitor IP, per minute, set in `apps/web/wrangler.toml`:
+
+| What | Page | Limit |
+|---|---|---|
+| Address lookup (Census geocoder) | `/start` | 20 |
+| Soil, climate and yard estimate (county records, aerial photo) | `/report` | 20 |
+| "Check my plan" (writes to the database) | `/plan` | 30 |
+
+Over the limit, the visitor sees "Slow down a little" and the outside call is
+never made. The API Worker has no public address any more
+(`workers_dev = false`): the site reaches it through its service binding, so
+the limits cannot be skipped by calling the API directly.
+
+**Error alerts.** Every unexpected error in the site or the API is logged
+(Cloudflare Workers Logs). To be told as well, create an incoming webhook in
+Slack or Discord and add it as a secret named `ALERT_WEBHOOK_URL` on **both**
+Workers: `nativeplants-web` and `nativeplants-api` (Settings → Variables and
+Secrets). Alerts never include addresses: only the page path and the error.
+The same error alerts at most once every ten minutes.

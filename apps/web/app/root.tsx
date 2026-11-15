@@ -71,6 +71,9 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       title = "We couldn't find that page";
       detail = "The link may be old, or the address may have a typo. Start again from the home page, or open your plant list.";
       showRetry = false;
+    } else if (error.status === 429) {
+      title = "Slow down a little";
+      detail = "That's a lot of lookups in a short time. Wait a minute, then try again. Your plant list is safe.";
     } else if (error.status === 503) {
       title = "We're having trouble reaching our data";
       detail = "Our soil and climate data is taking a break. Please try again in a moment.";

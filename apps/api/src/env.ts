@@ -13,6 +13,8 @@ export interface Env {
   ACCESS_AUD?: string;
   /** Comma-separated emails allowed to review plants. Checked as well as the Access policy. */
   REVIEWER_EMAILS?: string;
+  /** A Slack or Discord incoming webhook for error alerts. A Worker secret; optional. */
+  ALERT_WEBHOOK_URL?: string;
 }
 
 export interface Variables {

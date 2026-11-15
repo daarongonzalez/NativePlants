@@ -6,3 +6,4 @@ export * from "./sun-question";
 export * from "./rebate";
 export * from "./review";
 export * from "./yard";
+export * from "./alerts";

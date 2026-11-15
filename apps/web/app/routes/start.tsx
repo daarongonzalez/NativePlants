@@ -2,6 +2,7 @@ import { Form, Link, redirect } from "react-router";
 import type { Route } from "./+types/start";
 import flowStyles from "../styles/flow.css?url";
 import { api } from "../lib/api.server";
+import { enforceLimit } from "../lib/limits.server";
 import { shareImageMeta } from "../lib/meta";
 import { MATCH_LABELS, placeToParams, type AddressMatch } from "../lib/flow";
 import { FlowShell } from "../components/flow/Shell";
@@ -19,6 +20,7 @@ export function meta(_: Route.MetaArgs) {
 export async function loader({ request, context }: Route.LoaderArgs) {
   const address = new URL(request.url).searchParams.get("address")?.trim() ?? "";
   if (address === "") throw redirect("/");
+  await enforceLimit(context, request, "lookup");
 
   const result = await api<{ match: AddressMatch }>(context, "/v1/public/lookup", {
     method: "POST",
