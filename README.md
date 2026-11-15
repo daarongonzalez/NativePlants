@@ -9,12 +9,15 @@ connect that plan to a local nursery that has the plants in stock.
 
 ## Status
 
-Early. The backend (API, data ingestion, recommendation engine) and the
-landing page are built. The landing page lives in `apps/web`; run it with
-`pnpm --filter @np/web dev`.
+Live at grownativo.com, pre-launch. The report, yard estimate, planner,
+rebate check, drawn plan and plan document are built; payments are next.
+**[docs/status.md](docs/status.md) is the place to start**: what is live, the
+settings, and what is left. Run the site with `pnpm --filter @np/web dev`.
 
 ## Docs
 
+- [Status](docs/status.md) — **start here**: what is live, settings,
+  secrets, and what is left for launch
 - [Data source research](docs/research/data-sources.md) — what public soil,
   climate, and plant data actually exists, and what it costs to use
 - [Metro selection](docs/research/metro-selection.md) — where to launch, and
@@ -23,7 +26,7 @@ landing page are built. The landing page lives in `apps/web`; run it with
   with turf rebates, and what to do with that
 - [Competitive landscape](docs/research/competitive-landscape.md) — who else is
   in front of the same homeowner, and where the gaps are
-- [Architecture](docs/architecture.md) — proposed stack and the reasoning
+- [Architecture](docs/architecture.md) — the stack and the reasoning
 - [Photography](docs/photography.md) — catalog images and user uploads, and why
   they are different problems
 - [M3: zones and frost](docs/milestones/m3-zones-and-frost.md) — the next
@@ -34,6 +37,10 @@ landing page are built. The landing page lives in `apps/web`; run it with
   loaded
 - [Yard estimate](docs/yard-estimate.md) — measuring a lot, its house and its
   lawn from public records and an aerial photo
+- [Plan pack](docs/plan-pack.md) — the drawn plan, the plan document and
+  email, and how we sell it
+- [Plant draft review](docs/plant-draft-review.md) — notes on the draft
+  plant sheet
 - [Plant review](docs/plant-review.md) — the reviewer's page, photo
   candidates, and the Cloudflare Access setup
 - [Backend setup runbook](docs/milestones/m3-runbook.md) — the three steps to

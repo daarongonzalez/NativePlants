@@ -305,8 +305,9 @@ For realistic mockups, the data behind these is live now:
 - Frost dates for 45 weather stations
 - Address lookup and elevation
 
-Not built yet: soil data, the plant catalogue and the recommendation list. Use
-plausible placeholder content for those, and mark it as such.
+Also live since November 2026: soil data, a 33-plant draft catalogue (under
+review), the recommendation list, the rebate check, the yard estimate and the
+proposed plan. See [status.md](status.md).
 
 ---
 

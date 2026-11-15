@@ -1,6 +1,9 @@
 # Architecture
 
-Status: proposed, September 2026. Nothing here is built yet.
+Status: written September 2026 as a proposal; mostly built by November 2026.
+For what is live today, see [status.md](status.md). Two differences from
+this page: gardener sign-in screens wait (email delivers the plan), and
+payments start with Stripe Checkout for the plan pack, not Stripe Connect.
 
 Read [data-sources.md](research/data-sources.md) first — the constraint that
 external data sources cannot sit in the request path drives most of what

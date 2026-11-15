@@ -1,6 +1,8 @@
 # Plant review
 
-Status: built 9 November 2026. Set up 11 November 2026, apart from the plant load and the reviewer secret (see below).
+Status: built 9 November 2026. Fully set up by 15 November 2026: Access, the
+reviewer secret and the plant load (33 plants, 128 photo candidates) are all
+in place. The review itself has not started (0 of 33 decided).
 
 A private page where the horticultural reviewer goes through the catalogue one
 plant at a time: reads the facts in plain words, picks the photos, checks the

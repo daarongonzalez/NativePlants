@@ -1,6 +1,8 @@
 # Roadmap
 
-Status: proposed, September 2026.
+Status: proposed, September 2026. Phases have moved since: see
+[scope.md](scope.md) for what is in V1 and [status.md](status.md) for what
+is built.
 
 The organizing principle: **go deep in one metro before going wide.** A tool
 that gives excellent advice in Austin beats one that gives shallow advice

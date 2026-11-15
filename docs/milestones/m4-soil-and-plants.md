@@ -1,6 +1,7 @@
 # M4 and M6 start: soil and the plant list
 
-Status: soil loaded and checked on the dev database; plant path tested, plant sheet empty. 26 October 2026.
+Status: built, 26 October 2026. Since then the plant sheet has been filled
+(33 draft plants, November 2026). See [status.md](../status.md) for today.
 
 ## What was built
 

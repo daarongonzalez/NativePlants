@@ -24,11 +24,12 @@ out of scope, including good ideas.
 | Goal filters | Pollinators, low water, deer resistant. Edible and cut flowers wait (November 2026) |
 | Saved plant list | Printable — this is what goes to a nursery in V1 |
 | Profile error reporting | A gardener telling us we got it wrong |
-| Address-to-plan flow | Address, pin, profile (free), the plan-and-rebate game, then email to get the plan. See [plan-2026-11.md](plan-2026-11.md) |
+| Address-to-plan flow | Address, yard estimate, profile (free), the planner and rebate check, a drawn plan, the plan document and email. See [plan-2026-11.md](plan-2026-11.md) and [plan-pack.md](plan-pack.md) |
 | Rebate rules database | Utah only. Programs, participating areas and every rule, with source text and a last-checked date |
 | Rebate eligibility check | Each rule marked pass, warn, fail or owner to confirm. Never a promise of approval |
 | Rebate tracker | Our check results plus outcomes owners report, from application to payment |
-| Plan by email | Needs the privacy policy, terms and consent wording first |
+| Plan by email | Built, 15 November 2026, with Resend. Sends one email with the plan link; no list |
+| Plan pack and reviewed plan (paid) | Stripe Checkout, one-off payments, no accounts. Prices to test. See [plan-pack.md](plan-pack.md) |
 | Starter content pages | About, FAQ, the Utah rebate page and the first blog posts, written to be quoted by answer engines |
 
 **Market:** Wasatch Front only — Salt Lake, Utah, Davis and Weber counties.
@@ -76,7 +77,7 @@ media, no vision calls. The `plant_media` table serves catalogue images only.
 |---|---|
 | Garden layout and bed drawing | Phase 3. Depends on the profile being trusted first |
 | Nursery accounts and inventory | Phase 4. Needs signed partners, not code |
-| Payments and subscriptions | Phase 4. Marketplace vs referral is undecided |
+| Subscriptions and nursery payments | Phase 4. Marketplace vs referral is undecided. One-off plan payments came into V1 in November 2026 |
 | Rebate registry beyond Utah | Parked — see [rebate-programs.md](research/rebate-programs.md). Utah came into V1 in November 2026 |
 | Photo checks and a full rebate service | Later. The data model leaves room for both; see [plan-2026-11.md](plan-2026-11.md) |
 | Native mobile apps | The web app is enough for a long time |
@@ -111,6 +112,17 @@ a line saying what moved out to make room, because the constraint is calendar
 time and reviewer attention, not ambition.
 
 ## Changes
+
+### 15 November 2026
+
+**Added:** one-off payments for the plan pack and the reviewed plan, through
+Stripe Checkout. No accounts or subscriptions. Plan by email is built.
+
+**Stays parked:** photo upload. The address estimate already gives the square
+footage, so a photo adds privacy work without changing the plan.
+
+**Moved out to make room:** a server-made PDF. The plan document prints to PDF
+from the browser, and the email carries its link.
 
 ### 3 November 2026
 
