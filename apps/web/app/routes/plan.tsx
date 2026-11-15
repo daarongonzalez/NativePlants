@@ -14,10 +14,12 @@ import {
   placeFromParams,
   placeToParams,
   type ProgramResponse,
+  type Place,
 } from "../lib/flow";
 import type { Plan } from "../lib/planner";
 import { savePlanPlants, updateList } from "../lib/plant-list";
 import { ZONE_LABELS, ZONE_TO_AREA, choiceFromParams, type YardChoice } from "../lib/yard";
+import { encodePlan, planDocumentHref, planFromParams } from "../lib/plan-link";
 import { FlowShell } from "../components/flow/Shell";
 import { Planner, RESULT_LABELS } from "../components/flow/Planner";
 import { Window } from "../components/landing/primitives";
@@ -39,10 +41,13 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const params = new URL(request.url).searchParams;
   const place = placeFromParams(params);
   const yard = choiceFromParams(params);
+  // "Edit in the planner" from a plan document: start from that plan.
+  const linked = planFromParams(params)?.plan ?? null;
   const result = await api<ProgramResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}`);
   return {
     place,
     yard,
+    linked,
     data: result.ok ? result.data : null,
     error: result.ok ? null : result.error,
   };
@@ -59,16 +64,95 @@ interface CheckResponse {
   check: RebateCheck;
 }
 
-/** "Check my plan": the server checks again and records the result. */
+interface ProposalResponse {
+  proposal: {
+    plan: Plan;
+    picks: { plantId: string; commonName: string; scientificName: string; reason: string; squares: number; plantCount: number; band: string }[];
+    check: RebateCheck;
+    notes: string[];
+  };
+  rankedBy: "ground" | "form";
+}
+
+/**
+ * Two things happen here:
+ * - "Draw a plan for me" (intent "propose"): the API ranks plants for this
+ *   ground and lays out a plan.
+ * - "Check my plan": the server checks again and records the result.
+ */
 export async function action({ request, context }: Route.ActionArgs) {
+  const body = (await request.json().catch(() => null)) as
+    | { intent?: string; projectId?: string | null; zip?: string | null; layout?: unknown; place?: unknown; area?: unknown }
+    | null;
+  if (body?.intent === "propose") {
+    await enforceLimit(context, request, "estimate");
+    const place = body.place as { latitude?: number; longitude?: number; zip?: string; matchQuality?: string } | null;
+    if (!place?.latitude || !place.zip) return { ok: false as const, intent: "propose" as const, error: "Start with your address, so we can pick plants for your ground." };
+    const result = await api<ProposalResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}/proposals`, {
+      method: "POST",
+      body: { latitude: place.latitude, longitude: place.longitude, zip: place.zip, matchQuality: place.matchQuality, area: body.area },
+    });
+    return result.ok
+      ? { ok: true as const, intent: "propose" as const, ...result.data }
+      : { ok: false as const, intent: "propose" as const, error: result.error };
+  }
   await enforceLimit(context, request, "check");
-  const body = (await request.json().catch(() => null)) as { projectId?: string | null; zip?: string | null; layout?: unknown } | null;
   if (!body?.layout) return { ok: false as const, error: "That plan could not be read." };
   const result = await api<CheckResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}/checks`, {
     method: "POST",
     body: { projectId: body.projectId ?? null, zip: body.zip ?? null, layout: body.layout },
   });
-  return result.ok ? { ok: true as const, ...result.data } : { ok: false as const, error: result.error };
+  return result.ok ? { ok: true as const, intent: "check" as const, ...result.data } : { ok: false as const, error: result.error };
+}
+
+const BAND_LABELS: Record<string, string> = { back: "Back of the bed", middle: "Middle", front: "Front" };
+
+/** The proposed plan: which plants, why each one, and the way to the plan document. */
+function ProposalPanel({ result, place }: { result: ProposalResponse; place: Place | null }) {
+  const { proposal, rankedBy } = result;
+  return (
+    <section className="fl-result fl-proposal" aria-labelledby="proposal-title" aria-live="polite">
+      <Window label="proposed-plan · drawn for you" tone="green" size="md">
+        <h2 id="proposal-title" className="lp-h3">
+          Here's a plan drawn for your {rankedBy === "ground" ? "ground" : "yard"}
+        </h2>
+        <p className="lp-body">
+          {formatNumber(proposal.check.eligibleSqft)} sq ft · about {Math.round(proposal.check.coveragePct)}% plant cover when grown ·
+          an estimated {formatDollars(proposal.check.estimatedAmount)}. It is loaded in the planner above: change any square you like.
+        </p>
+        <ul className="fl-picks">
+          {proposal.picks.map((pick) => (
+            <li key={pick.plantId} className="fl-pick">
+              <span className="fl-pick__name">
+                {pick.commonName} <span className="np-sci-name">{pick.scientificName}</span>
+              </span>
+              <span className="fl-pick__facts np-value">
+                {pick.plantCount} plant{pick.plantCount === 1 ? "" : "s"} · {pick.squares} square{pick.squares === 1 ? "" : "s"} ·{" "}
+                {BAND_LABELS[pick.band] ?? pick.band}
+              </span>
+              {pick.reason && <span className="fl-pick__reason">{pick.reason}</span>}
+            </li>
+          ))}
+        </ul>
+        {proposal.notes.length > 0 && (
+          <ul className="fl-list">
+            {proposal.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        )}
+        <div className="fl-actions">
+          <Link to={planDocumentHref(proposal.plan, place)} className="lp-button lp-button--gold fl-button-link">
+            Get your plan document
+          </Link>
+        </div>
+      </Window>
+      <aside className="lp-note lp-note--peach fl-note fl-note--right">
+        <span className="lp-note__kicker">WANT AN EXPERT EYE?</span>
+        <p>Soon you can have our plant reviewer check your plan and your yard, with written notes, before you apply.</p>
+      </aside>
+    </section>
+  );
 }
 
 /** Where the plot's starting size came from, so the numbers can be traced back. */
@@ -110,14 +194,20 @@ function saveProject(id: string) {
 }
 
 export default function PlanPage({ loaderData }: Route.ComponentProps) {
-  const { place, yard, data, error } = loaderData;
+  const { place, yard, linked, data, error } = loaderData;
   const fetcher = useFetcher<typeof action>();
+  const proposer = useFetcher<typeof action>();
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
   const [listSaved, setListSaved] = useState<"idle" | "saved" | "failed">("idle");
+  // The plan last sent for a check: the plan document is made from it.
+  const [checkedPlan, setCheckedPlan] = useState<Plan | null>(null);
 
-  const result = fetcher.data;
+  const proposed = proposer.data && proposer.data.ok && proposer.data.intent === "propose" ? proposer.data : null;
+  const proposalError = proposer.data && !proposer.data.ok ? proposer.data.error : null;
+
+  const result = fetcher.data && "intent" in fetcher.data && fetcher.data.intent === "propose" ? undefined : fetcher.data;
   useEffect(() => {
-    if (result?.ok && result.projectId) {
+    if (result?.ok && "projectId" in result && result.projectId) {
       saveProject(result.projectId);
       setCheckedAt(new Date().toISOString());
       setListSaved("idle");
@@ -144,14 +234,19 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
   }
 
   const { program, plants } = data;
+  const onPropose = (area: { areaKind: string; widthFt: number; depthFt: number }) => {
+    proposer.submit({ intent: "propose", place, area } as never, { method: "post", encType: "application/json" });
+  };
+
   const onCheck = (plan: Plan, _check: RebateCheck) => {
+    setCheckedPlan(plan);
     fetcher.submit(
       { projectId: readProject(), zip: place?.zip ?? null, layout: plan } as never,
       { method: "post", encType: "application/json" },
     );
   };
 
-  const recorded = result?.ok ? result.check : null;
+  const recorded = result?.ok && "check" in result ? result.check : null;
   const otherRules = program.rules.filter((r) => r.checkType !== "plan_check");
   const byStage = (Object.keys(STAGE_LABELS) as RuleStage[])
     .map((stage) => ({ stage, rules: otherRules.filter((r) => r.stage === stage) }))
@@ -186,12 +281,25 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
       {yard && <YardNote yard={yard} />}
 
       <Planner
+        // A new proposal starts the planner again from it; edits after that are the gardener's.
+        key={proposed ? encodePlan(proposed.proposal.plan) : "start"}
         program={program}
         plants={plants}
         onCheck={onCheck}
         checking={fetcher.state !== "idle"}
         initial={yard ? { areaKind: ZONE_TO_AREA[yard.zone], widthFt: yard.widthFt, depthFt: yard.depthFt } : null}
+        initialPlan={proposed ? proposed.proposal.plan : linked}
+        onPropose={onPropose}
+        proposing={proposer.state !== "idle"}
+        canPropose={place !== null}
       />
+
+      {proposalError && (
+        <p className="fl-error" role="alert">
+          {proposalError}
+        </p>
+      )}
+      {proposed && <ProposalPanel result={proposed} place={place} />}
 
       {result && !result.ok && (
         <p className="fl-error" role="alert">
@@ -254,6 +362,11 @@ export default function PlanPage({ loaderData }: Route.ComponentProps) {
                   >
                     Save these plants to my list
                   </button>
+                )}
+                {checkedPlan && (
+                  <Link to={planDocumentHref(checkedPlan, place)} className="lp-button lp-button--green fl-button-link">
+                    Get your plan document
+                  </Link>
                 )}
                 <button type="button" className="lp-button lp-button--paper fl-button-link" onClick={() => window.print()}>
                   Print this plan

@@ -1,0 +1,313 @@
+/*
+ * The plan document: for the screen, the printer and "Save as PDF".
+ * Builds on the landing page's pieces. Tokens only.
+ */
+
+.pd-main {
+  padding-block: var(--space-32) var(--section-pad);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-40);
+  max-width: var(--layout-content-width);
+}
+
+.pd-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.pd-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding-bottom: var(--space-24);
+  border-bottom: var(--border-2) solid var(--line);
+}
+.pd-brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+  font-size: var(--type-mono-sm);
+}
+.pd-brand .lp-wordmark {
+  min-height: 0;
+}
+.pd-address {
+  font-size: var(--type-mono);
+}
+.pd-warn {
+  padding: var(--space-10) var(--space-16);
+  background: var(--gold-light);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+  font-size: var(--type-body-sm);
+}
+
+.pd-summary {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.pd-summary--ground {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.pd-summary > div {
+  padding: var(--space-12) var(--space-16);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-stat);
+}
+.pd-summary dt {
+  font-size: var(--type-caption);
+}
+.pd-summary dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+}
+.pd-summary dd.np-value {
+  font-family: var(--np-font-mono);
+  font-weight: normal;
+}
+
+.pd-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  break-inside: avoid-page;
+}
+.pd-section .lp-h3 {
+  color: var(--green);
+}
+
+/* The drawing and its key. */
+.pd-drawing-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-24);
+  align-items: start;
+}
+.pd-drawing {
+  width: 100%;
+  height: auto;
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+}
+.pd-cell {
+  stroke: var(--ink);
+  stroke-width: 0.4;
+}
+.pd-cell--plant {
+  fill: color-mix(in srgb, var(--dot-color) 45%, var(--paper));
+}
+.pd-cell--mulch {
+  fill: var(--sand);
+}
+.pd-cell--lawn {
+  fill: var(--lawn-light);
+}
+.pd-cell--pavers {
+  fill: color-mix(in srgb, var(--ink) 25%, var(--paper));
+}
+.pd-cell-letter {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 5px;
+  fill: var(--ink);
+}
+.pd-outline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+.pd-edge-label,
+.pd-scale-label {
+  font-family: var(--np-font-mono);
+  font-size: 3.5px;
+  fill: var(--ink);
+}
+.pd-scale {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.pd-key {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--type-body-sm);
+}
+.pd-key li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.pd-key__swatch {
+  flex: none;
+  width: var(--size-badge-num);
+  height: var(--size-badge-num);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-tile);
+  background: color-mix(in srgb, var(--dot-color) 45%, var(--paper));
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-footnote);
+}
+.pd-key__swatch--mulch {
+  background: var(--sand);
+}
+
+/* The plant list. */
+.pd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-body-sm);
+}
+.pd-table th,
+.pd-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-8) var(--space-12) var(--space-8) 0;
+  border-bottom: var(--border-2) solid var(--sand);
+}
+.pd-table thead th {
+  font-family: var(--np-font-mono);
+  font-size: var(--type-mono-sm);
+  font-weight: normal;
+  border-bottom-color: var(--line);
+}
+.pd-table tbody th {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.pd-table .np-sci-name {
+  display: block;
+  font-weight: normal;
+}
+
+/* Rules and steps. */
+.pd-rules,
+.pd-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: var(--type-body-sm);
+}
+.pd-rule {
+  display: grid;
+  grid-template-columns: var(--size-readout) minmax(0, 1fr);
+  gap: var(--space-12);
+}
+.pd-rule__result {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.pd-rule--fail .pd-rule__result,
+.pd-rule--warn .pd-rule__result {
+  color: var(--clay);
+}
+.pd-rule--pass .pd-rule__result {
+  color: var(--green);
+}
+.pd-stage__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--type-body-lg);
+  margin-top: var(--space-8);
+}
+.pd-checklist li {
+  display: flex;
+  gap: var(--space-10);
+}
+.pd-box {
+  flex: none;
+  width: var(--size-dot);
+  height: var(--size-dot);
+  margin-top: var(--space-4);
+  border: var(--border-2) solid var(--line);
+}
+.pd-steps {
+  margin: 0;
+  padding-left: var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  font-size: var(--type-body);
+}
+.pd-steps li::marker {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--green);
+}
+
+.pd-foot {
+  padding-top: var(--space-16);
+  border-top: var(--border-2) solid var(--line);
+}
+
+/* Email. */
+.pd-email {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--card-pad);
+  background: var(--paper);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-5);
+  max-width: var(--size-form-closing);
+}
+.pd-email__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+.pd-email__input {
+  flex: 1 1 var(--size-readout);
+  min-height: var(--np-touch-min);
+  padding: 0 var(--space-16);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+}
+
+@media (max-width: 767px) {
+  .pd-summary,
+  .pd-summary--ground {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .pd-drawing-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pd-rule {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+}
+
+@media print {
+  .pd-main {
+    gap: var(--space-24);
+  }
+  .pd-summary > div,
+  .pd-drawing {
+    background: none;
+  }
+  .pd-section--drawing {
+    break-after: page;
+  }
+}

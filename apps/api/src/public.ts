@@ -4,17 +4,20 @@ import { z } from "zod";
 import {
   createDatabase,
   getPlannerPlants,
+  listCatalogue,
   getRebateProgram,
   listPlannerPlants,
   listRebateAreas,
   recordRebateCheck,
 } from "@np/db";
 import { checkPlan } from "@np/engine";
-import { ordinalToZone, planLayoutSchema, sunExposureSchema } from "@np/shared";
+import { MAX_SQUARES, SQUARE_FT, areaKindSchema, ordinalToZone, planLayoutSchema, sunExposureSchema } from "@np/shared";
 import { CensusGeocodeClient, UsgsElevationClient, UtahYardSources } from "@np/sources";
 import type { Env, Variables } from "./env";
 import { assembleProfile } from "./resolve";
 import { estimateYard } from "./yard";
+import { drawProposal, siteProfileFrom } from "./proposal";
+import { planEmailSchema, sendPlanEmail } from "./email";
 
 /**
  * Routes for visitors who have not signed in.
@@ -184,4 +187,56 @@ publicRoutes.post("/yard", async (c) => {
   // Only cache a full answer: one without the photo should be retried next time.
   if (cache && outcome.estimate.photo.read) c.executionCtx.waitUntil(cache.put(cacheKey, res.clone()).catch(() => undefined));
   return res;
+});
+
+const proposalSchema = z.object({
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  zip: z.string().regex(/^\d{5}$/),
+  matchQuality: z.enum(["rooftop", "interpolated", "approximate"]).default("approximate"),
+  sunExposure: sunExposureSchema.optional(),
+  area: z
+    .object({
+      areaKind: areaKindSchema,
+      widthFt: z.number().int().min(SQUARE_FT).max(80),
+      depthFt: z.number().int().min(SQUARE_FT).max(80),
+    })
+    .refine((a) => a.widthFt % SQUARE_FT === 0 && a.depthFt % SQUARE_FT === 0, "Sizes go in 5 ft steps.")
+    .refine((a) => (a.widthFt / SQUARE_FT) * (a.depthFt / SQUARE_FT) <= MAX_SQUARES, "That area is too big for one plan."),
+});
+
+/**
+ * "Draw a plan for me": plants ranked for this yard's ground, laid out to
+ * pass the rebate rules. Nothing is saved; the plan comes back to the page.
+ */
+publicRoutes.post("/rebates/:code/proposals", async (c) => {
+  const body = proposalSchema.safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: body.error.issues[0]?.message ?? "That area could not be read." }, 400);
+  const { area, sunExposure, ...place } = body.data;
+
+  const db = createDatabase(c.env.HYPERDRIVE.connectionString);
+  const code = c.req.param("code");
+  const program = await getRebateProgram(db, code);
+  if (!program) return c.json({ error: "We do not have that rebate program." }, 404);
+
+  const includeDrafts = c.env.PLANNER_PLANTS === "drafts";
+  const [assembled, catalogue, plannerPlants] = await Promise.all([
+    assembleProfile({ db, elevation: new UsgsElevationClient() }, place, sunExposure ? { sunExposure } : {}),
+    listCatalogue(db, c.env.MARKET, { includeDrafts }),
+    listPlannerPlants(db, c.env.MARKET, { includeDrafts }),
+  ]);
+
+  const result = drawProposal(area, siteProfileFrom(assembled, place), catalogue, plannerPlants, program);
+  if (!result) {
+    return c.json({ error: "We could not find plants that suit this area. Try a bigger area, or plan it by hand." }, 422);
+  }
+  return c.json(result);
+});
+
+/** "Email me this plan": one email with a link to the plan document. Nothing is stored. */
+publicRoutes.post("/plan-email", async (c) => {
+  const body = planEmailSchema.safeParse(await c.req.json().catch(() => null));
+  if (!body.success) return c.json({ error: body.error.issues[0]?.message ?? "That email could not be read." }, 400);
+  const outcome = await sendPlanEmail(c.env, body.data);
+  return outcome.ok ? c.json({ ok: true }, 202) : c.json({ error: outcome.error }, outcome.status);
 });

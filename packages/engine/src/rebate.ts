@@ -33,6 +33,21 @@ export function plantsPerSquare(matureWidthCm: number): number {
   return across * across;
 }
 
+/**
+ * How many of a plant to buy for a number of squares. A plant up to 5 ft
+ * wide fills each square with `plantsPerSquare` of them. A wider one spans
+ * several squares, so it is counted once per the squares it fills: one 10 ft
+ * serviceberry for four squares, not four.
+ */
+export function plantsForSquares(squares: number, matureWidthCm: number): number {
+  if (squares <= 0) return 0;
+  const widthFt = matureWidthCm / CM_PER_FT;
+  if (widthFt <= SQUARE_FT) return squares * plantsPerSquare(matureWidthCm);
+  // Plants fill whole squares, so a 9.8 ft shrub spans four of them, not 3.87.
+  const squaresPerPlant = Math.max(1, Math.round((widthFt / SQUARE_FT) ** 2));
+  return Math.max(1, Math.ceil(squares / squaresPerPlant));
+}
+
 /** Ground a square of this plant covers at maturity, in sq ft, capped at the square. */
 export function coveredSqftPerSquare(matureWidthCm: number): number {
   const radiusFt = matureWidthCm / CM_PER_FT / 2;
@@ -112,7 +127,7 @@ export function checkPlan(
       planted++;
       const t = tallies.get(plant.id) ?? { plantId: plant.id, commonName: plant.commonName, squares: 0, plantCount: 0 };
       t.squares++;
-      t.plantCount += plantsPerSquare(plant.matureWidthCm);
+      t.plantCount = plantsForSquares(t.squares, plant.matureWidthCm);
       tallies.set(plant.id, t);
     }
   }

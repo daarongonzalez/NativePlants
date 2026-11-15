@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, inArray, desc, eq, sql } from "drizzle-orm";
 import type { Database } from "./client";
 import { toDomainPlant } from "./mappers";
 import type { Plant } from "@np/shared";
@@ -189,6 +189,20 @@ export async function listSavedPlants(db: Database, owner: Owner, siteId: string
  * owner-scoped — but only `published` rows are ever served, so a half-finished
  * curation pass cannot reach a gardener.
  */
+/**
+ * The catalogue for drawing proposed plans. Drafts are included only while
+ * the planner offers them (PLANNER_PLANTS = "drafts"), so a proposal never
+ * uses a plant the planner would not show.
+ */
+export async function listCatalogue(db: Database, market: string, options: { includeDrafts: boolean }): Promise<Plant[]> {
+  const statuses = options.includeDrafts ? ["draft", "reviewed", "published"] : ["published"];
+  const rows = await db
+    .select()
+    .from(plants)
+    .where(and(eq(plants.market, market), inArray(plants.reviewStatus, statuses)));
+  return rows.map(toDomainPlant);
+}
+
 export async function listPublishedPlants(db: Database, market: string): Promise<Plant[]> {
   const rows = await db
     .select()

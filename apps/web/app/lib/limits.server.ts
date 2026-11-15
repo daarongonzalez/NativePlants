@@ -13,12 +13,13 @@ export interface RateLimiter {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
 
-export type Bucket = "lookup" | "estimate" | "check";
+export type Bucket = "lookup" | "estimate" | "check" | "email";
 
-const BINDING: Record<Bucket, "LOOKUP_LIMIT" | "ESTIMATE_LIMIT" | "CHECK_LIMIT"> = {
+const BINDING: Record<Bucket, "LOOKUP_LIMIT" | "ESTIMATE_LIMIT" | "CHECK_LIMIT" | "EMAIL_LIMIT"> = {
   lookup: "LOOKUP_LIMIT",
   estimate: "ESTIMATE_LIMIT",
   check: "CHECK_LIMIT",
+  email: "EMAIL_LIMIT",
 };
 
 /** Cloudflare sets this on every request from the internet, and it cannot be faked by the visitor. */

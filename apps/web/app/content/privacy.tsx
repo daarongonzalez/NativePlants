@@ -11,7 +11,7 @@ import type { PolicyPage } from "./types";
 export const PRIVACY: PolicyPage = {
   title: "Privacy policy",
   description: "What Nativo collects, why, who else sees it and how long it is kept. In plain language.",
-  updated: "2026-11-11",
+  updated: "2026-11-15",
   draft: true,
   intro: (
     <p>
@@ -123,11 +123,20 @@ export const PRIVACY: PolicyPage = {
       id: "email",
       heading: "If you ask us to email your plan",
       body: (
-        <p>
-          We are adding a way to send your plan to your inbox. That will mean collecting an email address. Before it goes
-          live, this section will say exactly what we keep, which service sends the email, how follow-up emails work and
-          how to unsubscribe. We will not send you anything you have not asked for.
-        </p>
+        <>
+          <p>
+            On your plan document, you can ask us to email it to you. We send one email, with a link to your plan. The link
+            holds your plan and your address, so the plan opens wherever you click it.
+          </p>
+          <ul>
+            <li>We do not save your email address, and we do not add you to any list.</li>
+            <li>
+              The email is sent by <strong>Resend</strong>, our email provider, which receives your email address and the
+              message to deliver it, and keeps a record of the delivery. <Placeholder>How long Resend keeps it, to confirm.</Placeholder>
+            </li>
+            <li>We send nothing else unless you ask. If we add follow-up emails later, they will be your choice, with a way to stop them.</li>
+          </ul>
+        </>
       ),
     },
     {

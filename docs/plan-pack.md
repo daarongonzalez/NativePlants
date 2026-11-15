@@ -1,7 +1,9 @@
 # The proposed plan, the PDF, and selling it
 
-Status: exploration, 15 November 2026. Nothing here is built yet. Decisions
-for D'Aaron are at the end.
+Status: steps 1 and 2 built, 15 November 2026 (see [Built](#built)). Step 3,
+selling, is next. Decided: the plan generator, Resend for email, the free /
+plan pack / reviewed plan tiers to test, and no photo upload while the address
+estimate gives the square footage.
 
 ## The idea
 
@@ -151,3 +153,54 @@ link to it. No account needed: the email link is the key.
 3. **Selling:** do the tiers and starting prices feel right to test?
 4. **Photo upload:** wait for the reviewed plan, as recommended, or sooner?
 5. **Rachel:** would she take on reviewed plans, and how many a week?
+
+## Built
+
+**Step 1: the plan generator and the plan document.**
+
+- `packages/engine/src/propose.ts`: draws a plan for an area. Keeps plants
+  that count towards cover (perennials, not trees; only low plants in a park
+  strip), picks 3 to 8 with one of each form and no repeated genus, lays them
+  out tall at the back and low at the front in drifts, aims for 60% cover with
+  a mulch path and front edge, then runs the rebate check and plants mulch
+  squares if cover falls short. Tested on the real plant sheet against the
+  real Utah rules.
+- `POST /v1/public/rebates/:code/proposals`: ranks plants for the yard's soil,
+  zone, frost and sun with the scoring engine, and draws the plan. Without a
+  soil reading, it picks by form and size and says so.
+- The planner's **Draw a plan for me** button loads the plan into the planner
+  to edit, with each plant's count and reason.
+- `/plan/document`: the plan for paper and PDF: the drawing to scale with a
+  key, the plants to buy, the rule checklist, the steps in order, the ground,
+  and the sources. **Save as PDF or print** uses the browser's print dialog.
+- The plan travels in the link (`apps/web/app/lib/plan-link.ts`), so nothing
+  is stored and the link opens the plan anywhere, including back in the
+  planner.
+- Plant counts now handle wide shrubs: one 10 ft serviceberry fills four
+  squares, so the list says 1, not 4 (this also corrects the planner's list).
+
+**Step 2: plan by email (Resend).**
+
+- **Email me this plan** on the plan document sends one email with the link.
+  The API only sends links to plan documents on grownativo.com, so the form
+  cannot send anything else. Five a minute per visitor. Nothing is stored.
+- The privacy policy now describes it.
+
+**To switch email on:**
+
+1. Create a Resend account, add the domain `grownativo.com`, and add the DNS
+   records Resend shows (in Cloudflare DNS). Wait for it to say "Verified".
+2. Create an API key in Resend (sending access is enough).
+3. Add it as a secret named `RESEND_API_KEY` on the `nativeplants-api` Worker.
+4. Optional: change `EMAIL_FROM` in `apps/api/wrangler.toml` (now
+   `Nativo <plans@grownativo.com>`).
+
+Until then, the form says email is not switched on yet, and the PDF still
+works.
+
+**Not yet:** a PDF made on our side (Cloudflare Browser Rendering) to attach
+to the email. The browser's own "Save as PDF" covers it for now.
+
+**Next: step 3, selling.** Stripe Checkout for the plan pack ($29 to $49 to
+test) and the reviewed plan ($99 to $149). Needs a Stripe account; test-mode
+keys are enough to build and try it.
