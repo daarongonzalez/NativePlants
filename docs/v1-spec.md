@@ -1,6 +1,8 @@
 # V1 Specification
 
-Status: proposed, September 2026. One open blocker, noted at the end.
+Status: proposed, September 2026, and kept as the original spec. Its
+checklists were not kept up to date: [scope.md](scope.md) is the current
+in/out list and [status.md](status.md) says what is built.
 
 ## What V1 is
 

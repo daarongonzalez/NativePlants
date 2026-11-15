@@ -9,3 +9,6 @@
 - Take illustrations from `design/nativo/assets/` only. Use the `-green` file on light grounds and the `-cream` file on `green`, `green-deep` and `clay`. Never recolour them.
 - Nothing tappable below 44px. Every measured value shows its source.
 - If a rule is missing, ask before inventing one.
+
+## Where the project stands
+- Read `docs/status.md` first in a new session. It lists what is live, the accounts and secrets, and what is left. Update it at the end of each piece of work.

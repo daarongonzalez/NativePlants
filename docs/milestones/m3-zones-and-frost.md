@@ -1,6 +1,6 @@
 # M3 — Zones and Frost
 
-Status: ready to build. Depends on M1 (skeleton) and M2 (auth).
+Status: built, October 2026. Kept for the record; see [status.md](../status.md) for today.
 
 ## What M3 is, in one sentence
 

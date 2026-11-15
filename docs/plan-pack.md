@@ -24,9 +24,9 @@ plan without the gardener painting every square.
 | Plants ranked for that ground, each with plain reasons | Built (recommendation engine) |
 | Every plan-checkable rebate rule, with the program's own words | Built (rebate check) |
 | A printable plan and plant list | Built (print styles) |
-| **A plan drawn for them** | Not built |
-| **A PDF we generate and send** | Not built: today people use their browser's "Save as PDF" |
-| **Payment** | Not built, and out of V1 scope today |
+| **A plan drawn for them** | Built, 15 November 2026 ("Draw a plan for me") |
+| **A PDF we generate and send** | Built as a printable plan document and an email with its link. A server-made PDF waits |
+| **Payment** | Not built. Next step: Stripe Checkout |
 | **Photo upload** | Not built, and parked in `scope.md` |
 
 ## 1. Getting the area: address first, photo as a helper

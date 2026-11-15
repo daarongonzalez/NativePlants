@@ -1,6 +1,7 @@
 # Launch review: pages and polish
 
-Status: drafted 8 November 2026, waiting for review.
+Status: drafted 8 November 2026. Still waiting for review: every box below is
+open. The email placeholder is done (see Calls to make).
 
 This lists everything added for launch that needs a person to read it,
 confirm a fact or make a call. Work down the list, then flip the draft flags.
@@ -52,8 +53,9 @@ Also highlighted in place:
 - [ ] **The address travels in the page address** (`/report?address=…`). The
   privacy policy says so honestly. If that is not acceptable, the flow needs a
   change before launch, for example keeping the place in a short-lived cookie.
-- [ ] **The email section of the privacy policy is a placeholder.** It must be
-  rewritten in the same change that adds plan-by-email.
+- [x] **The email section of the privacy policy** was rewritten with
+  plan-by-email (15 November 2026). One gap remains in place: how long Resend
+  keeps delivery records.
 - [ ] **The nav's "Sign in" button is now "My plant list".** Sign-in screens
   were proposed to wait (see `scope.md`). The list lives in the browser, so it
   does not follow people between devices. The FAQ says so.
