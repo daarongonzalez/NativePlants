@@ -4,6 +4,7 @@ import type { Route } from "./+types/plan";
 import flowStyles from "../styles/flow.css?url";
 import type { RebateCheck, RuleOutcome, RuleStage } from "@np/shared";
 import { api } from "../lib/api.server";
+import { enforceLimit } from "../lib/limits.server";
 import { shareImageMeta } from "../lib/meta";
 import {
   PROGRAM_CODE,
@@ -60,6 +61,7 @@ interface CheckResponse {
 
 /** "Check my plan": the server checks again and records the result. */
 export async function action({ request, context }: Route.ActionArgs) {
+  await enforceLimit(context, request, "check");
   const body = (await request.json().catch(() => null)) as { projectId?: string | null; zip?: string | null; layout?: unknown } | null;
   if (!body?.layout) return { ok: false as const, error: "That plan could not be read." };
   const result = await api<CheckResponse>(context, `/v1/public/rebates/${PROGRAM_CODE}/checks`, {

@@ -11,3 +11,22 @@ enabled = true
 [[services]]
 binding = "API"
 service = "nativeplants-api"
+
+# Rate limits for the pages that call outside services or write to the
+# database, per visitor IP, per minute. Over the limit, the page answers
+# "429: slow down" and the call is never made. namespace_id is any number
+# unique to this account.
+[[ratelimits]]
+name = "LOOKUP_LIMIT"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "ESTIMATE_LIMIT"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "CHECK_LIMIT"
+namespace_id = "1003"
+simple = { limit = 30, period = 60 }

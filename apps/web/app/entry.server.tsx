@@ -1,7 +1,18 @@
 import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
-import type { AppLoadContext, EntryContext } from "react-router";
+import type { AppLoadContext, EntryContext, HandleErrorFunction } from "react-router";
 import { ServerRouter } from "react-router";
+import { reportError } from "@np/shared";
+
+/**
+ * Errors thrown in loaders and actions. Aborted requests (a visitor leaving
+ * mid-load) are not errors worth an alert.
+ */
+export const handleError: HandleErrorFunction = (error, { request, context }) => {
+  if (request.signal.aborted) return;
+  const cf = (context as AppLoadContext | undefined)?.cloudflare;
+  reportError(cf?.env, "web loader", error, { url: request.url, ...(cf?.ctx ? { ctx: cf.ctx } : {}) });
+};
 
 export default async function handleRequest(
   request: Request,

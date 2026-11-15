@@ -14,7 +14,7 @@ import {
   setSiteSunExposure,
 } from "@np/db";
 import { recommend } from "@np/engine";
-import { goalsSchema, siteProfileSchema, sunExposureSchema } from "@np/shared";
+import { goalsSchema, reportError, siteProfileSchema, sunExposureSchema } from "@np/shared";
 import { CensusGeocodeClient, UsgsElevationClient } from "@np/sources";
 import { requireAuth } from "./auth";
 import type { Env, Variables } from "./env";
@@ -239,7 +239,14 @@ protectedRoutes.get("/sites/:id/saved", async (c) => {
 app.route("/v1", protectedRoutes);
 
 app.onError((err, c) => {
-  console.error("unhandled", err);
+  // Logged, and posted to the alert channel when ALERT_WEBHOOK_URL is set.
+  let ctx;
+  try {
+    ctx = c.executionCtx;
+  } catch {
+    ctx = undefined; // tests run without one
+  }
+  reportError(c.env, "api", err, { url: c.req.url, ...(ctx ? { ctx } : {}) });
   return c.json({ error: "Something went wrong on our end." }, 500);
 });
 

@@ -5,6 +5,7 @@ import flowStyles from "../styles/flow.css?url";
 import { sunExposureSchema, textureClass, type YardEstimate } from "@np/shared";
 import grass from "../../../../design/nativo/assets/Grass/grass-07-cream.svg?url";
 import { api } from "../lib/api.server";
+import { enforceLimit } from "../lib/limits.server";
 import { shareImageMeta } from "../lib/meta";
 import {
   DRAINAGE_LABELS,
@@ -47,6 +48,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   const params = new URL(request.url).searchParams;
   const place = placeFromParams(params);
   if (!place) throw redirect("/");
+  await enforceLimit(context, request, "estimate");
   const sun = sunExposureSchema.safeParse(params.get("sun")).data ?? null;
 
   const [profile, program, yard] = await Promise.all([

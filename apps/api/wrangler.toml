@@ -3,6 +3,11 @@ main = "src/index.ts"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
+# No public address. The web app reaches this Worker through its service
+# binding, so nothing needs the workers.dev URL, and turning it off means the
+# visitor routes can only be reached through the site, behind its rate limits.
+workers_dev = false
+
 # Hyperdrive keeps warm connection pools at the edge in front of Neon.
 # Points at the Neon DIRECT host (no "-pooler") — Hyperdrive does the pooling,
 # and stacking it on Neon's pooler fails under load rather than immediately.
