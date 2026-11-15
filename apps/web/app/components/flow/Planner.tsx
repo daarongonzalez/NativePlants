@@ -67,6 +67,10 @@ export function Planner({
   onCheck,
   checking,
   initial,
+  initialPlan,
+  onPropose,
+  proposing = false,
+  canPropose = false,
 }: {
   program: RebateProgramSummary;
   plants: PlanPlant[];
@@ -74,9 +78,16 @@ export function Planner({
   checking: boolean;
   /** Where to start: from the yard estimate, when there is one. */
   initial?: { areaKind: AreaKind; widthFt: number; depthFt: number } | null;
+  /** A whole plan to start from: a proposed plan. Wins over `initial`. */
+  initialPlan?: Plan | null;
+  /** "Draw a plan for me": asks for a proposed plan for this area and size. */
+  onPropose?: (area: { areaKind: AreaKind; widthFt: number; depthFt: number }) => void;
+  proposing?: boolean;
+  /** Proposals need an address, to rank plants for the ground. */
+  canPropose?: boolean;
 }) {
   const [plan, setPlan] = useState<Plan>(() =>
-    initial ? resize(newPlan(initial.areaKind), initial.widthFt, initial.depthFt) : newPlan("front"),
+    initialPlan ?? (initial ? resize(newPlan(initial.areaKind), initial.widthFt, initial.depthFt) : newPlan("front")),
   );
   const [brush, setBrush] = useState<Brush>(() =>
     plants[0] ? { kind: "plant", plantId: plants[0].id } : { kind: "mulch" },
@@ -222,6 +233,17 @@ export function Planner({
             <button type="button" className="lp-button lp-button--paper fl-fill" onClick={() => setPlan((p) => newPlan(p.areaKind))}>
               Start over
             </button>
+            {onPropose && (
+              <button
+                type="button"
+                className="lp-button lp-button--green fl-fill fl-propose"
+                disabled={!canPropose || proposing}
+                title={canPropose ? undefined : "Start with your address, so we can pick plants for your ground"}
+                onClick={() => onPropose({ areaKind: plan.areaKind, widthFt: plan.widthFt, depthFt: plan.depthFt })}
+              >
+                {proposing ? "Drawing…" : "Draw a plan for me"}
+              </button>
+            )}
           </div>
 
           {plants.length > 0 ? (
@@ -270,7 +292,9 @@ export function Planner({
                 <span className="np-sci-name lp-planner__sci">{selectedPlant.scientificName}</span>
                 <span className="fl-chosen__facts np-value">
                   {inches(selectedPlant.matureHeightCm)} in tall · {inches(selectedPlant.matureWidthCm)} in wide when grown ·{" "}
-                  {plantsPerSquare(selectedPlant.matureWidthCm)} per square
+                  {inches(selectedPlant.matureWidthCm) > 60
+                    ? `one fills ${Math.round((selectedPlant.matureWidthCm / 152.4) ** 2)} squares`
+                    : `${plantsPerSquare(selectedPlant.matureWidthCm)} per square`}
                 </span>
                 <span className="fl-chosen__tags">
                   {selectedPlant.plantForm === "tree" && <span className="lp-chip">Canopy does not count</span>}

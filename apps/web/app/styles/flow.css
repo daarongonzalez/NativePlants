@@ -1188,3 +1188,48 @@ summary.fl-rule__title {
     min-width: 0;
   }
 }
+
+/* ---- The proposed plan ------------------------------------------------------------ */
+
+.fl-propose {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.fl-propose:disabled {
+  opacity: var(--opacity-muted);
+  cursor: not-allowed;
+}
+.fl-picks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.fl-pick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-10) var(--space-14);
+  background: var(--paper);
+  color: var(--ink);
+  border: var(--border-2) solid var(--line);
+  border-radius: var(--radius-note);
+}
+.fl-pick__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.fl-pick__name .np-sci-name {
+  font-weight: normal;
+}
+.fl-pick__facts {
+  font-size: var(--type-mono-sm);
+}
+.fl-pick__reason {
+  font-size: var(--type-body-sm);
+}
+.lp-window--green .fl-list li::marker {
+  color: var(--on-dark);
+}

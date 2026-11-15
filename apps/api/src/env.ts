@@ -15,6 +15,12 @@ export interface Env {
   REVIEWER_EMAILS?: string;
   /** A Slack or Discord incoming webhook for error alerts. A Worker secret; optional. */
   ALERT_WEBHOOK_URL?: string;
+  /** Resend, for "Email me this plan". A Worker secret; without it email is off. */
+  RESEND_API_KEY?: string;
+  /** The sender, e.g. "Nativo <plans@grownativo.com>". Its domain must be verified in Resend. */
+  EMAIL_FROM?: string;
+  /** The live site. Plan emails may only link to plan documents here. */
+  PUBLIC_SITE_ORIGIN?: string;
 }
 
 export interface Variables {

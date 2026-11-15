@@ -14,6 +14,7 @@ export interface WebEnv {
   LOOKUP_LIMIT?: RateLimiter;
   ESTIMATE_LIMIT?: RateLimiter;
   CHECK_LIMIT?: RateLimiter;
+  EMAIL_LIMIT?: RateLimiter;
   /** A Slack or Discord incoming webhook for error alerts. A Worker secret; optional. */
   ALERT_WEBHOOK_URL?: string;
 }

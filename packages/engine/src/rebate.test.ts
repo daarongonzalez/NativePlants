@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { rebateProgramFileSchema, type Cell, type PlanLayout, type PlanPlant } from "@np/shared";
-import { checkPlan, coveredSqftPerSquare, narrowLawnSquares, plantsPerSquare } from "./rebate";
+import { checkPlan, coveredSqftPerSquare, narrowLawnSquares, plantsForSquares, plantsPerSquare } from "./rebate";
 
 /**
  * Checks run against the real Utah data file, so a change to a rule's numbers
@@ -157,5 +157,22 @@ describe("checkPlan", () => {
     expect(check.plants).toEqual([
       { plantId: "spreader", commonName: "spreader", squares: 8, plantCount: 8 * plantsPerSquare(90) },
     ]);
+  });
+});
+
+describe("plantsForSquares", () => {
+  it("fills small plants into each square", () => {
+    expect(plantsForSquares(3, 90)).toBe(3 * plantsPerSquare(90));
+  });
+
+  it("counts a wide plant once for the squares it spans, not once per square", () => {
+    // About 10 ft wide: one plant fills four 5 ft squares.
+    expect(plantsForSquares(4, 300)).toBe(1);
+    expect(plantsForSquares(5, 300)).toBe(2);
+    expect(plantsForSquares(1, 300)).toBe(1);
+  });
+
+  it("buys nothing for no squares", () => {
+    expect(plantsForSquares(0, 90)).toBe(0);
   });
 });

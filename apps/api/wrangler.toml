@@ -46,5 +46,11 @@ ACCESS_AUD = "9975273ae9391bb90520881b0f8cdff8ca6d61ac7ac9592fdc8cd18aaaadd9f1"
 # file and a secret cannot share a name. Until it is set, the review routes
 # answer 503.
 
+# "Email me this plan" (Resend). RESEND_API_KEY is a Worker secret, set in the
+# dashboard; without it the email form says email is not switched on yet. The
+# sending domain must be verified in Resend first.
+EMAIL_FROM = "Nativo <plans@grownativo.com>"
+PUBLIC_SITE_ORIGIN = "https://grownativo.com"
+
 [observability]
 enabled = true

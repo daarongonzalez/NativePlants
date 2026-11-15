@@ -6,6 +6,8 @@ export default [
   route("start", "routes/start.tsx"),
   route("report", "routes/report.tsx"),
   route("plan", "routes/plan.tsx"),
+  // The plan document: for paper, PDF and email. The plan travels in the link.
+  route("plan/document", "routes/plan.document.tsx"),
   // The saved plant list, kept in the browser.
   route("list", "routes/list.tsx"),
   // Content pages, written to be quoted by search and answer engines.
