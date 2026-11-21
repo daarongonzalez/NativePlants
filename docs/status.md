@@ -95,6 +95,9 @@ all drafts; 128 photo candidates; 0 review decisions; 0 published.
 **Parked by decision:** photo upload, while the address estimate gives the
 square footage ([scope.md](scope.md)).
 
+**Researched, not started:** moving the API to Bun and SQLite (or Cloudflare
+D1). Findings in [bun-sqlite-research.md](bun-sqlite-research.md).
+
 ## Working in this repo
 
 - Design rules: `CLAUDE.md` and [design/nativo/README.md](../design/nativo/README.md).
