@@ -100,7 +100,7 @@ D1). Findings in [bun-sqlite-research.md](bun-sqlite-research.md).
 
 ## Working in this repo
 
-- Design rules: `CLAUDE.md` and [design/nativo/README.md](../design/nativo/README.md).
+- Design rules and project scope: `CLAUDE.md` and [design/nativo/README.md](../design/nativo/README.md). This repo is registered with Pfeiffer as `nativo`.
 - Checks before a push: `pnpm check` (typecheck and tests).
 - Run the site locally: `pnpm --filter @np/web dev`.
 - Database changes: write a Drizzle migration in `packages/db`; apply it to

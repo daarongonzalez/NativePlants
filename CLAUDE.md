@@ -10,5 +10,10 @@
 - Nothing tappable below 44px. Every measured value shows its source.
 - If a rule is missing, ask before inventing one.
 
+## Scope for this project
+- The Nativo design system, tokens, skills and illustrations belong to this repo only. Never use them in another project.
+- Connectors: GitHub and Neon (project `cool-term-95598834`). No Sanity or Figma unless the owner asks.
+- Database changes go through Drizzle migrations. Deleting a Neon branch, project or data needs the owner's go-ahead.
+
 ## Where the project stands
 - Read `docs/status.md` first in a new session. It lists what is live, the accounts and secrets, and what is left. Update it at the end of each piece of work.
